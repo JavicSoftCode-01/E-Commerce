@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>E-commerce JSC</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <div class="logo">Mi E-Commerce</div>
+            <div class="nav-buttons">
+                <button id="btnTienda">Tienda</button>
+                <button id="btnAdmin">Panel Admin</button>
+                <button id="btnCarrito" class="cart-icon">
+                    🛒 Carrito
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección Tienda -->
+    <div id="tienda" class="container">
+        <h2>Catálogo de Productos</h2>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar productos...">
+            <button id="searchButton">Buscar</button>
+        </div>
+
+        <div class="filters">
+            <select id="filterCategoria">
+                <option value="">Todas las categorías</option>
+            </select>
+            <select id="filterMarca">
+                <option value="">Todas las marcas</option>
+            </select>
+            <select id="sortBy">
+                <option value="default">Ordenar por</option>
+                <option value="price-asc">Precio: Menor a Mayor</option>
+                <option value="price-desc">Precio: Mayor a Menor</option>
+                <option value="name-asc">Nombre: A-Z</option>
+                <option value="name-desc">Nombre: Z-A</option>
+            </select>
+        </div>
+
+        <div class="products" id="productList">
+            <!-- Aquí se cargarán los productos -->
+        </div>
+    </div>
+
+    <!-- Sección Carrito -->
+    <div id="cartSection" class="cart hidden">
+        <h3>Carrito de Compra</h3>
+        <div id="emptyCart" class="cart-empty">
+            El carrito está vacío
+        </div>
+        <table id="cartTable" class="hidden">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Items del carrito -->
+            </tbody>
+        </table>
+        <p class="cart-total" id="cartTotal">Total: $0</p>
+        <div class="cart-actions hidden" id="cartActions">
+            <button id="btnEmptyCart" class="btn btn-danger">Vaciar Carrito</button>
+            <button id="btnCheckout" class="btn btn-success">Proceder al Pago</button>
+        </div>
+    </div>
+
+    <!-- Sección Checkout -->
+    <div id="checkoutSection" class="hidden">
+        <h2>Completar Compra</h2>
+
+        <div class="client-selector">
+            <h3>Seleccionar Cliente</h3>
+            <select id="clientSelect">
+                <option value="">Seleccione un cliente</option>
+            </select>
+            <button id="btnNewClient" class="btn">Cliente Nuevo</button>
+        </div>
+
+        <div id="newClientForm" class="hidden">
+            <h3>Datos del Cliente</h3>
+            <form id="checkoutClientForm"> <!--  Este ID no se usaba en el JS, pero es buena práctica tenerlo -->
+                <div class="form-row">
+                    <div>
+                        <label for="checkoutNombre">Nombre</label>
+                        <input type="text" id="checkoutNombre" required>
+                    </div>
+                    <div>
+                        <label for="checkoutTelefono">Teléfono</label>
+                        <input type="text" id="checkoutTelefono" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="checkoutDireccion">Dirección</label>
+                    <input type="text" id="checkoutDireccion" required>
+                </div>
+            </form>
+        </div>
+
+        <div class="cart" id="checkoutCartSection">
+            <h3>Resumen del Pedido</h3>
+            <table id="checkoutCartTable">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Items del carrito -->
+                </tbody>
+            </table>
+            <p class="cart-total" id="checkoutTotal">Total: $0</p>
+            <div class="cart-actions">
+                <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>
+                <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Factura -->
+    <div id="invoiceSection" class="hidden">
+        <div class="invoice">
+            <span class="invoice-close" id="btnCloseInvoice">×</span>
+            <div id="invoiceDetails">
+                <!-- Se mostrará la factura generada -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Sección Administrador -->
+    <div id="admin" class="container hidden">
+        <h2>Panel Administrador</h2>
+
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="categorias">Categorías</div>
+            <div class="admin-tab" data-tab="marcas">Marcas</div>
+            <div class="admin-tab" data-tab="proveedores">Proveedores</div>
+            <div class="admin-tab" data-tab="clientes">Clientes</div>
+            <div class="admin-tab" data-tab="productos">Productos</div>
+            <div class="admin-tab" data-tab="ventas">Historial de Ventas</div>
+        </div>
+
+        <div class="admin-panel">
+            <!-- Administrar Categorías -->
+            <div class="admin-section" id="adminCategorias">
+                <h3>Gestión de Categorías</h3>
+                <form id="formCategoria">
+                    <input type="hidden" id="categoriaId">
+                    <div>
+                        <label for="categoriaNombre">Nombre de Categoría</label>
+                        <input type="text" id="categoriaNombre" placeholder="Nombre de Categoría" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="resetCategoriaForm" class="btn btn-danger">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar Categoría</button>
+                    </div>
+                </form>
+                <table id="tablaCategorias">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Lista de categorías -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Administrar Marcas -->
+            <div class="admin-section hidden" id="adminMarcas">
+                <h3>Gestión de Marcas</h3>
+                <form id="formMarca">
+                    <input type="hidden" id="marcaId">
+                    <div>
+                        <label for="marcaNombre">Nombre de Marca</label>
+                        <input type="text" id="marcaNombre" placeholder="Nombre de Marca" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="resetMarcaForm" class="btn btn-danger">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar Marca</button>
+                    </div>
+                </form>
+                <table id="tablaMarcas">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Lista de marcas -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Administrar Proveedores -->
+            <div class="admin-section hidden" id="adminProveedores">
+                <h3>Gestión de Proveedores</h3>
+                <form id="formProveedor">
+                    <input type="hidden" id="proveedorId">
+                    <div>
+                        <label for="proveedorNombre">Nombre</label>
+                        <input type="text" id="proveedorNombre" placeholder="Nombre Completo" required>
+                    </div>
+                    <div>
+                        <label for="proveedorTelefono">Teléfono</label>
+                        <input type="text" id="proveedorTelefono" placeholder="Teléfono de contacto">
+                    </div>
+                    <div>
+                        <label for="proveedorContacto">Dirección</label>
+                        <input type="text" id="proveedorContacto" placeholder="Dirección Completa" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="resetProveedorForm" class="btn btn-danger">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar Proveedor</button>
+                    </div>
+                </form>
+                <table id="tablaProveedores">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Dirección</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Lista de proveedores -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Administrar Clientes -->
+            <div class="admin-section hidden" id="adminClientes">
+                <h3>Gestión de Clientes</h3>
+                <form id="formCliente">
+                    <input type="hidden" id="clienteId">
+                    <div>
+                        <label for="clienteNombre">Nombre</label>
+                        <input type="text" id="clienteNombre" placeholder="Nombre completo" required>
+                    </div>
+                    <div>
+                        <label for="clienteTelefono">Teléfono</label>
+                        <input type="text" id="clienteTelefono" placeholder="Teléfono de contacto">
+                    </div>
+                    <div>
+                        <label for="clienteDireccion">Dirección</label>
+                        <input type="text" id="clienteDireccion" placeholder="Dirección completa" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="resetClienteForm" class="btn btn-danger">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar Cliente</button>
+                    </div>
+                </form>
+                <table id="tablaClientes">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Lista de clientes -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Administrar Productos -->
+            <div class="admin-section hidden" id="adminProductos">
+                <h3>Gestión de Productos</h3>
+                <form id="formProducto">
+                    <input type="hidden" id="productoId">
+                    <div class="form-row">
+                        <div>
+                            <label for="productoNombre">Nombre del Producto *</label>
+                            <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
+                        </div>
+                        <div>
+                            <label for="productoPrecio">Precio *</label>
+                            <input type="number" id="productoPrecio" placeholder="Precio" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="productoCategoria">Categoría *</label>
+                            <select id="productoCategoria" required>
+                                <option value="">Seleccione Categoría</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="productoMarca">Marca *</label>
+                            <select id="productoMarca" required>
+                                <option value="">Seleccione Marca</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="productoProveedor">Proveedor *</label>
+                            <select id="productoProveedor" required>
+                                <option value="">Seleccione Proveedor</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="productoStock">Stock *</label>
+                            <input type="number" id="productoStock" placeholder="Cantidad en stock" min="0" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="productoPVP">PVP *</label>
+                        <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
+                    </div>
+                    <div>
+                        <label for="productoDescripcion">Descripción</label>
+                        <textarea id="productoDescripcion" placeholder="Descripción del producto"></textarea>
+                    </div>
+                    <div>
+                        <label for="productoImagen">URL de Imagen</label>
+                        <input type="text" id="productoImagen" placeholder="URL de la imagen">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="resetProductoForm" class="btn btn-danger">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                    </div>
+                </form>
+                <table id="tablaProductos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Marca</th>
+                            <th>Precio</th>
+                            <th>Proveedor</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Lista de productos -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Historial de Ventas -->
+            <div class="admin-section hidden" id="adminVentas">
+                <h3>Historial de Ventas</h3>
+                <table id="tablaVentas">
+                    <thead>
+                        <tr>
+                            <th>Factura #</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Lista de ventas -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        /***********************
+         * Modelos (Clases)  *
+         ***********************/
+        class Model {
+            constructor() {
+                if (this.constructor === Model) {
+                    throw new Error("Clase abstracta 'Model' no puede ser instanciada directamente");
+                }
+            }
+
+            static _lastId = {};
+
+            static generateId(modelName) {
+                Model._lastId[modelName] = (Model._lastId[modelName] || 0) + 1;
+                return Model._lastId[modelName];
+            }
+
+            static validarNombre(nombre, nombresExistentes = []) {
+                if (!nombre || typeof nombre !== 'string') {
+                    console.error("Error: El nombre de la categoría no puede estar vacío o ser falso.");
+                    return false;
+                }
+
+                // Eliminar espacios al inicio y final
+                const formattedName = nombre.trim();
+
+                // Verificar si contiene números
+                if (/\d/.test(formattedName)) {
+                    console.error("Error: El nombre no debe contener caracteres numéricos.");
+                    return false;
+                }
+
+                // Verificar que solo contenga letras (incluyendo acentos, ñ) y espacios
+                // El rango À-ÿ abarca la mayoría de vocales acentuadas y la ñ.
+                if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(formattedName)) {
+                    console.error("Error: El nombre solo debe contener letras y espacios.");
+                    return false;
+                }
+
+                if (formattedName.length < 3 || formattedName.length > 50) {
+                    console.error(`Error: El nombre debe tener entre 3 y 50 caracteres. Actual: ${formattedName.length}`);
+                    return false;
+                }
+
+                const existe = nombresExistentes.some(
+                    nombreExiste => nombreExiste.nombre?.trim().toLowerCase() === formattedName.toLowerCase()
+                );
+
+                if (existe) {
+                    console.error(`Error: Ya existe una categoría con el nombre: ${nombre}`);
+                    return false;
+                }
+
+                return formattedName;
+            }
+
+
+            static validarTelefono(telefono, telefonosExistentes = []) {
+                // Paso 1: Verificar si el teléfono es nulo, vacío o contiene solo espacios
+                if (!telefono || telefono.trim() === '') {
+                    console.error("Error: El número de teléfono no puede estar vacío.");
+                    return false;
+                }
+
+                // Paso 2: Eliminar espacios al inicio y al final
+                let telefonoLimpio = telefono.trim();
+
+                // Paso 3: Verificar que solo contenga números
+                if (!/^\d+$/.test(telefonoLimpio)) {
+                    console.error("Error: El número de teléfono debe contener solo dígitos.");
+                    return false;
+                }
+
+                // Paso 4: Validar la longitud (10 dígitos para Ecuador)
+                if (telefonoLimpio.length !== 10) {
+                    console.error("Error: El número de teléfono debe tener 10 dígitos.");
+                    return false;
+                }
+
+                // Paso 5: Verificar que comience con 0
+                if (!telefonoLimpio.startsWith('0')) {
+                    console.error("Error: El número de teléfono ecuatoriano debe comenzar con 0.");
+                    return false;
+                }
+
+                // Paso 6: Formatear el teléfono en el formato solicitado
+                const telefonoFormateado = `+593 ${telefonoLimpio.substring(1, 3)} ${telefonoLimpio.substring(3, 6)} ${telefonoLimpio.substring(6)}`;
+
+                // Paso 7: Verificar que no esté duplicado
+                if (telefonosExistentes.some(p => p.telefono === telefonoFormateado)) {
+                    console.error("Error: El número de teléfono ya está registrado con otro proveedor.");
+                    return false;
+                }
+
+                return telefonoFormateado;
+            }
+        }
+
+
+        class Categoria extends Model {
+            constructor(nombre, ctg_nombresExistentes = []) {
+                super();
+                this.id = Categoria.generateId('Categoria');
+                const nombreValidado = Categoria.validarNombre(nombre, ctg_nombresExistentes);
+                if (!nombreValidado) {
+                    throw new Error("Nombre de categoría no válido.");
+                }
+                this.nombre = nombreValidado;
+            }
+        }
+
+
+        class Marca extends Model {
+            constructor(nombre, mca_nombresExistentes = []) {
+                super();
+                this.id = Marca.generateId('Marca');
+                const nombreValidado = Marca.validarNombre(nombre, mca_nombresExistentes);
+                if (!nombreValidado) {
+                    throw new Error("Nombre de marca no válido.");
+                }
+                this.nombre = nombreValidado;
+            }
+        }
+
+
+        class Proveedor extends Model {
+            constructor(nombre, direccion, telefono, prov_telefonosExistentes = []) {
+                super();
+                this.id = Proveedor.generateId('Proveedor');
+                this.nombre = Proveedor.validarNombre(nombre);
+                this.direccion = Proveedor.validarDireccion(direccion);
+                const telefonoValidado = Proveedor.validarTelefono(telefono, prov_telefonosExistentes);
+                if (!telefonoValidado) {
+                    throw new Error("Número de teléfono no válido.");
+                }
+                this.telefono = telefonoValidado;
+            }
+
+            static validarNombre(nombre) {
+                if (!nombre.trim()) {
+                    console.error("El nombre del proveedor no puede estar vacío.");
+                    return false;
+                }
+                return nombre;
+            }
+
+            static validarDireccion(direccion) {
+                if (!direccion.trim()) {
+                    console.error("La dirección del proveedor no puede estar vacía.");
+                    return false;
+                }
+                return direccion;
+            }
+        }
+
+
+        class Producto extends Model {
+            constructor(nombre, categoriaId, marcaId, proveedorId, precio, pvp, cantidad, descripcion = "", imagen = "", nombresExistentes = []) {
+                super();
+                this.id = Producto.generateId('Producto');
+                this.serial = Producto.generarSerial();
+                const nombreValidado = Producto.validarNombre(nombre);
+                if (!nombreValidado) {
+                    throw new Error("Nombre de producto no válido.");
+                }
+                this.nombre = nombreValidado;
+                this.categoria = categoriaId; // ID, no el objeto
+                this.marca = marcaId;        // ID, no el objeto
+                this.proveedor = proveedorId; // ID, no el objeto
+                this.precio = parseFloat(precio); // Precio de compra al proveedor
+                this.pvp = parseFloat(pvp);      // Precio de venta al público
+                this.cantidad = parseInt(cantidad);  // Cantidad comprada
+                this.stock = parseInt(cantidad);     // Inicialmente, el stock es igual a la cantidad
+                this.descripcion = descripcion;
+                this.imagen = imagen || "https://via.placeholder.com/300";
+            }
+
+
+            static generarSerial() {
+                // Formato:  PROD-[año]-[mes]-[consecutivo]  (ej: PROD-2024-02-0001)
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                Producto._lastSerial = (Producto._lastSerial || 0) + 1;
+                const consecutive = String(Producto._lastSerial).padStart(4, '0');
+                return `PROD-${year}-${month}-${consecutive}`;
+            }
+
+            actualizarStock(nuevaCantidad) {
+                this.stock = parseInt(nuevaCantidad);
+            }
+
+            reducirStock(cantidadVendida) {
+                if (cantidadVendida > this.stock) {
+                    console.error("Error: No hay suficiente stock para realizar la venta.");
+                    return false; // No se pudo realizar la venta
+                }
+                this.stock -= cantidadVendida;
+                return true;  // Venta exitosa
+            }
+
+            static validarPrecio(precio) {
+                if (isNaN(precio) || precio <= 0) {
+                    console.error("Error: El precio debe ser un número mayor que cero.");
+                    return false;
+                }
+                return parseFloat(precio); // Return the parsed float
+            }
+
+            static validarPvp(pvp) {
+                if (isNaN(pvp) || pvp <= 0) {
+                    console.error("Error: El PVP debe ser un número mayor que cero.");
+                    return false;
+                }
+                return parseFloat(pvp); // Return the parsed float
+            }
+
+            static validarCantidad(cantidad) {
+                if (isNaN(cantidad) || cantidad < 0 || !Number.isInteger(cantidad)) {
+                    console.error("Error: La cantidad debe ser un número entero no negativo.");
+                    return false;
+                }
+                return parseInt(cantidad); // Return the parsed integer
+            }
+        }
+
+
+        class Cliente extends Model {
+            constructor(nombre, telefono, direccion, cli_telefonosExistentes = []) { // Added direccion
+                super();
+                this.id = Cliente.generateId('Cliente');
+                this.nombre = Cliente.validarNombre(nombre); //validar nombre
+                const telefonoValidado = Cliente.validarTelefono(telefono, cli_telefonosExistentes);
+                if (!telefonoValidado) {
+                    throw new Error("Número de teléfono no válido.");
+                }
+                this.telefono = telefonoValidado;
+                this.direccion = Cliente.validarDireccion(direccion);
+            }
+
+            static validarNombre(nombre) {
+                if (!nombre.trim()) {
+                    console.error("El nombre del cliente no puede estar vacío.");
+                    return false;
+                }
+                return nombre.trim();
+            }
+            static validarDireccion(direccion) {
+                if (!direccion.trim()) {
+                    console.error("La dirección del cliente no puede estar vacía.");
+                    return false;
+                }
+                return direccion.trim();  // Return the trimmed address
+            }
+        }
+
+
+        class DetalleFactura {
+            constructor(producto, cantidad) {
+                this.producto = producto; // Objeto Producto *completo*
+                this.cantidad = cantidad;
+                this.precio = producto.pvp; // Usar el *PVP*, no el precio de costo
+                this.subtotal = this.precio * this.cantidad;
+            }
+        }
+
+        class Factura extends Model {
+            constructor(clienteId, detalles = [], fecha = new Date()) {
+                super();
+                this.id = Factura.generateId('Factura');
+                this.cliente = clienteId; // ID del cliente, no el objeto
+                this.detalles = detalles;
+                this.fecha = fecha;
+                this.total = this.calcularTotal();
+            }
+
+            calcularTotal() {
+                return this.detalles.reduce((sum, detalle) => sum + detalle.subtotal, 0);
+            }
+
+            agregarDetalle(detalle) {
+                this.detalles.push(detalle);
+                this.total = this.calcularTotal();
+            }
+        }
+
+        class Carrito {
+            constructor() {
+                this.items = [];
+                this.total = 0;
+            }
+
+            agregarItem(producto, cantidad = 1) {
+                const existente = this.items.find(item => item.producto.id === producto.id);
+
+                if (existente) {
+                    existente.cantidad += cantidad;
+                    existente.subtotal = existente.precio * existente.cantidad;
+                } else {
+                    // Importante: Usamos ahora DetalleFactura, y referenciamos el *objeto completo*
+                    this.items.push(new DetalleFactura(producto, cantidad));
+                }
+                this.calcularTotal();
+            }
+
+            eliminarItem(productoId) {
+                this.items = this.items.filter(item => item.producto.id !== productoId);
+                this.calcularTotal();
+            }
+
+            vaciar() {
+                this.items = [];
+                this.total = 0;
+            }
+
+            calcularTotal() {
+                this.total = this.items.reduce((sum, item) => sum + item.subtotal, 0);
+                return this.total;
+            }
+
+            obtenerCantidadItems() {
+                return this.items.reduce((sum, item) => sum + item.cantidad, 0);
+            }
+        }
+
+
+        /***********************
+         * Servicios (Controllers)  *
+         ***********************/
+        class IndexedDBService {
+            constructor(dbName, storeName, version = 1) {
+                this.dbName = dbName;
+                this.storeName = storeName;
+                this.version = version;
+                this.dbPromise = this.openDB();
+            }
+
+            openDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+                    request.onerror = (event) => reject(event.target.error);
+
+                    // CORRECTA IMPLEMENTACION, ya no es necesario hacer varios onupgradeneeded()
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('categorias')) {
+                            db.createObjectStore('categorias', { keyPath: 'id' });
+                        }
+
+                        if (!db.objectStoreNames.contains('marcas')) {
+                            db.createObjectStore('marcas', { keyPath: 'id' });
+                        }
+
+                        if (!db.objectStoreNames.contains('proveedores')) {
+                            db.createObjectStore('proveedores', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('clientes')) {
+                            db.createObjectStore('clientes', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('productos')) {
+                            db.createObjectStore('productos', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('facturas')) {
+                            db.createObjectStore('facturas', { keyPath: 'id' });
+                        }
+
+                    };
+
+                    request.onsuccess = (event) => resolve(event.target.result);
+                });
+            }
+
+            async getAll() { // Use arrow functions for conciseness
+                const db = await this.dbPromise;
+                try {
+                    const transaction = db.transaction([this.storeName], 'readonly');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.getAll();
+                    return await new Promise((resolve, reject) => {
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = (event) => reject(event.target.error);
+                    });
+                } catch (error) {
+                    console.error("Error getting all items:", error);
+                    return []; // Return an empty array on error
+                }
+            }
+
+            async add(item) {
+                const db = await this.dbPromise;
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([this.storeName], 'readwrite');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.add(item);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (event) => reject(event.target.error);
+                });
+            }
+
+            async update(id, updatedItem) {
+                const db = await this.dbPromise;
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([this.storeName], 'readwrite');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.put(updatedItem); // put updates or adds
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (event) => reject(event.target.error);
+                });
+            }
+
+            async delete(id) {
+                const db = await this.dbPromise;
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([this.storeName], 'readwrite');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (event) => reject(event.target.error);
+                });
+            }
+
+            async getById(id) {
+                const db = await this.dbPromise;
+                try {
+                    const transaction = db.transaction([this.storeName], 'readonly');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.get(id);
+                    return await new Promise((resolve, reject) => {
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = (event) => reject(event.target.error);
+                    });
+                } catch (error) {
+                    console.error(`Error getting item with ID ${id}:`, error);
+                    return null; // Return null on error
+                }
+            }
+        }
+
+        class CategoriaService extends IndexedDBService {
+            constructor() {
+                super('mydb', 'categorias');
+            }
+        }
+
+        class MarcaService extends IndexedDBService {
+            constructor() {
+                super('mydb', 'marcas');
+            }
+        }
+
+        class ProveedorService extends IndexedDBService {
+            constructor() {
+                super('mydb', 'proveedores');
+            }
+        }
+
+        class ClienteService extends IndexedDBService {
+            constructor() {
+                super('mydb', 'clientes');
+            }
+        }
+
+        class ProductoService extends IndexedDBService {
+            constructor(categoriaService, marcaService, proveedorService) {
+                super('mydb', 'productos');
+                this.categoriaService = categoriaService;
+                this.marcaService = marcaService;
+                this.proveedorService = proveedorService;
+            }
+
+            async getProducts(filters = {}) {
+                let products = await this.getAll();
+
+                // Filtro por categoría (usando el ID)
+                if (filters.categoria) {
+                    products = products.filter(product => product.categoria === filters.categoria);
+                }
+
+                // Filtro por marca (usando el ID)
+                if (filters.marca) {
+                    products = products.filter(product => product.marca === filters.marca);
+                }
+
+                // Filtro por texto
+                if (filters.search) {
+                    const search = filters.search.toLowerCase();
+                    products = products.filter(product => product.nombre.toLowerCase().includes(search) || product.descripcion.toLowerCase().includes(search));
+                }
+
+                // Ordenamiento
+                if (filters.sort) {
+                    switch (filters.sort) {
+                        case 'price-asc':
+                            products.sort((a, b) => a.pvp - b.pvp); // Ordenar por PVP
+                            break;
+                        case 'price-desc':
+                            products.sort((a, b) => b.pvp - a.pvp); // Ordenar por PVP
+                            break;
+                        case 'name-asc':
+                            products.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                            break;
+                        case 'name-desc':
+                            products.sort((a, b) => b.nombre.localeCompare(a.nombre));
+                            break;
+                    }
+                }
+
+                return products;
+            }
+
+            async getCategoriaName(categoriaId) {
+                try {
+                    const categoria = await this.categoriaService.getById(categoriaId);
+                    return categoria ? categoria.nombre : "Desconocida";
+                } catch (error) {
+                    console.error("Error getting category name:", error);
+                    return "Desconocida"; // Handle error gracefully
+                }
+            }
+
+            async getMarcaName(marcaId) {
+                try {
+                    const marca = await this.marcaService.getById(marcaId);
+                    return marca ? marca.nombre : "Desconocida";
+                } catch (error) {
+                    console.error("Error getting brand name:", error);
+                    return "Desconocida";
+                }
+            }
+
+            async getProveedorName(proveedorId) {
+                try {
+                    const proveedor = await this.proveedorService.getById(proveedorId);
+                    return proveedor ? proveedor.nombre : "Desconocido";
+                } catch (error) {
+                    console.error("Error getting supplier name", error);
+                    return "Desconocida";
+                }
+            }
+
+            async updateStock(productoId, cantidad) {
+                try {
+                    const producto = await this.getById(productoId);
+                    if (producto) {
+                        if (producto.reducirStock(cantidad)) { // Check if reduction was successful
+                            await this.update(productoId, { stock: producto.stock });
+                        } else {
+                            console.error("Error updating stock: Not enough stock.");
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error updating stock:", error);
+                }
+            }
+        }
+
+
+        class FacturaService extends IndexedDBService {
+            constructor(productoService, clienteService) {
+                super('mydb', 'facturas');
+                this.productoService = productoService;
+                this.clienteService = clienteService;
+            }
+
+            async generarFactura(clienteId, carrito) {
+                try {
+                    // 1. Retrieve client information
+                    const cliente = await handleAsyncOperation(() => this.clienteService.getById(clienteId), "Error retrieving client information");
+                    if (!cliente) {
+                        throw new Error("Client not found for this invoice.");
+                    }
+
+                    // 2. Create factura details
+                    const detalles = carrito.items.map(item => new DetalleFactura(item.producto, item.cantidad));
+
+                    // 3. Create the Factura object
+                    const factura = new Factura(clienteId, detalles);
+
+                    // 4. Add the Factura to the database.  This is crucial to do *before* updating stock.
+                    const addedFactura = await handleAsyncOperation(() => this.add(factura), "Error adding invoice to database");
+                    if (!addedFactura) {
+                        throw new Error("Failed to add invoice to the database.");
+                    }
+
+                    // 5. Update product stock (after successful invoice creation)
+                    for (const item of carrito.items) {
+                        await handleAsyncOperation(async () => {
+                            const producto = await this.productoService.getById(item.producto.id);
+                            if (!producto) {
+                                throw new Error(`Product with ID ${item.producto.id} not found.`);
+                            }
+                            await this.productoService.updateStock(item.producto.id, item.cantidad);
+                        }, `Error updating stock for product ${item.producto.id}`);
+                    }
+
+                    // 6. Return the generated factura (or throw error if updateStock fails)
+                    return addedFactura; // This should now work, as 'factura' is persisted before stock update.
+
+                } catch (error) {
+                    console.error("Error generating invoice:", error);
+                    return null;
+                }
+            }
+
+
+            async getFacturas() {
+                return await handleAsyncOperation(() => this.getAll(), "Error retrieving invoices");
+            }
+
+            async getClienteName(clienteId) {
+                try {
+                    const cliente = await this.clienteService.getById(clienteId);
+                    return cliente ? cliente.nombre : "Desconocido";
+                } catch (error) {
+                    console.error("Error retrieving client name:", error);
+                    return "Desconocido";
+                }
+            }
+        }
+
+        /***********************
+         * APLICACIÓN PRINCIPAL *
+         ***********************/
+        document.addEventListener('DOMContentLoaded', async () => { // Make the event listener async
+            // Instanciar servicios
+            const categoriaService = new CategoriaService();
+            const marcaService = new MarcaService();
+            const proveedorService = new ProveedorService();
+            const clienteService = new ClienteService();
+            const productoService = new ProductoService(categoriaService, marcaService, proveedorService);
+            const facturaService = new FacturaService(productoService, clienteService);
+
+            // Carrito Global
+            const carrito = new Carrito();
+
+            // Referencias a elementos del DOM
+            const tiendaSection = document.getElementById('tienda');
+            const adminSection = document.getElementById('admin');
+            const cartSection = document.getElementById('cartSection');
+            const productList = document.getElementById('productList');
+            const cartTable = document.getElementById('cartTable');
+            const cartTotal = document.getElementById('cartTotal');
+            const cartCount = document.getElementById('cartCount');
+            const emptyCart = document.getElementById('emptyCart');
+            const cartActions = document.getElementById('cartActions');
+            const checkoutSection = document.getElementById('checkoutSection');
+            const checkoutCartTable = document.getElementById('checkoutCartTable');
+            const checkoutTotal = document.getElementById('checkoutTotal');
+            const invoiceSection = document.getElementById('invoiceSection');
+            const invoiceDetails = document.getElementById('invoiceDetails');
+
+            // Referencia a los tabs del administrador
+            const adminTabs = document.querySelectorAll('.admin-tab');
+            const adminSections = document.querySelectorAll('.admin-section');
+
+            async function handleAsyncOperation(operation, errorMessage) {
+                try {
+                    return await operation();
+                } catch (error) {
+                    console.error(errorMessage, error);
+                    alert(`Error: ${errorMessage}`); // Provide user feedback
+                    return null;
+                }
+            }
+
+
+            async function loadAdminSection(tabName) {
+                adminSections.forEach(section => section.classList.add('hidden'));
+                document.getElementById('admin' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+                adminTabs.forEach(tab => tab.classList.remove('active'));
+                document.querySelector(`.admin-tab[data-tab="${tabName}"]`).classList.add('active');
+
+                // Use handleAsyncOperation for error handling
+                await handleAsyncOperation(() => {
+                    switch (tabName) {
+                        case 'categorias':
+                            return loadCategorias();
+                        case 'marcas':
+                            return loadMarcas();
+                        case 'proveedores':
+                            return loadProveedores();
+                        case 'clientes':
+                            return loadClientes();
+                        case 'productos':
+                            return loadProductos();
+                        case 'ventas':
+                            return loadVentas();
+                        default:
+                            return Promise.resolve(); // No operation needed for other tabs
+                    }
+                }, `Error loading ${tabName} section`);
+
+            }
+
+
+            // NAVEGACIÓN
+            // Botones de navegación principal
+            document.getElementById('btnTienda').addEventListener('click', async () => { //async
+                tiendaSection.classList.remove('hidden');
+                adminSection.classList.add('hidden');
+                await cargarProductos(); // Await cargarProductos
+            });
+
+            document.getElementById('btnAdmin').addEventListener('click', () => {
+                tiendaSection.classList.add('hidden');
+                adminSection.classList.remove('hidden');
+                loadAdminSection('categorias');
+            });
+
+            document.getElementById('btnCarrito').addEventListener('click', () => {
+                cartSection.classList.remove('hidden');
+                actualizarCarrito();
+                window.scrollTo(0, cartSection.offsetTop - 20);
+            });
+
+            // Navegación por tabs del administrador
+            adminTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    loadAdminSection(tab.dataset.tab);
+                });
+            });
+
+            async function cargarProductos(filters = {}) {
+                const productos = await handleAsyncOperation(() => productoService.getProducts(filters), "Error fetching products");
+                productList.innerHTML = ''; // Clear previous products
+
+                if (!productos || productos.length === 0) {
+                    productList.innerHTML = '<div class="cart-empty">No se encontraron productos</div>';
+                    return; // Exit if no products are found
+                }
+
+                //Check if productos is an array (add a safety check)
+                if (!Array.isArray(productos)) {
+                    console.error("Error: productos is not an array.");
+                    return;
+                }
+
+                for (const producto of productos) {
+                    const productElement = document.createElement('div');
+                    productElement.className = 'product';
+                    productElement.innerHTML = `
+            <img src="${producto.imagen}" alt="${producto.nombre}" class="product-image">
+            <div class="product-info">
+                <div class="product-title">${producto.nombre}</div>
+                <div class="product-category">Categoría: ${await handleAsyncOperation(() => productoService.getCategoriaName(producto.categoria), "Error getting category name")}</div>
+                <div class="product-brand">Marca: ${await handleAsyncOperation(() => productoService.getMarcaName(producto.marca), "Error getting brand name")}</div>
+                <div class="product-price">$${producto.pvp.toFixed(2)}</div>
+                <div class="product-description">${producto.descripcion}</div>
+                <button class="btn btn-primary btn-block add-to-cart" data-id="${producto.id}">
+                    Agregar al Carrito
+                </button>
+            </div>
+        `;
+                    productList.appendChild(productElement);
+                }
+
+                // Add event listeners for "Add to Cart" buttons *after* the elements are added to the DOM
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const productoId = parseInt(e.target.dataset.id);
+                        const producto = await handleAsyncOperation(() => productoService.getById(productoId), "Error retrieving product");
+
+                        if (producto && producto.stock > 0) {
+                            carrito.agregarItem(producto);
+                            actualizarContadorCarrito(); // Update cart counter
+                            e.target.textContent = "✓ Agregado";
+                            setTimeout(() => {
+                                e.target.textContent = "Agregar al Carrito";
+                            }, 1500);
+                        } else {
+                            alert("Lo sentimos, no hay stock disponible para este producto.");
+                        }
+                    });
+                });
+            }
+
+            // FILTROS Y BÚSQUEDA
+            async function cargarFiltros() { //async
+                const categoriaSelect = document.getElementById('filterCategoria');
+                const marcaSelect = document.getElementById('filterMarca');
+
+                // Use handleAsyncOperation for robust error handling
+                const categorias = await handleAsyncOperation(() => categoriaService.getAll(), "Error loading categories");
+                if (categorias) { // Check if categorias was loaded successfully
+                    categoriaSelect.innerHTML = '<option value="">Todas las categorías</option>';
+                    categorias.forEach(categoria => {
+                        categoriaSelect.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
+                    });
+                }
+
+                // Similarly for marcas
+                const marcas = await handleAsyncOperation(() => marcaService.getAll(), "Error loading brands");
+                if (marcas) {
+                    marcaSelect.innerHTML = '<option value="">Todas las marcas</option>';
+                    marcas.forEach(marca => {
+                        marcaSelect.innerHTML += `<option value="${marca.id}">${marca.nombre}</option>`;
+                    });
+                }
+            }
+
+            // Evento para búsqueda
+            document.getElementById('searchButton').addEventListener('click', () => {
+                aplicarFiltros();
+            });
+
+            document.getElementById('searchInput').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    aplicarFiltros();
+                }
+            });
+
+            // Eventos para filtros
+            document.getElementById('filterCategoria').addEventListener('change', aplicarFiltros);
+            document.getElementById('filterMarca').addEventListener('change', aplicarFiltros);
+            document.getElementById('sortBy').addEventListener('change', aplicarFiltros);
+
+            function aplicarFiltros() {
+                const categoriaValue = document.getElementById('filterCategoria').value;
+                const marcaValue = document.getElementById('filterMarca').value;
+                const searchValue = document.getElementById('searchInput').value;
+                const sortValue = document.getElementById('sortBy').value;
+
+                const filters = {
+                    categoria: categoriaValue ? parseInt(categoriaValue) : null,  //important, parse to INT
+                    marca: marcaValue ? parseInt(marcaValue) : null, //parse to INT
+                    search: searchValue,
+                    sort: sortValue !== 'default' ? sortValue : null
+                };
+
+                cargarProductos(filters);
+            }
+
+            // GESTIÓN DEL CARRITO
+            function actualizarCarrito() {
+                if (carrito.items.length === 0) {
+                    cartTable.classList.add('hidden');
+                    cartActions.classList.add('hidden');
+                    emptyCart.classList.remove('hidden');
+                    cartTotal.textContent = "Total: $0";
+                } else {
+                    emptyCart.classList.add('hidden');
+                    cartTable.classList.remove('hidden');
+                    cartActions.classList.remove('hidden');
+
+                    const tbody = cartTable.querySelector('tbody');
+                    tbody.innerHTML = '';
+
+                    carrito.items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+            <td>${item.producto.nombre}</td>
+            <td>${item.cantidad}</td>
+            <td>$${item.precio.toFixed(2)}</td>
+            <td>$${item.subtotal.toFixed(2)}</td>
+            <td>
+              <button class="action-button delete-button remove-item" data-id="${item.producto.id}">
+                X
+              </button>
+            </td>
+          `;
+                        tbody.appendChild(tr);
+                    });
+
+                    cartTotal.textContent = `Total: $${carrito.total.toFixed(2)}`;
+
+                    // Eventos para eliminar productos del carrito
+                    document.querySelectorAll('.remove-item').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const productoId = parseInt(e.target.dataset.id); // Convert to integer
+                            carrito.eliminarItem(productoId);
+                            actualizarCarrito();
+                            actualizarContadorCarrito();
+                        });
+                    });
+                }
+            }
+
+            function actualizarContadorCarrito() {
+                cartCount.textContent = carrito.obtenerCantidadItems();
+            }
+
+            // Vaciar carrito
+            document.getElementById('btnEmptyCart').addEventListener('click', () => {
+                if (confirm("¿Estás seguro de vaciar el carrito?")) {
+                    carrito.vaciar();
+                    actualizarCarrito();
+                    actualizarContadorCarrito();
+                }
+            });
+
+            // PROCESO DE CHECKOUT
+            // Botón para proceder al pago
+            document.getElementById('btnCheckout').addEventListener('click', async () => { //async
+                if (carrito.items.length === 0) {
+                    alert("El carrito está vacío");
+                    return;
+                }
+
+                // Ocultar carrito y mostrar checkout
+                cartSection.classList.add('hidden');
+                checkoutSection.classList.remove('hidden');
+
+                // Cargar clientes en selector
+                const clientSelect = document.getElementById('clientSelect');
+                clientSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
+
+                const clientes = await clienteService.getAll(); // Await getAll
+                clientes.forEach(cliente => {
+                    clientSelect.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`; //removed (cliente.email)
+                });
+
+                // Mostrar items en checkout
+                const tbody = checkoutCartTable.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                carrito.items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${item.producto.nombre}</td>
+          <td>${item.cantidad}</td>
+          <td>$${item.precio.toFixed(2)}</td>
+          <td>$${item.subtotal.toFixed(2)}</td>
+        `;
+                    tbody.appendChild(tr);
+                });
+
+                checkoutTotal.textContent = `Total: $${carrito.total.toFixed(2)}`;
+            });
+
+            // Mostrar formulario de cliente nuevo
+            document.getElementById('btnNewClient').addEventListener('click', () => {
+                document.getElementById('newClientForm').classList.remove('hidden');
+                document.getElementById('clientSelect').value = '';
+            });
+
+            // Seleccionar cliente existente
+            document.getElementById('clientSelect').addEventListener('change', () => {
+                const clienteId = document.getElementById('clientSelect').value;
+                if (clienteId) {
+                    document.getElementById('newClientForm').classList.add('hidden');
+                }
+            });
+
+            // Cancelar checkout
+            document.getElementById('btnCancelCheckout').addEventListener('click', () => {
+                checkoutSection.classList.add('hidden');
+                cartSection.classList.remove('hidden');
+            });
+
+
+
+            document.getElementById('btnConfirmCheckout').addEventListener('click', async () => {
+                let clienteId = document.getElementById('clientSelect').value;
+                let cliente;
+
+                try {
+                    // Get client data, either from selection or new client form
+                    if (clienteId) {
+                        // Existing client
+                        cliente = await handleAsyncOperation(() => clienteService.getById(parseInt(clienteId)), "Error retrieving existing client");
+                        if (!cliente) {
+                            throw new Error("Selected client not found."); // Throw error if client doesn't exist
+                        }
+                    } else {
+                        // New client
+                        const nombre = document.getElementById('checkoutNombre').value;
+                        const telefono = document.getElementById('checkoutTelefono').value;
+                        const direccion = document.getElementById('checkoutDireccion').value;
+
+                        // Input validation for new client
+                        if (!nombre || !telefono || !direccion) {
+                            throw new Error("Please fill in all client details.");
+                        }
+
+                        cliente = new Cliente(nombre, telefono, direccion);
+                        cliente = await handleAsyncOperation(() => clienteService.add(cliente), "Error adding new client");
+                        clienteId = cliente.id; // Update clienteId with the newly generated ID
+                    }
+
+                    // Generate invoice
+                    const factura = await handleAsyncOperation(() => facturaService.generarFactura(parseInt(clienteId), carrito), "Error generating invoice");
+                    if (!factura) {
+                        throw new Error("Invoice generation failed."); // Throw error if invoice generation fails
+                    }
+
+
+                    // Display invoice (assuming you have a mostrarFactura function defined elsewhere)
+                    await mostrarFactura(factura);
+
+                    // Clear cart and update counter (assuming these functions are defined elsewhere)
+                    carrito.vaciar();
+                    actualizarContadorCarrito();
+
+                    // Hide checkout section
+                    checkoutSection.classList.add('hidden');
+
+                } catch (error) {
+                    console.error("Error in checkout process:", error);
+                    // Provide user-friendly error message
+                    alert(`Checkout failed: ${error.message}`);
+                }
+            });
+
+            // Mostrar factura generada
+            async function mostrarFactura(factura) { //async
+                if (!factura) return; // Add this check to avoid errors.
+                const fecha = new Date(factura.fecha).toLocaleDateString();
+
+                let detallesHTML = '';
+                for (const detalle of factura.detalles) { // Use for...of loop
+                    detallesHTML += `
+        <tr>
+          <td>${detalle.producto.nombre}</td>
+          <td>${detalle.cantidad}</td>
+          <td>$${detalle.precio.toFixed(2)}</td>
+          <td>$${detalle.subtotal.toFixed(2)}</td>
+        </tr>
+      `;
+                }
+
+                const cliente = await clienteService.getById(factura.cliente); // Await cliente
+
+                invoiceDetails.innerHTML = `
+      <div class="invoice-header">
+        <div>
+          <div class="invoice-id">Factura #${factura.id}</div>
+          <div class="invoice-date">Fecha: ${fecha}</div>
+        </div>
+      </div>
+      <div class="invoice-client">
+        <h3>Cliente</h3>
+        <p><strong>Nombre:</strong> ${cliente.nombre}</p>
+        <p><strong>Telefono:</strong> ${cliente.telefono}</p>
+        <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+      </div>
+      <h3>Detalle de Compra</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${detallesHTML}
+        </tbody>
+      </table>
+      <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
+    `;
+
+                invoiceSection.classList.remove('hidden');
+            }
+
+            // Cerrar factura
+            document.getElementById('btnCloseInvoice').addEventListener('click', () => {
+                invoiceSection.classList.add('hidden');
+                // Recargar productos para actualizar stock
+                cargarProductos();
+            });
+
+            // PANEL DE ADMINISTRADOR
+
+            async function loadCategorias() {
+                const categorias = await handleAsyncOperation(() => categoriaService.getAll(), "Error loading categories");
+                if (!categorias) return; // Exit early if there's an error or no categories
+
+                const tablaCategorias = document.getElementById('tablaCategorias').querySelector('tbody');
+                tablaCategorias.innerHTML = ''; // Clear existing table rows
+
+                // Check if categorias is an array (add a safety check)
+                if (!Array.isArray(categorias)) {
+                    console.error("Error: categorias is not an array.");
+                    return;
+                }
+
+
+                categorias.forEach(categoria => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+      <td>${categoria.id}</td>
+      <td>${categoria.nombre}</td>
+      <td class="action-buttons">
+        <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">Editar</button>
+        <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">Eliminar</button>
+      </td>
+    `;
+                    tablaCategorias.appendChild(tr);
+                });
+
+                // Event listeners for edit and delete buttons
+                document.querySelectorAll('.edit-categoria').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const categoriaId = parseInt(e.target.dataset.id);
+                        const categoria = await handleAsyncOperation(() => categoriaService.getById(categoriaId), "Error retrieving category");
+                        if (categoria) { //Check if categoria was retrieved successfully
+                            document.getElementById('categoriaId').value = categoria.id;
+                            document.getElementById('categoriaNombre').value = categoria.nombre;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.delete-categoria').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const categoriaId = parseInt(e.target.dataset.id);
+                        if (confirm("¿Estás seguro de eliminar esta categoría?")) {
+                            await handleAsyncOperation(() => categoriaService.delete(categoriaId), "Error deleting category");
+                            await loadCategorias(); // Reload categories after deletion
+                            await cargarOpcionesProductoForm(); // Update product form options
+                            await cargarFiltros(); // Update filters in the store section
+                        }
+                    });
+                });
+            }
+
+            // Formulario de Categoría
+            document.getElementById('formCategoria').addEventListener('submit', async (e) => { //async
+                e.preventDefault();
+
+                const categoriaId = document.getElementById('categoriaId').value;
+                const nombre = document.getElementById('categoriaNombre').value;
+
+                if (!nombre) {
+                    alert("El nombre de la categoría es obligatorio");
+                    return;
+                }
+
+                if (categoriaId) {
+                    // Editar
+                    await categoriaService.update(parseInt(categoriaId), {
+                        id: parseInt(categoriaId),
+                        nombre: nombre
+                    });// Await update, parse id
+                } else {
+                    // Nuevo
+                    const newCat = new Categoria(nombre);
+                    await categoriaService.add(newCat); // Await add
+                }
+
+                await loadCategorias();  // Await loadCategorias
+                resetCategoriaForm();
+                await cargarOpcionesProductoForm(); // Recargar opciones en formulario de productos // Await
+                await cargarFiltros(); // Recargar filtros en tienda // Await
+            });
+
+            // Reset Formulario Categoria
+            function resetCategoriaForm() {
+                document.getElementById('categoriaId').value = '';
+                document.getElementById('categoriaNombre').value = '';
+            }
+
+            document.getElementById('resetCategoriaForm').addEventListener('click', resetCategoriaForm);
+
+
+            // Gestión de marcas
+            async function loadMarcas() { //async
+                const marcas = await marcaService.getAll(); // Await getAll
+                const tablaMarcas = document.getElementById('tablaMarcas').querySelector('tbody');
+                tablaMarcas.innerHTML = '';
+
+                marcas.forEach(marca => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${marca.id}</td>
+          <td>${marca.nombre}</td>
+          <td class="action-buttons">
+            <button class="action-button edit-button edit-marca" data-id="${marca.id}">Editar</button>
+            <button class="action-button delete-button delete-marca" data-id="${marca.id}">Eliminar</button>
+          </td>
+        `;
+                    tablaMarcas.appendChild(tr);
+                });
+
+                // Eventos de edición y eliminación
+                document.querySelectorAll('.edit-marca').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const marcaId = parseInt(e.target.dataset.id); // Convert to integer
+                        const marca = await marcaService.getById(marcaId); // Await getById
+
+                        document.getElementById('marcaId').value = marca.id;
+                        document.getElementById('marcaNombre').value = marca.nombre;
+                    });
+                });
+
+                document.querySelectorAll('.delete-marca').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const marcaId = parseInt(e.target.dataset.id); // Convert to integer
+
+                        if (confirm("¿Estás seguro de eliminar esta marca?")) {
+                            await marcaService.delete(marcaId); // Await delete
+                            await loadMarcas(); // Await loadMarcas
+                            await cargarOpcionesProductoForm(); // Recargar opciones en formulario de productos // Await
+                            await cargarFiltros(); // Recargar filtros en tienda // Await
+                        }
+                    });
+                });
+            }
+
+            // Formulario de Marca
+            document.getElementById('formMarca').addEventListener('submit', async (e) => { //async
+                e.preventDefault();
+
+                const marcaId = document.getElementById('marcaId').value;
+                const nombre = document.getElementById('marcaNombre').value;
+
+                if (!nombre) {
+                    alert("El nombre de la marca es obligatorio");
+                    return;
+                }
+
+                if (marcaId) {
+                    // Editar
+                    await marcaService.update(parseInt(marcaId), { id: parseInt(marcaId), nombre: nombre }); // Await update, parse
+                } else {
+                    // Nuevo
+                    const newMarca = new Marca(nombre);
+                    await marcaService.add(newMarca); // Await add
+                }
+
+                await loadMarcas(); // Await loadMarcas
+                resetMarcaForm();
+                await cargarOpcionesProductoForm(); // Recargar opciones en formulario de productos // Await
+                await cargarFiltros(); // Recargar filtros en tienda // Await
+            });
+
+            // Reset Formulario Marca
+            function resetMarcaForm() {
+                document.getElementById('marcaId').value = '';
+                document.getElementById('marcaNombre').value = '';
+            }
+
+            document.getElementById('resetMarcaForm').addEventListener('click', resetMarcaForm);
+
+            // Gestión de proveedores
+            async function loadProveedores() { //async
+                const proveedores = await proveedorService.getAll(); // Await getAll
+                const tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
+                tablaProveedores.innerHTML = '';
+
+                proveedores.forEach(proveedor => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${proveedor.id}</td>
+          <td>${proveedor.nombre}</td>
+          <td>${proveedor.direccion}</td>
+          <td>${proveedor.telefono}</td>
+          <td class="action-buttons">
+            <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}">Editar</button>
+            <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}">Eliminar</button>
+          </td>
+        `;
+                    tablaProveedores.appendChild(tr);
+                });
+
+                // Eventos de edición y eliminación
+                document.querySelectorAll('.edit-proveedor').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const proveedorId = parseInt(e.target.dataset.id);  // Convert to integer
+                        const proveedor = await proveedorService.getById(proveedorId); // Await getById
+
+                        document.getElementById('proveedorId').value = proveedor.id;
+                        document.getElementById('proveedorNombre').value = proveedor.nombre;
+                        document.getElementById('proveedorContacto').value = proveedor.direccion; // Corrected
+                        document.getElementById('proveedorTelefono').value = proveedor.telefono;
+                    });
+                });
+
+                document.querySelectorAll('.delete-proveedor').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const proveedorId = parseInt(e.target.dataset.id);  // Convert to integer
+
+                        if (confirm("¿Estás seguro de eliminar este proveedor?")) {
+                            await proveedorService.delete(proveedorId);  // Await delete
+                            await loadProveedores(); // Await loadProveedores
+                            await cargarOpcionesProductoForm(); // Recargar opciones en formulario de productos // Await
+                        }
+                    });
+                });
+            }
+
+            // Formulario de Proveedor
+            document.getElementById('formProveedor').addEventListener('submit', async (e) => { //async
+                e.preventDefault();
+
+                const proveedorId = document.getElementById('proveedorId').value;
+                const nombre = document.getElementById('proveedorNombre').value;
+                const direccion = document.getElementById('proveedorContacto').value; // Corrected
+                const telefono = document.getElementById('proveedorTelefono').value;
+
+                if (!nombre || !direccion) { // Added validation for direccion
+                    alert("El nombre y la dirección del proveedor son obligatorios");
+                    return;
+                }
+
+                const proveedorData = {
+                    nombre: nombre,
+                    direccion: direccion, // Corrected
+                    telefono: telefono
+                };
+                if (proveedorId) {
+                    proveedorData.id = parseInt(proveedorId);
+                }
+
+
+                if (proveedorId) {
+                    // Editar
+                    await proveedorService.update(parseInt(proveedorId), proveedorData); // Await update, parse
+                } else {
+                    // Nuevo
+                    const prov = new Proveedor(nombre, direccion, telefono); // Create the new object
+                    await proveedorService.add(prov); // Await add
+
+                }
+
+                await loadProveedores(); // Await loadProveedores
+                resetProveedorForm();
+                await cargarOpcionesProductoForm(); // Recargar opciones en formulario de productos // Await
+            });
+
+            // Reset Formulario Proveedor
+            function resetProveedorForm() {
+                document.getElementById('proveedorId').value = '';
+                document.getElementById('proveedorNombre').value = '';
+                document.getElementById('proveedorContacto').value = '';
+                document.getElementById('proveedorTelefono').value = '';
+            }
+
+            document.getElementById('resetProveedorForm').addEventListener('click', resetProveedorForm);
+
+
+            // Gestión de clientes
+            async function loadClientes() { //async
+                const clientes = await clienteService.getAll(); // Await getAll
+                const tablaClientes = document.getElementById('tablaClientes').querySelector('tbody');
+                tablaClientes.innerHTML = '';
+
+                clientes.forEach(cliente => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${cliente.id}</td>
+          <td>${cliente.nombre}</td>
+          <td>${cliente.telefono}</td>
+          <td>${cliente.direccion}</td>
+          <td class="action-buttons">
+            <button class="action-button edit-button edit-cliente" data-id="${cliente.id}">Editar</button>
+            <button class="action-button delete-button delete-cliente" data-id="${cliente.id}">Eliminar</button>
+          </td>
+        `;
+                    tablaClientes.appendChild(tr);
+                });
+
+                // Eventos de edición y eliminación
+                document.querySelectorAll('.edit-cliente').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const clienteId = parseInt(e.target.dataset.id); // Convert to integer
+                        const cliente = await clienteService.getById(clienteId); // Await getById
+
+                        document.getElementById('clienteId').value = cliente.id;
+                        document.getElementById('clienteNombre').value = cliente.nombre;
+                        document.getElementById('clienteTelefono').value = cliente.telefono; // Removed email
+                        document.getElementById('clienteDireccion').value = cliente.direccion;
+
+                    });
+                });
+
+                document.querySelectorAll('.delete-cliente').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const clienteId = parseInt(e.target.dataset.id); // Convert to integer
+
+                        if (confirm("¿Estás seguro de eliminar este cliente?")) {
+                            await clienteService.delete(clienteId); // Await delete
+                            await loadClientes(); // Await loadClientes
+                        }
+                    });
+                });
+            }
+
+            // Formulario de Cliente
+            document.getElementById('formCliente').addEventListener('submit', async (e) => { //async
+                e.preventDefault();
+
+                const clienteId = document.getElementById('clienteId').value;
+                const nombre = document.getElementById('clienteNombre').value;
+                const telefono = document.getElementById('clienteTelefono').value; // Removed email
+                const direccion = document.getElementById('clienteDireccion').value;
+
+
+                if (!nombre || !telefono || !direccion) { // Validate telefono
+                    alert("Nombre, telefono y dirección del cliente son obligatorios");
+                    return;
+                }
+
+                const clienteData = {
+                    nombre: nombre,
+                    telefono: telefono,
+                    direccion: direccion
+                };
+                if (clienteId) {
+                    clienteData.id = parseInt(clienteId);
+                }
+
+                if (clienteId) {
+                    // Editar
+                    await clienteService.update(parseInt(clienteId), clienteData); // Await, parse
+                } else {
+                    // Nuevo
+                    const cli = new Cliente(nombre, telefono, direccion);
+                    await clienteService.add(cli); // Await add
+
+                }
+
+                await loadClientes(); // Await
+                resetClienteForm();
+            });
+
+            // Reset Formulario Cliente
+            function resetClienteForm() {
+                document.getElementById('clienteId').value = '';
+                document.getElementById('clienteNombre').value = '';
+                document.getElementById('clienteTelefono').value = ''; // Removed email
+                document.getElementById('clienteDireccion').value = '';
+            }
+
+            document.getElementById('resetClienteForm').addEventListener('click', resetClienteForm);
+
+
+            // Gestión de productos
+            async function loadProductos() { //async
+                const productos = await productoService.getProducts();  // Await getProducts
+                const tablaProductos = document.getElementById('tablaProductos').querySelector('tbody');
+                tablaProductos.innerHTML = '';
+
+                for (const producto of productos) { //for...of
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${producto.id}</td>
+          <td>${producto.nombre}</td>
+          <td>${await productoService.getCategoriaName(producto.categoria)}</td>
+          <td>${(await productoService.getMarcaName(producto.marca))}</td>
+
+          <td>$${producto.pvp.toFixed(2)}</td>
+          <td>${(await productoService.getProveedorName(producto.proveedor))}</td>
+
+          <td>${producto.stock}</td>
+          <td class="action-buttons">
+            <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
+            <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
+          </td>
+        `;
+                    tablaProductos.appendChild(tr);
+                }
+
+                // Eventos de edición y eliminación
+                document.querySelectorAll('.edit-producto').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const productoId = parseInt(e.target.dataset.id); // Convert to integer
+                        const producto = await productoService.getById(productoId); // Await getById
+
+                        document.getElementById('productoId').value = producto.id;
+                        document.getElementById('productoNombre').value = producto.nombre;
+                        document.getElementById('productoPrecio').value = producto.precio;  //pvp
+                        document.getElementById('productoCategoria').value = producto.categoria;
+                        document.getElementById('productoMarca').value = producto.marca;
+                        document.getElementById('productoProveedor').value = producto.proveedor;
+                        document.getElementById('productoStock').value = producto.stock;
+                        document.getElementById('productoPVP').value = producto.pvp; //pvp
+                        document.getElementById('productoDescripcion').value = producto.descripcion;
+                        document.getElementById('productoImagen').value = producto.imagen;
+                    });
+                });
+
+                document.querySelectorAll('.delete-producto').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const productoId = parseInt(e.target.dataset.id); // Convert to integer
+
+                        if (confirm("¿Estás seguro de eliminar este producto?")) {
+                            await productoService.delete(productoId); // Await delete
+                            await loadProductos(); // Await loadProductos
+                            await cargarProductos(); // Recargar productos en la tienda // Await
+                        }
+                    });
+                });
+            }
+
+            // Cargar opciones de categorías, marcas y proveedores en el formulario de productos
+            async function cargarOpcionesProductoForm() { //async
+                const categoriaSelect = document.getElementById('productoCategoria');
+                const marcaSelect = document.getElementById('productoMarca');
+                const proveedorSelect = document.getElementById('productoProveedor');
+
+                // Categorías
+                categoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>';
+                (await categoriaService.getAll()).forEach(categoria => { // Await getAll and use parentheses
+                    categoriaSelect.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
+                });
+
+                // Marcas
+                marcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';
+                (await marcaService.getAll()).forEach(marca => { // Await getAll and use parentheses
+                    marcaSelect.innerHTML += `<option value="${marca.id}">${marca.nombre}</option>`;
+                });
+
+                // Proveedores
+                proveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';
+                (await proveedorService.getAll()).forEach(proveedor => { // Await getAll and use parentheses
+                    proveedorSelect.innerHTML += `<option value="${proveedor.id}">${proveedor.nombre}</option>`;
+                });
+            }
+
+            // Formulario de Producto
+            document.getElementById('formProducto').addEventListener('submit', async (e) => { //async
+                e.preventDefault();
+
+                const productoId = document.getElementById('productoId').value;
+                const nombre = document.getElementById('productoNombre').value;
+                const precio = document.getElementById('productoPrecio').value;
+                const categoria = document.getElementById('productoCategoria').value;
+                const marca = document.getElementById('productoMarca').value;
+                const proveedor = document.getElementById('productoProveedor').value;
+                const stock = document.getElementById('productoStock').value;
+                const pvp = document.getElementById('productoPVP').value; //pvp
+                const descripcion = document.getElementById('productoDescripcion').value;
+                const imagen = document.getElementById('productoImagen').value;
+
+                if (!nombre || !precio || !categoria || !marca || !proveedor || !stock || !pvp) { //validate pvp
+                    alert("Todos los campos marcados con (*) son obligatorios");
+                    return;
+                }
+                const productoData = {
+                    nombre: nombre,
+                    precio: parseFloat(precio),
+                    categoria: parseInt(categoria), // Convert to integer
+                    marca: parseInt(marca), // Convert to integer
+                    proveedor: parseInt(proveedor), // Convert to integer
+                    stock: parseInt(stock),  // Convert to integer
+                    pvp: parseFloat(pvp), //parse pvp
+                    descripcion: descripcion,
+                    imagen: imagen
+                };
+                if (productoId) {
+                    productoData.id = parseInt(productoId);
+                    productoData.serial = (await productoService.getById(parseInt(productoId))).serial;
+                }
+
+                if (productoId) {
+                    // Editar
+
+                    await productoService.update(parseInt(productoId), productoData); // Await, parse id
+                } else {
+                    // Nuevo
+                    const prod = new Producto(nombre, categoria, marca, proveedor, precio, pvp, stock, descripcion, imagen);
+                    await productoService.add(prod); // Await add
+                }
+
+                await loadProductos(); // Await
+                resetProductoForm();
+                await cargarProductos(); // Recargar productos en la tienda // Await
+            });
+
+            // Reset Formulario Producto
+            function resetProductoForm() {
+                document.getElementById('productoId').value = '';
+                document.getElementById('productoNombre').value = '';
+                document.getElementById('productoPrecio').value = '';
+                document.getElementById('productoCategoria').value = '';
+                document.getElementById('productoMarca').value = '';
+                document.getElementById('productoProveedor').value = '';
+                document.getElementById('productoStock').value = '';
+                document.getElementById('productoPVP').value = ''; //pvp
+                document.getElementById('productoDescripcion').value = '';
+                document.getElementById('productoImagen').value = '';
+            }
+
+            document.getElementById('resetProductoForm').addEventListener('click', resetProductoForm);
+
+
+            // Historial de ventas
+            async function loadVentas() { //async
+                const ventas = await facturaService.getFacturas(); // Await
+                const tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
+                tablaVentas.innerHTML = '';
+
+                for (const venta of ventas) { //for...of
+                    const fecha = new Date(venta.fecha).toLocaleDateString();
+                    const clienteNombre = await facturaService.getClienteName(venta.cliente); // Await and corrected
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${venta.id}</td>
+          <td>${fecha}</td>
+          <td>${clienteNombre}</td>
+          <td>$${venta.total.toFixed(2)}</td>
+          <td class="action-buttons">
+            <button class="action-button edit-button view-venta" data-id="${venta.id}">Ver Detalle</button>
+          </td>
+        `;
+                    tablaVentas.appendChild(tr);
+                }
+
+                // Evento para ver detalle de venta
+                document.querySelectorAll('.view-venta').forEach(button => {
+                    button.addEventListener('click', async (e) => { //async
+                        const ventaId = parseInt(e.target.dataset.id);  // Convert to integer
+                        const venta = await facturaService.getById(ventaId); // Await
+                        await mostrarFactura(venta); // Reutilizar función para mostrar factura // Await
+                        tiendaSection.classList.add('hidden'); // Asegurar que la sección tienda sea visible para mostrar la factura
+                        adminSection.classList.add('hidden'); // Ocultar panel admin
+                        invoiceSection.classList.remove('hidden'); // Mostrar sección factura
+                    });
+                });
+            }
+
+
+            // Inicialización
+            async function init() { //async
+                await cargarProductos();
+                await cargarFiltros();
+                actualizarContadorCarrito();
+                await cargarOpcionesProductoForm();
+            }
+
+            init();
+        }
+        )
+            ;
+    </script>
+</body>
+
+</html>
