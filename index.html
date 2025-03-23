@@ -112,6 +112,7 @@
         <label for="checkoutDireccion">Dirección</label>
         <input type="text" id="checkoutDireccion" required>
       </div>
+      <button id="btnConfirmClientData" class="btn hidden">Confirmar Datos</button>
     </form>
   </div>
 
@@ -1048,6 +1049,50 @@
   /***********************
    * APLICACIÓN PRINCIPAL *
    ***********************/
+  // document.addEventListener('DOMContentLoaded', async () => {
+  //   const idGeneratorService = new IdGeneratorService(); // Create an instance
+  //   //Ensure Ids exist
+  //   await idGeneratorService.ensureIdExists('Categoria');
+  //   await idGeneratorService.ensureIdExists('Marca');
+  //   await idGeneratorService.ensureIdExists('Proveedor');
+  //   await idGeneratorService.ensureIdExists('Cliente');
+  //   await idGeneratorService.ensureIdExists('Producto');
+  //   await idGeneratorService.ensureIdExists('Factura');
+  //   await idGeneratorService.ensureIdExists('ProductoSerial');
+  //
+  //
+  //   const categoriaService = new CategoriaService();
+  //   const marcaService = new MarcaService();
+  //   const proveedorService = new ProveedorService();
+  //   const clienteService = new ClienteService();
+  //   const productoService = new ProductoService(categoriaService, marcaService, proveedorService);
+  //   const facturaService = new FacturaService(productoService, clienteService, idGeneratorService); // Pass it
+  //
+  //   // Carrito Global
+  //   const carrito = new Carrito();
+  //
+  //   // Referencias a elementos del DOM
+  //   const tiendaSection = document.getElementById('tienda');
+  //   const adminSection = document.getElementById('admin');
+  //   const cartSection = document.getElementById('cartSection');
+  //   const productList = document.getElementById('productList');
+  //   const cartTable = document.getElementById('cartTable');
+  //   const cartTotal = document.getElementById('cartTotal');
+  //   const cartCount = document.getElementById('cartCount');
+  //   const emptyCart = document.getElementById('emptyCart');
+  //   const cartActions = document.getElementById('cartActions');
+  //   const checkoutSection = document.getElementById('checkoutSection');
+  //   const checkoutCartTable = document.getElementById('checkoutCartTable');
+  //   const checkoutTotal = document.getElementById('checkoutTotal');
+  //   const invoiceSection = document.getElementById('invoiceSection');
+  //   const invoiceDetails = document.getElementById('invoiceDetails');
+  //
+  //   // add buttons new
+  //   const newClientForm = document.getElementById('newClientForm'); // Referencia al formulario
+  //   // const btnConfirmClientData = document.getElementById('btnConfirmClientData'); // Nuevo botón
+  //
+  //   const clientSelect = document.getElementById('clientSelect'); //  ¡USAMOS ESTA REFERENCIA!
+
   document.addEventListener('DOMContentLoaded', async () => {
     const idGeneratorService = new IdGeneratorService(); // Create an instance
     //Ensure Ids exist
@@ -1059,19 +1104,23 @@
     await idGeneratorService.ensureIdExists('Factura');
     await idGeneratorService.ensureIdExists('ProductoSerial');
 
-
     const categoriaService = new CategoriaService();
     const marcaService = new MarcaService();
     const proveedorService = new ProveedorService();
     const clienteService = new ClienteService();
-    const productoService = new ProductoService(categoriaService, marcaService, proveedorService);
-    const facturaService = new FacturaService(productoService, clienteService, idGeneratorService); // Pass it
-    //...
+    const productoService = new ProductoService(
+      categoriaService,
+      marcaService,
+      proveedorService
+    );
 
-    // Carrito Global
+    // FacturaService
+    const facturaService = new FacturaService(productoService, clienteService, idGeneratorService); // Instancia Factura Service
+
+    //Carrito Global
     const carrito = new Carrito();
 
-    // Referencias a elementos del DOM
+    // Referencias DOM, simplificado
     const tiendaSection = document.getElementById('tienda');
     const adminSection = document.getElementById('admin');
     const cartSection = document.getElementById('cartSection');
@@ -1086,6 +1135,11 @@
     const checkoutTotal = document.getElementById('checkoutTotal');
     const invoiceSection = document.getElementById('invoiceSection');
     const invoiceDetails = document.getElementById('invoiceDetails');
+    const newClientForm = document.getElementById('newClientForm');
+
+    // Variable para rastrear el estado
+    let esNuevoCliente = false; // <--  ¡VARIABLE IMPORTANTE! Inicia en false.
+    const clientSelect = document.getElementById('clientSelect');
 
     // Referencia a los tabs del administrador
     const adminTabs = document.querySelectorAll('.admin-tab');
@@ -1290,155 +1344,272 @@
       }
     });
 
-    // PROCESO DE CHECKOUT
+    //*****************************
+    // CHECKOUT (COMPLETO/UNIFICADO)
+    //*****************************
     document.getElementById('btnCheckout').addEventListener('click', async () => {
+
       if (carrito.items.length === 0) {
-        alert("El carrito está vacío");
-        return;
+        alert('El carrito está vacío'); //Mensaje
+        return; //Salimos
       }
 
-      cartSection.classList.add('hidden');
+      cartSection.classList.add('hidden'); // ocultar carrito, mostrar checkout
       checkoutSection.classList.remove('hidden');
-
-      const clientSelect = document.getElementById('clientSelect');
       clientSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
+      const clientes = await handleAsyncOperation(() => clienteService.getAll(),
+        "Error", []
+      );
 
-      const clientes = await clienteService.getAll();
-      clientes.forEach(cliente => {
-        clientSelect.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`;
-      });
+      if (clientes && Array.isArray(clientes)) {
+        clientes.forEach(cliente => {
+          clientSelect.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`;
 
-      const tbody = checkoutCartTable.querySelector('tbody');
-      tbody.innerHTML = '';
+        });
 
+      }
+
+      const tbody = checkoutCartTable.querySelector('tbody'); //elemento agregar compra:
+      tbody.innerHTML = '';//antes, limpieza!
       carrito.items.forEach(item => {
-        const tr = document.createElement('tr');
+        const tr = document.createElement('tr'); //Creamos fila:
         tr.innerHTML = `
-                  <td>${item.producto.nombre}</td>
-                  <td>${item.cantidad}</td>
-                  <td>$${item.precio.toFixed(2)}</td>
-                  <td>$${item.subtotal.toFixed(2)}</td>
-                `;
-        tbody.appendChild(tr);
+               <td>${item.producto.nombre}</td>
+              <td>${item.cantidad}</td>
+              <td>$${item.precio.toFixed(2)}</td>
+				<td>$${item.subtotal.toFixed(2)}</td>
+            `;
+
+        tbody.appendChild(tr); //Se añade como hijo, como el final de esta tabla:
+
       });
 
-      checkoutTotal.textContent = `Total: $${carrito.total.toFixed(2)}`;
+      checkoutTotal.textContent = `Total: $${carrito.total.toFixed(2)}`;//mostramos total:
+    });
+    // Si damos click , y NO hay opciones selecionadas:
+    document.getElementById('btnNewClient').addEventListener('click', () => {
+      newClientForm.classList.remove('hidden');
+      clientSelect.value = ''; // Limpiar cualquier seleccion, o existente
+      esNuevoCliente = true;// indicativo.
     });
 
-    // Mostrar formulario de cliente nuevo
-    document.getElementById('btnNewClient').addEventListener('click', () => {
-      document.getElementById('newClientForm').classList.remove('hidden');
-      document.getElementById('clientSelect').value = '';
+    //--- NUEVO --- Evento para confirmar datos del nuevo cliente
+    btnConfirmClientData.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('checkoutNombre').value;
+      const telefono = document.getElementById('checkoutTelefono').value;
+      const direccion = document.getElementById('checkoutDireccion').value;
+
+      if (!nombre || !telefono || !direccion) {
+        alert('Por favor, complete todos los campos del cliente.');
+        return;
+      }
+      //uso de try catch
+      try {
+        const cliente = new Cliente(nombre, telefono, direccion);
+        cliente.id = await Model.generateId('Cliente', idGeneratorService);
+        const nuevoCliente = await clienteService.add(cliente);
+
+        if (nuevoCliente) {
+          //  Añadir directamente al 'clientSelect' global  -- ¡CORREGIDO!
+          const option = document.createElement('option');
+          option.value = nuevoCliente.id;       // Usar .id, no solo el objeto.
+          option.textContent = nuevoCliente.nombre; // Usar la propiedad .nombre.
+          clientSelect.appendChild(option);      // 'clientSelect' global
+          clientSelect.value = nuevoCliente.id;  //  Seleccionar
+
+          //Notificacion
+          alert("Cliente registrado con éxito. Ahora puedes Confirmar la Compra");
+        }
+
+      } catch (error) {
+        console.error("Error al registrar el cliente:", error);
+        alert("Hubo un error al registrar el cliente. Revisa la consola.");
+      }
     });
 
     // Seleccionar cliente existente
     document.getElementById('clientSelect').addEventListener('change', () => {
-      const clienteId = document.getElementById('clientSelect').value;
-      if (clienteId) {
-        document.getElementById('newClientForm').classList.add('hidden');
+      const clienteId = document.getElementById("clientSelect").value;// valor actual
+      if (clienteId) { //si Existe.
+        newClientForm.classList.add('hidden');
+        esNuevoCliente = false;// Marcamos a falso. Ya no *intencion* Nuevo Cliente, sino *existente en lista*
       }
-    });
 
-    // Cancelar checkout
-    document.getElementById('btnCancelCheckout').addEventListener('click', () => {
+    });
+    // cancelar checkout
+    document.getElementById('btnCancelCheckout').addEventListener('click', () => //Cerrar la ventana del Checkout:
+    { //ocultamos esta seccion.
       checkoutSection.classList.add('hidden');
+
+      //limpiar variables/elementos para nuevos procesos/valores:
+      // Limpiar datos
       cartSection.classList.remove('hidden');
+      clientSelect.value = ''; // Reset
+      newClientForm.classList.add('hidden');
+      document.getElementById('checkoutNombre').value = ''; // reset cliente
+      document.getElementById('checkoutTelefono').value = '';//
+      document.getElementById('checkoutDireccion').value = '';//
+      esNuevoCliente = false;// restaurar.
+
     });
 
+    // --- Confirmar Compra (¡AHORA HACE TODO!) ---
     document.getElementById('btnConfirmCheckout').addEventListener('click', async () => {
-      let clienteId = document.getElementById('clientSelect').value;
-      let cliente;
+      //1. -----FLUJO------
+      //Obtener desde *ORIGEN CORRECTO* del valor.  ya Sea  Nuevo Registro / Ya Existente y seleccionado en: clienteSelect:
+      let clienteId = clientSelect.value;
 
-      try {
-        if (clienteId) {
-          cliente = await clienteService.getById(parseInt(clienteId));
-          if (!cliente) {
-            throw new Error("Selected client not found.");
-          }
-        } else {
-          const nombre = document.getElementById('checkoutNombre').value;
-          const telefono = document.getElementById('checkoutTelefono').value;
-          const direccion = document.getElementById('checkoutDireccion').value;
 
-          if (!nombre || !telefono || !direccion) {
-            throw new Error("Please fill in all client details.");
-          }
+      if (esNuevoCliente) {
+        const nombre = document.getElementById('checkoutNombre').value;
+        const telefono = document.getElementById('checkoutTelefono').value;
+        const direccion = document.getElementById('checkoutDireccion').value;
 
-          cliente = new Cliente(nombre, telefono, direccion);
-          cliente.id = await Model.generateId('Cliente', idGeneratorService); // Generate the ID
-          cliente = await clienteService.add(cliente);
+        if (!nombre || !telefono || !direccion) { //si hay un dato sin completar:
 
-          if (!cliente) return; //If there is any problem adding, return.
+          alert('Complete datos del cliente, o si existe , seleccione desde la Lista.'); //mostrarlo al usuario.
 
-          clienteId = cliente.id;  // Update cliente ID
+          return;  // Salida.
         }
 
-        const factura = await facturaService.generarFactura(parseInt(clienteId), carrito);
-        if (!factura) {
-          throw new Error("Invoice generation failed.");
+        try {
+          const cliente = new Cliente(nombre, telefono, direccion);
+          cliente.id = await Model.generateId('Cliente', idGeneratorService);
+
+          const nuevoCliente = await clienteService.add(cliente);
+          if (nuevoCliente) { // si existe:
+            //Actualizar con nuevo registro
+            const option = document.createElement('option'); //creamos el obj
+            option.value = nuevoCliente.id;//
+            option.textContent = nuevoCliente.nombre; // Texto del Objeto en HTML:
+
+            clientSelect.appendChild(option); //añadir
+
+            clientSelect.value = nuevoCliente.id; // ASIGNAR EN EL CLIENTE SELECT, AHORA CLIENTE SELECT, ES ORIGEN.
+
+          }
+
+        } catch (error) {
+          console.error('Error Registrar Cliente:', error);
+          return; // Salimos.
+        }
+
+      }
+
+      // --Obtener conversion desde select, ya selecciono uno, o nuevo
+
+      let parsedClienteId = parseInt(clienteId);
+
+      //Si despues de ese flujo, aun sigue *sin una ID Válida*:
+      if (isNaN(parsedClienteId)) {
+        alert("Seleccione o registre un cliente Por Favor"); //Mostrar msj
+        return;//Salimos;
+      }
+      try {
+        //Obtener ya despues con la ID FINAL del select de: nuevo / existente.
+
+        const factura = await facturaService.generarFactura(parsedClienteId, carrito); //lamamos al generador.
+
+        if (!factura) { //Mensajes:
+          throw new Error('Error al Generar la factura!');
         }
 
         await mostrarFactura(factura);
-        carrito.vaciar();
-        actualizarContadorCarrito();
-        checkoutSection.classList.add('hidden');
+        carrito.vaciar();//
+        actualizarContadorCarrito();//
+        checkoutSection.classList.add('hidden'); //ocultar compra.
+        clientSelect.value = '';
+        esNuevoCliente = false;//retornar;
 
-      } catch (error) {
-        console.error("Error in checkout process:", error);
+        newClientForm.classList.add('hidden');
+
+        document.getElementById('checkoutNombre').value = '';
+        document.getElementById('checkoutTelefono').value = '';//tel
+        document.getElementById('checkoutDireccion').value = ''; //
+
+      } catch (error) { //error para el programador
+
+        console.error('Error during checkout:', error); //
         alert(`Checkout failed: ${error.message}`);
+
       }
+
     });
 
     // Mostrar factura generada
     async function mostrarFactura(factura) {
-      if (!factura) return;
+
+      if (!factura) return; //si no, sale
       const fecha = new Date(factura.fecha).toLocaleDateString();
 
-      let detallesHTML = '';
-      for (const detalle of factura.detalles) {
+      let detallesHTML = '';  // Aqui es donde agregaremos las filas
+
+      // Iteramos
+      for (const detalle of factura.detalles) { // Loop through the details array
+
         detallesHTML += `
-                    <tr>
-                      <td>${detalle.producto.nombre}</td>
-                      <td>${detalle.cantidad}</td>
-                      <td>$${detalle.precio.toFixed(2)}</td>
-                      <td>$${detalle.subtotal.toFixed(2)}</td>
+
+              <tr>
+                <td>${detalle.producto.nombre}</td>
+                 <td>${detalle.cantidad}</td>
+                <td>$${detalle.precio.toFixed(2)}</td>
+                  <td>$${detalle.subtotal.toFixed(2)}</td>
                     </tr>
-                  `;
+                         `; //
       }
 
       const cliente = await clienteService.getById(factura.cliente);
 
+      if (!cliente) {
+
+        console.error("Error,  factura ID", factura.cliente);
+        invoiceDetails.innerHTML = "<p>No hay Cliente Asociado a Factura.</p>";//mensaje error.
+        invoiceSection.classList.remove('hidden'); //ocultar.
+        return; //Salir
+      }
       invoiceDetails.innerHTML = `
-              <div class="invoice-header">
-                <div>
+           <div class="invoice-header">
+
+                  <div>
+
                   <div class="invoice-id">Factura #${factura.id}</div>
                   <div class="invoice-date">Fecha: ${fecha}</div>
                 </div>
-              </div>
-              <div class="invoice-client">
-                <h3>Cliente</h3>
-                <p><strong>Nombre:</strong> ${cliente.nombre}</p>
-                <p><strong>Telefono:</strong> ${cliente.telefono}</p>
-                <p><strong>Dirección:</strong> ${cliente.direccion}</p>
-              </div>
-              <h3>Detalle de Compra</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${detallesHTML}
-                </tbody>
-              </table>
-              <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
-            `;
 
+             </div>
+                <div class="invoice-client">
+                  <h3>Cliente</h3>
+                   <p><strong>Nombre:</strong> ${cliente.nombre}</p>
+                 <p><strong>Telefono:</strong> ${cliente.telefono}</p>
+                     <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+            </div>
+
+                  <h3>Detalle de Compra</h3>
+
+            <table>
+
+              <thead>
+                  <tr>
+                       <th>Producto</th>
+                         <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                   <th>Subtotal</th>
+
+                        </tr>
+                  </thead>
+
+                  <tbody>
+                     ${detallesHTML}
+                </tbody>
+
+             </table>
+
+             <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
+               `;
       invoiceSection.classList.remove('hidden');
+
     }
 
     // Cerrar factura
