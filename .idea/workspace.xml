@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/database/indexdDB.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/BaseModel.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/BasePersona.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Carrito.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Categoria.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Cliente.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Factura.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Marca.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Models.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Producto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/models/Proveedor.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/notifications/showNotifications.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/services/CategoriaService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/services/ClienteService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/services/ProveedorService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/utils/execute.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/app/app.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/app/utils/utilities.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui_admin.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui_carrito.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui_checkout.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui_common.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui_factura.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui_tienda.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prueva.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/E-Commerce.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2ue3lXZepn9o2Bd4NiV36BShLw6" />
+  <component name="ProjectViewState">
+    <option name="compactDirectories" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+    <option name="sortByType" value="true" />
+    <option name="sortKey" value="BY_TYPE" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/JavicSoftCode-01/Downloads/E-Commerce/BackEnd/src&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\JavicSoftCode-01\Downloads\E-Commerce\BackEnd\src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\JavicSoftCode-01\Downloads\E-Commerce\FrontEnd\public\pages" />
+      <recent name="C:\Users\JavicSoftCode-01\Downloads\E-Commerce\BackEnd\src" />
+      <recent name="C:\Users\JavicSoftCode-01\Downloads\E-Commerce\FrontEnd\public" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
+        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="" />
+      <created>1742595364422</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1742595364422</updated>
+      <workItem from="1742595366799" duration="11946000" />
+      <workItem from="1742652422352" duration="27032000" />
+      <workItem from="1742700674648" duration="26430000" />
+      <workItem from="1742793724666" duration="6932000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
