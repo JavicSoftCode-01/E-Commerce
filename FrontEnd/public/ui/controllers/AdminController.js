@@ -7,7 +7,8 @@ import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
 import {Producto} from '../../../../BackEnd/src/models/Producto.js';
 import {appService} from '../services/UшымтаService.js'; // Importar para usar la caché
 import {CheckoutController} from './CheckoutController.js';
-import {TiendaController} from "./TiendaController.js";  // Importa tiendaController
+
+// import {TiendaController} from "./TiendaController.js";  // Importa tiendaController
 
 
 class AdminController {
@@ -74,7 +75,8 @@ class AdminController {
     // Elementos Ventas (factura)
     this.tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
 
-    this.tiendaController = new TiendaController()
+    // this.tiendaController = new TiendaController() // <-- ¡ELIMINAR ESTO!
+    this.tiendaController = app.tiendaController; // <-- ¡USAR ESTO!
     this.setupEventListeners();
   }
 
@@ -712,6 +714,37 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Productos
   //---------------------------------------------------
+  // async cargarProductos() {
+  //   try {
+  //     const productos = await this.productoService.obtenerProductos();
+  //     this.tablaProductos.innerHTML = '';
+  //     if (!Array.isArray(productos)) {
+  //       console.error('Error: El resultado de obtenerProductos no es un array.');
+  //       return;
+  //     }
+  //     productos.forEach(producto => {
+  //       const tr = document.createElement('tr');
+  //       tr.innerHTML = `
+  //                  <td>${producto.id}</td>
+  //                  <td>${producto.nombre}</td>
+  //                <td>${producto.categoriaNombre}</td>
+  //                  <td>${producto.marcaNombre}</td>
+  //                    <td>$${producto.pvp.toFixed(2)}</td>
+  //                    <td>${producto.proveedorNombre}</td>
+  //                <td>${producto.stock}</td>
+  //                  <td class="action-buttons">
+  //                     <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
+  //                     <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
+  //                   </td>
+  //                  `;
+  //       this.tablaProductos.appendChild(tr); // Añade a tbody
+  //     });
+  //     this.setupProductoListeners();
+  //   } catch (error) {
+  //     console.error("Hubo un error obteniendo los productos:", error);
+  //     alert("Error al cargar los productos");
+  //   }
+  // }
   async cargarProductos() {
     try {
       const productos = await this.productoService.obtenerProductos();
@@ -723,18 +756,18 @@ class AdminController {
       productos.forEach(producto => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-                   <td>${producto.id}</td>
-                   <td>${producto.nombre}</td>
-                 <td>${producto.categoriaNombre}</td>
-                   <td>${producto.marcaNombre}</td>
-                     <td>$${producto.pvp.toFixed(2)}</td>
-                     <td>${producto.proveedorNombre}</td>
-                 <td>${producto.stock}</td>
-                   <td class="action-buttons">
-                      <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
-                      <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
-                    </td>
-                   `;
+                       <td>${producto.id}</td>
+                       <td>${producto.nombre}</td>
+                     <td>${producto.categoriaNombre}</td>
+                       <td>${producto.marcaNombre}</td>
+                         <td>$${producto.pvp.toFixed(2)}</td>
+                         <td>${producto.proveedorNombre}</td>
+                     <td>${producto.stock}</td>
+                       <td class="action-buttons">
+                          <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
+                          <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
+                        </td>
+                       `;
         this.tablaProductos.appendChild(tr); // Añade a tbody
       });
       this.setupProductoListeners();
@@ -744,6 +777,57 @@ class AdminController {
     }
   }
 
+  // setupProductoListeners() {
+  //   // Editar
+  //   this.tablaProductos.querySelectorAll('.edit-producto').forEach(button => {
+  //     button.addEventListener('click', async (e) => { // Pone Evento click
+  //
+  //       const productoId = parseInt(e.target.dataset.id);        // Obtiene
+  //
+  //       const producto = await this.productoService.obtenerProductoPorId(productoId); // producto por ID
+  //
+  //       if (producto) { // producto existe!
+  //         // Cargar  form
+  //         this.productoIdInput.value = producto.id;
+  //         this.productoNombreInput.value = producto.nombre;
+  //         this.productoPrecioInput.value = producto.precio;
+  //         this.productoCategoriaSelect.value = producto.categoriaId;
+  //         this.productoMarcaSelect.value = producto.marcaId;
+  //         this.productoProveedorSelect.value = producto.proveedorId;
+  //         this.productoStockInput.value = producto.stock;
+  //         this.productoPVPInput.value = producto.pvp;
+  //         this.productoDescripcionInput.value = producto.descripcion;
+  //         this.productoImagenInput.value = producto.imagen
+  //       }
+  //     });
+  //   });
+  //   // Eliminar Producto
+  //   this.tablaProductos.querySelectorAll('.delete-producto').forEach(button => { // forEach para el boton eliminar
+  //     button.addEventListener('click', async (e) => {               //
+  //       const productoId = parseInt(e.target.dataset.id);     //
+  //
+  //       // --- CONFIRMACION ---
+  //       if (confirm("Esta seguro de eliminar?")) { //
+  //
+  //         //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
+  //         const result = await this.productoService.eliminarProducto(productoId);  //
+  //         //Actualiza
+  //         if (result !== null) {
+  //           await this.cargarProductos();      // Vuelve a cargar productos
+  //           //Verifica que tiendaController esté definido antes de usarlo
+  //           if (typeof this.tiendaController !== 'undefined' && this.tiendaController.cargarProductos) {
+  //             this.tiendaController.cargarProductos();
+  //           } else {
+  //             console.error("tiendaController no está definido o no tiene un método cargarProductos.");
+  //           }
+  //
+  //         }
+  //
+  //       }  //Cierra confirm()
+  //     }); //cierra Listener
+  //
+  //   });  // cierra forEach, setupProductoListeners
+  // } //cierra metodo
   setupProductoListeners() {
     // Editar
     this.tablaProductos.querySelectorAll('.edit-producto').forEach(button => {
@@ -782,11 +866,7 @@ class AdminController {
           if (result !== null) {
             await this.cargarProductos();      // Vuelve a cargar productos
             //Verifica que tiendaController esté definido antes de usarlo
-            if (typeof this.tiendaController !== 'undefined' && this.tiendaController.cargarProductos) {
-              this.tiendaController.cargarProductos();
-            } else {
-              console.error("tiendaController no está definido o no tiene un método cargarProductos.");
-            }
+            await app.tiendaController.cargarProductos();
 
           }
 
@@ -795,7 +875,6 @@ class AdminController {
 
     });  // cierra forEach, setupProductoListeners
   } //cierra metodo
-
   // Enviar Formulario Producto:  CREATE y UPDATE:
   // async guardarProducto(e) { // METODO, RECIBE EL EVENTO
   //   e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
@@ -909,6 +988,129 @@ class AdminController {
   // Enviar Formulario Producto:  CREATE y UPDATE:
 // En AdminController.js
 
+//   async guardarProducto(e) {
+//     e.preventDefault();
+//     const productoId = this.productoIdInput.value;
+//     const nombre = this.productoNombreInput.value;
+//     const precio = this.productoPrecioInput.value;
+//     const categoriaId = this.productoCategoriaSelect.value;
+//     const marcaId = this.productoMarcaSelect.value;
+//     const proveedorId = this.productoProveedorSelect.value;
+//     const stock = this.productoStockInput.value;
+//     const pvp = this.productoPVPInput.value;
+//     const descripcion = this.productoDescripcionInput.value;
+//     const imagen = this.productoImagenInput.value;
+//
+//
+//     //1.  Validaciones *previas* a la conversión:
+//     if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
+//       alert("Todos los campos marcados con (*) son obligatorios");
+//       return;  // Salida temprana si faltan campos
+//     }
+//
+//     // 2. Conversión de datos *antes* de crear la instancia:
+//     const precioNumerico = parseFloat(precio);
+//     const pvpNumerico = parseFloat(pvp);
+//     const stockNumerico = parseInt(stock, 10);
+//     const categoriaIdNumerico = parseInt(categoriaId, 10);
+//     const marcaIdNumerico = parseInt(marcaId, 10);
+//     const proveedorIdNumerico = parseInt(proveedorId, 10);
+//
+//     // Comprobaciones *adicionales* (que deberían estar en las validaciones, idealmente):
+//     if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
+//         isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
+//       alert("Error:  Valores numéricos inválidos.");
+//       return; // Salida temprana
+//     }
+//     if(precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0){
+//       alert('No se permiten números negativos')
+//       return
+//     }
+//
+//     let resultado; // Declaración de resultado
+//     try {
+//
+//         // 3.  Lógica para crear/actualizar:
+//         if (productoId) {
+//             // ACTUALIZAR
+//             const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
+//             if (!productoExistente) {
+//                 alert("Error: Producto no encontrado."); // Mejor mensaje
+//                 return;
+//             }
+//
+//              // *No* modificamos productoExistente directamente todavía.
+//              const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
+//              const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
+//              const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
+//
+//             //  *Aquí*, crea un *nuevo* objeto con los datos actualizados
+//             const productoActualizado = {
+//               ...productoExistente,  // Copia todas las propiedades existentes
+//               nombre: nombre,          // Valores actualizados/convertidos:
+//               precio: precioNumerico,
+//               categoriaId: categoriaIdNumerico,
+//               categoriaNombre: categoria.nombre,  // <- Usar los datos de las búsquedas.
+//               marcaId: marcaIdNumerico,
+//               marcaNombre: marca.nombre,          // <- Usar los datos de las búsquedas.
+//               proveedorId: proveedorIdNumerico,
+//               proveedorNombre: proveedor.nombre, // <- Usar los datos de las búsquedas
+//               stock: stockNumerico,
+//               pvp: pvpNumerico,
+//               descripcion: descripcion,
+//               imagen: imagen,
+//               id: parseInt(productoId),     //  MUY IMPORTANTE, para el update
+//
+//           };
+//
+//             resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
+//             if (resultado !== null) {
+//                 alert("Producto ACTUALIZADO");
+//              }
+//
+//         } else {
+//             // CREAR
+//
+//              //  *Aquí* se crea el *nuevo* producto *antes* de llamar al servicio.
+//             const nuevoProducto = new Producto(
+//                 nombre,
+//                 categoriaIdNumerico, // Usar ya los valores *numéricos*.
+//                 '', //  temporal
+//                 marcaIdNumerico,
+//                 '',
+//                 proveedorIdNumerico,
+//                 '',
+//                 precioNumerico,
+//                 pvpNumerico,
+//                 stockNumerico,
+//                 descripcion,
+//                 imagen
+//             );
+//              // Ya no necesitas idGenerator
+//             resultado = await this.productoService.agregarProducto(nuevoProducto);
+//             if (resultado) {
+//               alert(`EXITO Agregando Producto, ID ${resultado} `); //Muestra id creado.
+//             }
+//         } //  else/crear
+//
+//
+//         // 4.  *Después* de agregar/actualizar, y *si* fue exitoso:
+//
+//         if (resultado !== null && resultado !== undefined) {
+//             this.resetFormProducto();
+//             await this.cargarProductos();
+//             await this.cargarOpcionesProductoForm(); // <-  Para actualizar los selects!
+//             await appService.refreshCache(); // <- ¡Importante!
+//         }
+//         else{ // Si resultado es null
+//           throw new Error('Errores en Datos o Validacion.');
+//         }
+//
+//     } catch (error) {
+//         console.error("Error :", error);
+//         alert("Revise consola");  // Mejor feedback
+//     }
+// }
   async guardarProducto(e) {
     e.preventDefault();
     const productoId = this.productoIdInput.value;
@@ -939,11 +1141,11 @@ class AdminController {
 
     // Comprobaciones *adicionales* (que deberían estar en las validaciones, idealmente):
     if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
-        isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
+      isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
       alert("Error:  Valores numéricos inválidos.");
       return; // Salida temprana
     }
-    if(precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0){
+    if (precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0) {
       alert('No se permiten números negativos')
       return
     }
@@ -951,87 +1153,86 @@ class AdminController {
     let resultado; // Declaración de resultado
     try {
 
-        // 3.  Lógica para crear/actualizar:
-        if (productoId) {
-            // ACTUALIZAR
-            const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
-            if (!productoExistente) {
-                alert("Error: Producto no encontrado."); // Mejor mensaje
-                return;
-            }
-
-             // *No* modificamos productoExistente directamente todavía.
-             const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
-             const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
-             const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-
-            //  *Aquí*, crea un *nuevo* objeto con los datos actualizados
-            const productoActualizado = {
-              ...productoExistente,  // Copia todas las propiedades existentes
-              nombre: nombre,          // Valores actualizados/convertidos:
-              precio: precioNumerico,
-              categoriaId: categoriaIdNumerico,
-              categoriaNombre: categoria.nombre,  // <- Usar los datos de las búsquedas.
-              marcaId: marcaIdNumerico,
-              marcaNombre: marca.nombre,          // <- Usar los datos de las búsquedas.
-              proveedorId: proveedorIdNumerico,
-              proveedorNombre: proveedor.nombre, // <- Usar los datos de las búsquedas
-              stock: stockNumerico,
-              pvp: pvpNumerico,
-              descripcion: descripcion,
-              imagen: imagen,
-              id: parseInt(productoId),     //  MUY IMPORTANTE, para el update
-
-          };
-
-            resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
-            if (resultado !== null) {
-                alert("Producto ACTUALIZADO");
-             }
-
-        } else {
-            // CREAR
-
-             //  *Aquí* se crea el *nuevo* producto *antes* de llamar al servicio.
-            const nuevoProducto = new Producto(
-                nombre,
-                categoriaIdNumerico, // Usar ya los valores *numéricos*.
-                '', //  temporal
-                marcaIdNumerico,
-                '',
-                proveedorIdNumerico,
-                '',
-                precioNumerico,
-                pvpNumerico,
-                stockNumerico,
-                descripcion,
-                imagen
-            );
-             // Ya no necesitas idGenerator
-            resultado = await this.productoService.agregarProducto(nuevoProducto);
-            if (resultado) {
-              alert(`EXITO Agregando Producto, ID ${resultado} `); //Muestra id creado.
-            }
-        } //  else/crear
-
-
-        // 4.  *Después* de agregar/actualizar, y *si* fue exitoso:
-
-        if (resultado !== null && resultado !== undefined) {
-            this.resetFormProducto();
-            await this.cargarProductos();
-            await this.cargarOpcionesProductoForm(); // <-  Para actualizar los selects!
-            await appService.refreshCache(); // <- ¡Importante!
+      // 3.  Lógica para crear/actualizar:
+      if (productoId) {
+        // ACTUALIZAR
+        const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
+        if (!productoExistente) {
+          alert("Error: Producto no encontrado."); // Mejor mensaje
+          return;
         }
-        else{ // Si resultado es null
-          throw new Error('Errores en Datos o Validacion.');
+
+        // *No* modificamos productoExistente directamente todavía.
+        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico)
+        const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
+        const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
+
+        //  *Aquí*, crea un *nuevo* objeto con los datos actualizados
+        const productoActualizado = {
+          ...productoExistente,  // Copia todas las propiedades existentes
+          nombre: nombre,          // Valores actualizados/convertidos:
+          precio: precioNumerico,
+          categoriaId: categoriaIdNumerico,
+          categoriaNombre: categoria.nombre,  // <- Usar los datos de las búsquedas.
+          marcaId: marcaIdNumerico,
+          marcaNombre: marca.nombre,          // <- Usar los datos de las búsquedas.
+          proveedorId: proveedorIdNumerico,
+          proveedorNombre: proveedor.nombre, // <- Usar los datos de las búsquedas
+          stock: stockNumerico,
+          pvp: pvpNumerico,
+          descripcion: descripcion,
+          imagen: imagen,
+          id: parseInt(productoId),     //  MUY IMPORTANTE, para el update
+
+        };
+
+        resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
+        if (resultado !== null) {
+          alert("Producto ACTUALIZADO");
         }
+
+      } else {
+        // CREAR
+
+        //  *Aquí* se crea el *nuevo* producto *antes* de llamar al servicio.
+        const nuevoProducto = new Producto(
+          nombre,
+          categoriaIdNumerico, // Usar ya los valores *numéricos*.
+          '', //  temporal
+          marcaIdNumerico,
+          '',
+          proveedorIdNumerico,
+          '',
+          precioNumerico,
+          pvpNumerico,
+          stockNumerico,
+          descripcion,
+          imagen
+        );
+        // Ya no necesitas idGenerator
+        resultado = await this.productoService.agregarProducto(nuevoProducto);
+        if (resultado) {
+          alert(`EXITO Agregando Producto, ID ${resultado} `); //Muestra id creado.
+        }
+      } //  else/crear
+
+
+      // 4.  *Después* de agregar/actualizar, y *si* fue exitoso:
+
+      if (resultado !== null && resultado !== undefined) {
+        this.resetFormProducto();
+        await this.cargarProductos();
+        await this.cargarOpcionesProductoForm(); // <-  Para actualizar los selects!
+        await appService.refreshCache(); // <- ¡Importante!
+      } else { // Si resultado es null
+        throw new Error('Errores en Datos o Validacion.');
+      }
 
     } catch (error) {
-        console.error("Error :", error);
-        alert("Revise consola");  // Mejor feedback
+      console.error("Error :", error);
+      alert("Revise consola");  // Mejor feedback
     }
-}
+  }
 
   // Reset
   resetFormProducto() {
@@ -1086,7 +1287,7 @@ class AdminController {
 
 
     } catch (error) {     // Errores
-                          //Feedback, si falla.
+      //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }
@@ -1095,6 +1296,45 @@ class AdminController {
   //-------------------------
   //Ventas (Historial)
   //-------------------------
+  // async cargarVentas() {
+  //   try {
+  //     const ventas = await this.facturaService.obtenerFacturas(); //  await (indexedDB)
+  //     this.tablaVentas.innerHTML = ''; // limpiar antes
+  //
+  //     if (!Array.isArray(ventas)) {  // <--- AÑADE ESTA COMPROBACIÓN
+  //       console.error("Error: ventas no es un array.");
+  //       return; // Salir si no es un array
+  //     }
+  //
+  //     for (const venta of ventas) {      //  venta singular!!       NO "ventas", sino "venta"
+  //       // Obtener ,  nombre de Cliente
+  //       //const clienteNombre = await this.facturaService.obtenerNombreCliente(venta.cliente); //
+  //       const cliente = await this.clienteService.obtenerClientePorId(venta.cliente);
+  //       const clienteNombre = cliente ? cliente.nombre : 'Cliente Desconocido'; // Si no existe, pone
+  //       // Convertir a un  formato
+  //       const fecha = new Date(venta.fecha).toLocaleDateString();  //Formato legible
+  //       // Crea elemento HTML <tr> fila!
+  //       const tr = document.createElement('tr');     // Row
+  //
+  //       // Añadir a esta fila, columnas!
+  //       tr.innerHTML = `
+  //                  <td>${venta.id}</td>
+  //                <td>${fecha}</td>
+  //                   <td>${clienteNombre}</td>
+  //                <td>$${venta.total.toFixed(2)}</td>
+  //                 <td class="action-buttons">
+  //                    <button class="action-button edit-button view-venta" data-id="${venta.id}">Ver Detalle</button>
+  //                </td>
+  //           `;  // Texto!, datos, botones
+  //       this.tablaVentas.appendChild(tr); // Añadir al tbody
+  //
+  //     } //cierra loop "for"
+  //     this.setupVentasListeners(); //METODO, Inicializa o Refresca Listeners
+  //   } catch (error) {  // Error!
+  //     console.error("Hubo Error obtener ventas, o no existen:", error);
+  //     alert("Revise si existem Facturas.");//Mensaje
+  //   }
+  // }
   async cargarVentas() {
     try {
       const ventas = await this.facturaService.obtenerFacturas(); //  await (indexedDB)
@@ -1135,9 +1375,90 @@ class AdminController {
     }
   }
 
-
   // Metodo Setup para eventos dentro de la Tabla, para: Boton!
   // setupVentasListeners()
+  // setupVentasListeners() {
+  //   // Dentro de este <tbody>:  usar querySelectorAll Para *todos* botones
+  //   this.tablaVentas.querySelectorAll('.view-venta').forEach(button => { // querySelectorAll(... foreach ...
+  //     button.addEventListener('click', async (e) => { //   Listener al click, en: ( e )
+  //
+  //       const ventaId = parseInt(e.target.dataset.id);          // sacar id
+  //       const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
+  //
+  //       // invocar , Vista detallada, la funcion:
+  //       await CheckoutController.mostrarFactura(venta);
+  //       document.getElementById('tienda').classList.add('hidden')
+  //       document.getElementById('admin').classList.add('hidden'); //  panel de ADMIN oculto:
+  //       //Ocultar ventana actual!
+  //       document.getElementById('invoiceSection').classList.remove('hidden'); // Muestra vista
+  //
+  //     }); // Listener, cada boton:
+  //   });  // foreach loop
+  //
+  // }  //Metodo.
+  async mostrarFactura(factura) { //METODO, para mostrar el detalle de la factura
+    if (!factura) return;
+
+    const fecha = new Date(factura.fecha).toLocaleDateString();
+
+    let detallesHTML = '';
+
+    //Aqui busca mediante el id, el producto
+    for (const detalle of factura.detalles) {
+
+      const producto = await this.productoService.obtenerProductoPorId(detalle.productoId)
+
+      detallesHTML += `
+                <tr>
+                  <td>${producto.nombre}</td>
+                <td>${detalle.cantidad}</td>
+                  <td>$${detalle.precio.toFixed(2)}</td>
+                 <td>$${detalle.subtotal.toFixed(2)}</td>
+              </tr>
+            `;
+    }
+
+    const cliente = await this.clienteService.obtenerClientePorId(factura.cliente);
+    if (!cliente) {
+      console.error("No se pudo encontrar el cliente para la factura ID:", factura.cliente);
+      this.invoiceDetails.innerHTML = "<p>Cliente no encontrado.</p>"; // Mejor mensaje.
+      document.getElementById('invoiceSection').classList.remove('hidden');
+      return;
+    }
+
+    this.invoiceDetails.innerHTML = `
+        <div class="invoice-header">
+               <div>
+                 <div class="invoice-id">Factura #${factura.id}</div>
+               <div class="invoice-date">Fecha: ${fecha}</div>
+              </div>
+          </div>
+            <div class="invoice-client">
+                <h3>Cliente</h3>
+               <p><strong>Nombre:</strong> ${cliente.nombre}</p>
+              <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
+               <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+            </div>
+         <h3>Detalle de Compra</h3>
+            <table>
+            <thead>
+                 <tr>
+                  <th>Producto</th>
+                    <th>Cantidad</th>
+                   <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+             </thead>
+             <tbody>
+                 ${detallesHTML}  <!-- Aquí se insertan las filas -->
+             </tbody>
+         </table>
+         <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
+      `;
+
+    this.invoiceSection.classList.remove('hidden');
+  }
+
   setupVentasListeners() {
     // Dentro de este <tbody>:  usar querySelectorAll Para *todos* botones
     this.tablaVentas.querySelectorAll('.view-venta').forEach(button => { // querySelectorAll(... foreach ...
@@ -1147,7 +1468,11 @@ class AdminController {
         const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
 
         // invocar , Vista detallada, la funcion:
-        await CheckoutController.mostrarFactura(venta);
+        if (venta) {
+          await this.mostrarFactura(venta);
+
+        }
+
         document.getElementById('tienda').classList.add('hidden')
         document.getElementById('admin').classList.add('hidden'); //  panel de ADMIN oculto:
         //Ocultar ventana actual!
@@ -1157,7 +1482,6 @@ class AdminController {
     });  // foreach loop
 
   }  //Metodo.
-
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.
