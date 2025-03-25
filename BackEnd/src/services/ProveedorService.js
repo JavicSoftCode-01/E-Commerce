@@ -121,6 +121,7 @@ class ProveedorService extends IndexedDB {
   async eliminarProveedor(id) {
     try {
       await super.delete(id);
+      alert(`Proveedor con ID ${id} eliminado correctamente`);
       console.info(`Proveedor con ID ${id} eliminado correctamente.`);
     } catch (error) {
       console.error(`Error al eliminar proveedor con ID ${id}:`, error);
