@@ -1,8 +1,6 @@
 // FrontEnd/ui/controllers/CheckoutController.js
-import { app } from '../AppFactory.js';
 import { TiendaController } from './TiendaController.js'; // Importa para el carrito y actualizar contador
 import { Cliente } from '../../../../BackEnd/src/models/Cliente.js';
-import { Model } from '../../../../BackEnd/src/models/Models.js';
 import { appService } from '../services/UшымтаService.js';
 
 
@@ -91,16 +89,16 @@ class CheckoutController {
 
         try {
             const cliente = new Cliente(nombre, telefono, direccion);
-          cliente.id = await Model.generateId('Cliente', app.idGeneratorService); //  Generar ID *antes* de agregar.
+          //  cliente.id = await Model.generateId('Cliente', app.idGeneratorService); //  <- YA NO
            const nuevoCliente = await this.clienteService.agregarCliente(cliente);
 
             if (nuevoCliente) {
               // Actualizar la lista desplegable de clientes
                 const option = document.createElement('option');
-             option.value = nuevoCliente.id; // Usar el *ID* como valor.
-                option.textContent = nuevoCliente.nombre; // Usar el *nombre* como texto visible.
+             option.value = nuevoCliente; // Usar el *ID* como valor.  Ya no es .id
+                option.textContent = cliente.nombre; // Usar el *nombre* como texto visible.
                this.clientSelect.appendChild(option);
-             this.clientSelect.value = nuevoCliente.id; // Seleccionar el nuevo cliente.
+             this.clientSelect.value = nuevoCliente; // Seleccionar el nuevo cliente.  Ya no es .id
 
                 alert('Cliente registrado con éxito. Ahora puedes confirmar la compra.');
           }

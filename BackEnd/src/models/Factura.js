@@ -1,5 +1,4 @@
 // BackEnd/src/models/Factura.js
-import {Model} from './Models.js'
 
 /**
  *  🔰🔰Clase que representa el detalle de una factura de venta (un ítem de la factura).🔰🔰
@@ -23,7 +22,7 @@ class DetalleFactura {
 /**
  * 🔰🔰Clase que representa una factura de venta.🔰🔰
  */
-class Factura extends Model {
+class Factura   {
 
   /**
    * Crea una instancia de Factura.
@@ -32,7 +31,6 @@ class Factura extends Model {
    * @param {Date} [fecha=new Date()] - Fecha de la factura.
    */
   constructor(clienteId, detalles = [], fecha = new Date()) {
-    super();
     this.id = null; // Se asigna al guardar.
     this.cliente = clienteId;
     this.detalles = detalles;

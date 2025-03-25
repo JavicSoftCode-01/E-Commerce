@@ -5,23 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/database/indexdDB.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/database/indexdDB.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/BaseModel.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/BaseModel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/BasePersona.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/BasePersona.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Categoria.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Categoria.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Factura.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Factura.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Models.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/BackEnd/src/services/CategoriaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/CategoriaService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ClienteService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ClienteService.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ProveedorService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ProveedorService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/app/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/app/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui_admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/AppFactory.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui_carrito.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui_checkout.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui_factura.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/TiendaController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui_tienda.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/services/UшымтаService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,7 +88,7 @@
       <workItem from="1742652422352" duration="27032000" />
       <workItem from="1742700674648" duration="26430000" />
       <workItem from="1742793724666" duration="6966000" />
-      <workItem from="1742825808520" duration="20411000" />
+      <workItem from="1742825808520" duration="23570000" />
     </task>
     <servers />
   </component>

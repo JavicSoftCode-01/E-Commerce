@@ -112,6 +112,7 @@ class MarcaService extends IndexedDB {
   async eliminarMarca(id) {
     try {
       await super.delete(id);
+      alert(`Categoría con ID ${id} eliminada correctamente.`);
       console.info(`La marca con ID ${id} fue eliminada correctamente.`);
     } catch (error) {
       console.error(`Error al intentar eliminar la marca con ID ${id}:`, error);

@@ -1,214 +1,197 @@
 // BackEnd/src/utils/validar.js
+import { IndexedDB } from '../database/indexdDB.js'; //  importación correcta
+
 /**
  *  🔰🔰Clase con métodos de validación.  Todos los métodos son estáticos.🔰🔰
  */
 export class Validar {
 
-  /**
-   * Valida un nombre (para categoría, marca o producto).
-   * @param {string} nombre - El nombre a validar.
-   * @param {IndexedDB} service - Instancia de IndexedDB (categoria, marca o producto).
-   * @param {number|null} [id=null] - ID del registro actual si se está editando.
-   * @returns {string|false} Nombre formateado si es válido, false si no.
-   */
-  static async nombreBM(nombre, service, id = null) {
-    if (!nombre || typeof nombre !== 'string') {
-      console.error("Error: El nombre no puede estar vacío o ser falso.");
-      return false;
+
+/**
+ * Valida un nombre para categorías o marcas, con restricciones avanzadas de formato
+ * @param {string} nombre - El nombre a validar.
+ * @param {IndexedDB} service  Instancia del servicio (CategoriaService, MarcaService, etc.).
+ * @param {number} [id=null] -  ID para excluir en la validación de duplicados (para actualizaciones).
+ * @returns {Promise<string|null>} El nombre validado si es válido, o null si no lo es.
+ */
+static async nombreBM(nombre, service, id = null) {
+    // Validación inicial
+    if (!nombre || nombre.trim() === '') {
+        console.error('El nombre no puede estar vacío.');
+        return null;
     }
-    const formattedName = nombre.trim(); // Elimina espacios al inicio y final.
-    if (/\d/.test(formattedName)) {
-      console.error("Error: El nombre no debe contener caracteres numéricos.");
-      return false;
+
+    // Eliminar espacios al inicio y al final
+    const nombreFormateado = nombre.trim();
+
+    // Validación de longitud
+    if (nombreFormateado.length < 3 || nombreFormateado.length > 50) {
+        console.error('El nombre debe tener entre 3 y 50 caracteres.');
+        return null;
     }
-    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(formattedName)) {
-      console.error("Error: El nombre solo debe contener letras y espacios.");
-      return false;
+
+    // Expresión regular mejorada:
+    // - Solo letras (incluyendo acentuadas y Ñ)
+    // - Permite espacios solo entre palabras
+    // - No permite números ni símbolos
+    const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:\s+[A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
+
+    if (!regex.test(nombreFormateado)) {
+        console.error('El nombre solo debe contener letras (con acentos y Ñ). No se permiten números, símbolos o espacios al inicio/final.');
+        return null;
     }
-    if (formattedName.length < 3 || formattedName.length > 100) {
-      console.error(`Error: El nombre debe tener entre 3 y 100 caracteres.  Actual: ${formattedName.length}`);
-      return false;
-    }
+
     try {
-      const allItems = await service.getAll();
-      // Comprueba si *otro* elemento (con diferente ID) tiene el mismo nombre.
-      const existe = allItems.some(item => item.nombre?.trim().toLowerCase() === formattedName.toLowerCase() && item.id !== id);
-      if (existe) {
-        console.error(`Error: Ya existe un registro con el nombre: ${nombre}`);
-        return false;
-      }
-    } catch (error) {
-      console.error(`Error al validar nombre para ${nombre}:`, error);
-      return false; // Falso en caso de error de DB.
-    }
-    console.info(`Nombre validado correctamente: ${formattedName}`);
-    return formattedName;
-  }
-
-
-  /**
-   * Valida y formatea un número de teléfono (para cliente o proveedor).
-   * @param {string} telefono - El número de teléfono a validar.
-   * @param {IndexedDB} service - Instancia de IndexedDB (cliente o proveedor).
-   * @param {number|null} [id=null] - ID del registro si se está editando.
-   * @returns {string|false} Teléfono formateado si es válido, false si no.
-   */
-  static async telefonoBP(telefono, service, id = null) {
-    if (!telefono || telefono.trim() === '') {
-      console.error("Error: El número de teléfono no puede estar vacío.");
-      return false;
-    }
-    let telefonoLimpio = telefono.trim().replace(/[^0-9+]/g, ''); // Elimina caracteres no numéricos excepto '+'
-    // Detectar si es un número de celular o convencional
-    let formatoFinal = '';
-    if (telefonoLimpio.startsWith('+593')) { //Formato Internacional
-      telefonoLimpio = telefonoLimpio.slice(4); // Elimina '+593' al inicio
-      if (telefonoLimpio.length === 9 && telefonoLimpio.startsWith('9')) {
-        //Celular
-        formatoFinal = `+593 ${telefonoLimpio.substring(0, 1)} ${telefonoLimpio.substring(1, 5)} ${telefonoLimpio.substring(5, 9)}`;
-      } else if (telefonoLimpio.length === 9 && !telefonoLimpio.startsWith('9')) {
-        //Convencional
-        const codigoProvincia = telefonoLimpio.substring(0, 1);
-        if (['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
-          formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5, 9)}`;
-        } else {
-          console.error("Error: Formato de número convencional incorrecto.");
-          return false;
-        }
-      } else if (telefonoLimpio.length === 8 && !telefonoLimpio.startsWith('9')) {
-        //Convencional de 8 dígitos
-        let codigoProvincia = telefonoLimpio.substring(0, 1);
-        formatoFinal = `(0${codigoProvincia})${telefonoLimpio.substring(1, 2)}-${telefonoLimpio.substring(2, 4)}-${telefonoLimpio.substring(4, 8)}`;
-      } else {
-        console.error("Error: Formato de número internacional incorrecto.");
-        return false;
-      }
-    } else if (telefonoLimpio.startsWith('09')) {//Formato celular
-      if (telefonoLimpio.length !== 10) {
-        console.error("Error: El número de celular debe tener 10 dígitos (incluyendo el 0 inicial).");
-        return false;
-      }
-      formatoFinal = `+593 ${telefonoLimpio.substring(1, 3)} ${telefonoLimpio.substring(3, 6)} ${telefonoLimpio.substring(6)}`;
-    } else if (telefonoLimpio.startsWith('0')) {  // Formato convencional con 0 inicial
-      const codigoProvincia = telefonoLimpio.substring(1, 2);
-      if (!['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
-        console.error("Error: Código de provincia inválido.");
-        return false;
-      }
-      if (telefonoLimpio.length === 8) { //Valida si es de 8
-        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
-      } else if (telefonoLimpio.length === 9) {// Formato convencional, asume 9 dígitos.
-        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 6)} - ${telefonoLimpio.substring(6)}`;
-      } else if (telefonoLimpio.length === 7) {//formato local
-        formatoFinal = `(${telefonoLimpio.substring(0, 1)})${telefonoLimpio.substring(1, 3)}-${telefonoLimpio.substring(3, 5)}-${telefonoLimpio.substring(5, 7)}`;
-      } else {
-        console.error("Error: El número convencional tiene que tener un formato correcto (ej: (02) xx-xx-xx o (02) xxx-xxxx ).");
-        return false;
-      }
-    } else if (telefonoLimpio.length >= 7 && telefonoLimpio.length <= 10) {
-      //Podria ser un celular sin 09 o convencional
-      if (telefonoLimpio.startsWith('9'))//Es celular sin 09
-      {
-        formatoFinal = '+593 ' + telefonoLimpio.substring(0, 1) + " " + telefonoLimpio.substring(1, 5) + " " + telefonoLimpio.substring(5, 9)
-      } else { //Verificar convencional sin 0
-        const posiblesCodigos = ['2', '3', '4', '5', '6', '7'];
-        let codigoEncontrado = false;
-        for (const cod of posiblesCodigos) {
-          if (telefonoLimpio.startsWith(cod)) {
-            if (telefonoLimpio.length === 8) {
-              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 8)}`;
-              codigoEncontrado = true;
-              break;
-            } else if (telefonoLimpio.length === 7) {
-              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
-              codigoEncontrado = true;
-            } else if (telefonoLimpio.length === 6) {
-              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4)}`;
-              codigoEncontrado = true;
+        // Determinar qué método getAll usar según el tipo de servicio
+        let items = [];
+        if (service instanceof service.constructor) {
+            if (service.storeName === 'categorias') {
+                items = await service.obtenerTodasLasCategorias();
+            } else if (service.storeName === 'marcas') {
+                items = await service.obtenerTodasLasMarcas();
+            } else {
+                console.error('Servicio no reconocido en validación de nombre.');
+                return null;
             }
-            break;
-          }
         }
-      }
-    } else { //Si no inicia por nada conocido.
-      console.error("Error, formato desconocido")
-      return false;
-    }
-    if (!formatoFinal) {
-      return false;
-    }
-    // Verificar duplicados *excluyendo* el elemento actual que se está editando (si lo hay)
-    try {
-      const allItems = await service.getAll();
-      const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
-      if (isDuplicate) {
-        console.error("Error: El número de teléfono ya está registrado.");
-        return false;
-      }
+
+        // Verificación de nombre duplicado (case-insensitive)
+        const existe = items.some(item =>
+            item.nombre.toLowerCase() === nombreFormateado.toLowerCase() && item.id !== id
+        );
+
+        if (existe) {
+            console.error(`Ya existe un registro con el nombre: ${nombreFormateado}.`);
+            return null;
+        }
+
+        console.info(`Nombre ${nombreFormateado} validado`);
+        return nombreFormateado;
     } catch (error) {
-      console.error(`Error al validar teléfono ${telefono}:`, error);
-      return false; // Falso en caso de error de DB.
+        console.error("Error al validar el nombre:", error);
+        return null;
     }
-    console.info(`Teléfono validado y formateado: ${formatoFinal}`);
-    return formatoFinal;
-  }
+}
 
-  /**
-   * Valida una dirección (para cliente o proveedor).
-   * @param {string} direccion - La dirección a validar.
-   * @returns {string|false} Dirección formateada si es válida, false si no.
-   */
-  static direccionBP(direccion) {
-    const trimmed = direccion.trim(); // Elimina espacios al inicio y final
-    // Valida longitud mínima y máxima
-    if (trimmed.length < 3 || trimmed.length > 256) {
-      console.error("La dirección debe tener entre 3 y 256 caracteres.");
-      return false;
-    }
-    // Verifica si la dirección contiene al menos una letra o número
-    if (!/[a-zA-Z0-9]/.test(trimmed)) {
-      console.error("La dirección debe contener al menos una letra o número.");
-      return false;
-    }
-    console.info(`Dirección validada: ${trimmed}`);
-    return trimmed;
-  }
+    /**
+     * Valida un nombre de Proveedor o Cliente.
+     * Permite caracteres alfanuméricos, espacios y algunos caracteres especiales comunes en nombres y
+     * con una longuitud de entre 3 y 70 caracteres
+     * @param {string} nombre - El nombre a validar.
+     * @returns {string|null} El nombre validado si es válido, o null si no lo es.
+     */
+    static nombreBP(nombre) {
+        if (!nombre || nombre.trim() === '') {
+            console.error('El nombre no puede estar vacío.');
+            return null;
+        }
+        const nombreFormateado = nombre.trim();
+        if (nombreFormateado.length < 3 || nombreFormateado.length > 70) {
+            console.error('El nombre debe tener entre 3 y 70 caracteres.');
+            return null;
+        }
+        // Solo letras, números, espacios, y ciertos caracteres especiales.
+        const regex = /^[a-zA-Z0-9][a-zA-Z0-9\s.,'-]*[a-zA-Z0-9.]$/;
+        if (!regex.test(nombreFormateado)) {
+            console.error('El nombre para Proveedor o Cliente no es válido.  Solo letras/números/espacios/.,-\'');
+            return null;
+        }
 
-  /**
-   * Valida el nombre de un cliente o proveedor.
-   * @param {string} nombre - El nombre del cliente/proveedor.
-   * @param {boolean} [esEmpresa=false] - Indica si el nombre es de una empresa.
-   * @returns {string|false} Nombre validado o false si no es válido.
-   */
-  static nombreBP(nombre, esEmpresa = false) {
-    if (!nombre || typeof nombre !== 'string') {
-      console.error("Error: El nombre no puede estar vacío.");
-      return false;
+        console.info(`Nombre "${nombreFormateado}" validado.`);
+        return nombreFormateado;
     }
-    const trimmedName = nombre.trim();
-    if (trimmedName.length < 3 || trimmedName.length > 100) {
-      console.error("Error: El nombre debe tener entre 3 y 100 caracteres.");
-      return false;
+
+    /**
+     * Valida un número de teléfono, permite diferentes formatos, espacios, guiones, puntos
+     * @param {string} telefono - El número de teléfono a validar.
+     * @param {IndexedDB} service  Instancia del servicio (ClienteService, etc.)
+     * @param {number} [id=null] -  ID para excluir en la validación de duplicados (para actualizaciones).
+     * @returns {Promise<string|null>} El número de teléfono validado si es válido, o null si no lo es.  También verifica duplicados en DB.
+     */
+    static async telefonoBP(telefono, service, id = null) {
+        if (!telefono || telefono.trim() === '') {
+            console.error('El número de teléfono no puede estar vacío.');
+            return null;
+        }
+        const telefonoFormateado = telefono.replace(/\s/g, '').trim(); // Elimina espacios
+
+        if (telefonoFormateado.length < 7 || telefonoFormateado.length > 20) {
+            console.error('El teléfono debe tener entre 7 y 20 caracteres.');
+            return null;
+        }
+
+        // Mejor expresión regular: permite números, espacios, guiones y puntos opcionales,
+        const regex = /^[0-9+\-().\s]*$/;
+        if (!regex.test(telefono)) {
+            console.error('El número de teléfono no es válido.  Solo números, +, -, ., ( ).');
+            return null;
+        }
+
+        try {
+
+            // Determinar qué método getAll usar según el tipo de servicio
+            let items = [];
+           if (service instanceof service.constructor) {
+               if(service.storeName === 'clientes') {
+                items = await service.obtenerTodosLosClientes();
+
+               } else if(service.storeName === 'proveedores') {
+                   items = await service.obtenerTodosLosProveedores();
+                } else {
+                console.error('Servicio no reconocido en validación de nombre.');
+                return null;
+                }
+            }
+
+            // Verificación de duplicados, considerando la edición
+            const existe = items.some(item => {
+                // Si se proporciona un ID, *excluimos* ese ítem de la búsqueda de duplicados (es una edición).
+                // Si id es null, verificamos contra todos (es una inserción).
+                return item.telefono === telefonoFormateado && item.id !== id;
+            });
+            if (existe) {
+                console.error(`El telefono ya existe`);
+                return null
+            }
+
+            console.info(`Teléfono "${telefonoFormateado}" validado.`);
+            return telefonoFormateado;
+        } catch (error) {
+            console.error("Error durante la validación de teléfono:", error);
+            return null;
+        }
     }
-    if (esEmpresa) {
-      // Permitir letras, espacios, puntos y "S.A."
-      if (!/^[a-zA-ZÀ-ÿ\s.]+$/.test(trimmedName)) {
-        console.error("Error: El nombre de la empresa solo debe contener letras, espacios y puntos.");
-        return false;
-      }
-      if (!trimmedName.toUpperCase().includes("S.A.")) {
-        console.warn("Advertencia: Nombre de la empresa deberia Finalizar con 'S.A.'");
-      }
-    } else {
-      // Solo letras, espacios y acentos (para nombres y apellidos)
-      if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(trimmedName)) {
-        console.error("Error: El nombre solo debe contener letras y espacios.");
-        return false;
-      }
+
+    /**
+     * Valida una dirección, permite letras, números, espacios y algunos caracteres especiales
+     * @param {string} direccion - La dirección a validar.
+     * @returns {string|null} La dirección validada si es válida, o null si no lo es.
+     */
+    static direccionBP(direccion) {
+        if (!direccion || direccion.trim() === '') {
+            console.error('La direccion no puede ser vacia.')
+            return null
+        }
+        const direccionFormateada = direccion.trim()
+
+        if (direccionFormateada.length < 5 || direccionFormateada.length > 100) {
+            console.error('La direccion debe tener entre 5 y 100 caracteres.');
+            return null
+        }
+        //Permite letras, números, espacios, #, -, y coma. Empieza/termina con letra/número.
+        const regex = /^[a-zA-Z0-9][a-zA-Z0-9\s#,-]*[a-zA-Z0-9]$/;
+
+        if (!regex.test(direccionFormateada)) {
+            console.error('Dirección no válida. Solo letras, números, espacios, #, -, y comas. Debe empezar/terminar con letra/número.');
+            return null;
+        }
+
+        console.info(`Dirección "${direccionFormateada}" validada.`);
+        return direccionFormateada;
     }
-    console.info(`Nombre validado: ${trimmedName}`);
-    return trimmedName;
-  }
+
+
+
 
   /**
    * Valida y formatea un precio o precio de venta (PVP).

@@ -1,20 +1,17 @@
 // BackEnd/src/models/BaseModel.js
-import {Model} from './Models.js'
-
 /**
- * 🔰🔰Clase BaseModel que servirá para categoría, marca y producto.  Define los campos comunes (id y nombre).🔰🔰
+ * Clase BaseModel que servirá para categoría, marca y producto.
+ * Define los campos comunes (id y nombre).
  */
-class BaseModel extends Model {
-
+class BaseModel {
   /**
    * Crea una instancia de BaseModel.
    * @param {string} nombre - Nombre de la categoría, marca o producto.
    */
   constructor(nombre) {
-    super();
-    this.id = null; // Se establece en null inicialmente. Se asignará un valor al guardar en la DB.
+    // this.id = null; // ¡Elimina esto!  IndexedDB se encarga del ID con autoIncrement.
     this.nombre = nombre;
   }
 }
 
-export {BaseModel};
+export { BaseModel };

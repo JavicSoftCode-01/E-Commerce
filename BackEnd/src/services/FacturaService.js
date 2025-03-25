@@ -1,7 +1,6 @@
 // BackEnd/src/services/FacturaService.js
 import {IndexedDB} from '../database/indexdDB.js';
 import {Factura, DetalleFactura} from '../models/Factura.js';
-import {Model} from '../models/Models.js';
 
 /**
  * 🔰🔰Servicio para la gestión de facturas.
@@ -110,15 +109,15 @@ class FacturaService extends IndexedDB {
    * @param {number} id - ID de la factura a eliminar.
    * @returns {Promise<void|null>} - Devuelve void si fue eliminado, null si falla
    */
-  async eliminarFactura(id) {
-    try {
-      await super.delete(id);
-      console.info(`Factura con ID ${id} eliminada correctamente.`);
-    } catch (error) {
-      console.error(`Error al eliminar la factura con ID ${id}:`, error);
-      return null;
-    }
-  }
+  // async eliminarFactura(id) {
+  //   try {
+  //     await super.delete(id);
+  //     console.info(`Factura con ID ${id} eliminada correctamente.`);
+  //   } catch (error) {
+  //     console.error(`Error al eliminar la factura con ID ${id}:`, error);
+  //     return null;
+  //   }
+  // }
 }
 
 export {FacturaService};
