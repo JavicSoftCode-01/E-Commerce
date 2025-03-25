@@ -20,8 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       app.carritoController.mostrarCarrito();
     });
 
+    // document.getElementById('btnCheckout').addEventListener('click', () => {
+    //   app.checkoutController.procederAlPago();
+    // });
     document.getElementById('btnCheckout').addEventListener('click', () => {
-      app.checkoutController.procederAlPago();
+      app.carritoController.procederAlPago();
     });
 
     // Load store components after event listeners
