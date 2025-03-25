@@ -1,16 +1,13 @@
 // BackEnd/src/services/ClienteService.js
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
-import {Cliente} from '../models/Cliente.js'; // Importa la clase Cliente
+import {Cliente} from '../models/Cliente.js';
 
 /**
- * 🔰 Servicio para la gestión de clientes.
- *  Extiende de IndexedDB para interactuar con la base de datos.
+ * 🔰🔰Servicio para la gestión de clientes.
+ *  Extiende de IndexedDB para interactuar con la base de datos.🔰🔰
  */
 class ClienteService extends IndexedDB {
-  /**
-   * Constructor del servicio de Cliente.
-   */
   constructor() {
     super('mydb', 'clientes');
   }
@@ -25,14 +22,12 @@ class ClienteService extends IndexedDB {
       const nombreValidado = await Validar.nombreBP(cliente.nombre);
       const direccionValidada = Validar.direccionBP(cliente.direccion);
       const telefonoValidado = await Validar.telefonoBP(cliente.telefono, this);
-
       if (!nombreValidado || !direccionValidada || !telefonoValidado) {
         return null; // Los errores de validación ya se registran en los métodos de Validar
       }
       // Crea instancia de Cliente
       const nuevoCliente = new Cliente(nombreValidado, telefonoValidado, direccionValidada);
       nuevoCliente.id = await super.add(nuevoCliente); // Guarda instancia
-
       console.info(`Cliente agregado con ID: ${nuevoCliente.id}`);
       return nuevoCliente.id;
     } catch (error) {
@@ -52,21 +47,18 @@ class ClienteService extends IndexedDB {
       const nombreValidado = await Validar.nombreBP(clienteActualizado.nombre);
       const direccionValidada = Validar.direccionBP(clienteActualizado.direccion);
       const telefonoValidado = await Validar.telefonoBP(clienteActualizado.telefono, this, id);
-
       if (!nombreValidado || !direccionValidada || !telefonoValidado) {
         return null; // Los errores de validación ya se registran en los métodos de Validar
       }
-
       // Obtener el cliente existente como instancia.
       const clienteExistente = await this.obtenerClientePorId(id);
       if (!clienteExistente) {
         return null;
       }
-        // Actualizar los datos.
-        clienteExistente.nombre = nombreValidado;
-        clienteExistente.direccion = direccionValidada;
-        clienteExistente.telefono = telefonoValidado;
-
+      // Actualizar los datos.
+      clienteExistente.nombre = nombreValidado;
+      clienteExistente.direccion = direccionValidada;
+      clienteExistente.telefono = telefonoValidado;
       const updatedId = await super.update(id, clienteExistente);  // Guardar instancia.
       console.info(`Cliente con ID ${id} actualizado correctamente.`);
       return updatedId;
@@ -85,11 +77,10 @@ class ClienteService extends IndexedDB {
       const clientes = await super.getAll();
       // Convertir a instancias de Cliente
       const clientesInstancias = clientes.map(cliente => {
-          const nuevoCliente = new Cliente(cliente.nombre, cliente.telefono, cliente.direccion);
-          nuevoCliente.id = cliente.id;
-          return nuevoCliente;
+        const nuevoCliente = new Cliente(cliente.nombre, cliente.telefono, cliente.direccion);
+        nuevoCliente.id = cliente.id;
+        return nuevoCliente;
       });
-
       console.info('Clientes obtenidos:', clientesInstancias);
       return clientesInstancias;
     } catch (error) {
@@ -121,20 +112,21 @@ class ClienteService extends IndexedDB {
       return null;
     }
   }
-    /**
-     * Elimina un cliente por su ID.
-     * @param {number} id - ID del cliente a eliminar.
-     * @returns {Promise<void|null>} - Devuelve void si fue eliminado con exito, o null en caso de error.
-     */
-    async eliminarCliente(id) {
-        try {
-            await super.delete(id);
-            console.info(`Cliente con ID ${id} eliminado correctamente.`);
-        } catch (error) {
-            console.error(`Error al eliminar cliente con ID ${id}:`, error);
-            return null
-        }
+
+  /**
+   * Elimina un cliente por su ID.
+   * @param {number} id - ID del cliente a eliminar.
+   * @returns {Promise<void|null>} - Devuelve void si fue eliminado con exito, o null en caso de error.
+   */
+  async eliminarCliente(id) {
+    try {
+      await super.delete(id);
+      console.info(`Cliente con ID ${id} eliminado correctamente.`);
+    } catch (error) {
+      console.error(`Error al eliminar cliente con ID ${id}:`, error);
+      return null
     }
+  }
 }
 
 export {ClienteService};

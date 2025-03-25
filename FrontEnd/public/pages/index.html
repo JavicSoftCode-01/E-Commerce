@@ -10,1516 +10,390 @@
 
 <body>
 
-<!-- Navegación -->
-<header>
-  <div class="nav-container">
-    <div class="logo">Mi E-Commerce</div>
-    <div class="nav-buttons">
-      <button id="btnTienda">Tienda</button>
-      <button id="btnAdmin">Panel Admin</button>
-      <button id="btnCarrito" class="cart-icon">
-        🛒 Carrito
-        <span class="cart-count" id="cartCount">0</span>
-      </button>
+  <!-- Navegación -->
+  <header>
+    <div class="nav-container">
+      <div class="logo">Mi E-Commerce</div>
+      <div class="nav-buttons">
+        <button id="btnTienda">Tienda</button>
+        <button id="btnAdmin">Panel Admin</button>
+        <button id="btnCarrito" class="cart-icon">
+          🛒 Carrito
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sección Tienda -->
+  <div id="tienda" class="container">
+    <h2>Catálogo de Productos</h2>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Buscar productos...">
+      <button id="searchButton">Buscar</button>
+    </div>
+
+    <div class="filters">
+      <select id="filterCategoria">
+        <option value="">Todas las categorías</option>
+      </select>
+      <select id="filterMarca">
+        <option value="">Todas las marcas</option>
+      </select>
+      <select id="sortBy">
+        <option value="default">Ordenar por</option>
+        <option value="price-asc">Precio: Menor a Mayor</option>
+        <option value="price-desc">Precio: Mayor a Menor</option>
+        <option value="name-asc">Nombre: A-Z</option>
+        <option value="name-desc">Nombre: Z-A</option>
+      </select>
+    </div>
+
+    <div class="products" id="productList">
+      <!-- Aquí se cargarán los productos -->
     </div>
   </div>
-</header>
 
-<!-- Sección Tienda -->
-<div id="tienda" class="container">
-  <h2>Catálogo de Productos</h2>
-
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Buscar productos...">
-    <button id="searchButton">Buscar</button>
-  </div>
-
-  <div class="filters">
-    <select id="filterCategoria">
-      <option value="">Todas las categorías</option>
-    </select>
-    <select id="filterMarca">
-      <option value="">Todas las marcas</option>
-    </select>
-    <select id="sortBy">
-      <option value="default">Ordenar por</option>
-      <option value="price-asc">Precio: Menor a Mayor</option>
-      <option value="price-desc">Precio: Mayor a Menor</option>
-      <option value="name-asc">Nombre: A-Z</option>
-      <option value="name-desc">Nombre: Z-A</option>
-    </select>
-  </div>
-
-  <div class="products" id="productList">
-    <!-- Aquí se cargarán los productos -->
-  </div>
-</div>
-
-<!-- Sección Carrito -->
-<div id="cartSection" class="cart hidden">
-  <h3>Carrito de Compra</h3>
-  <div id="emptyCart" class="cart-empty">
-    El carrito está vacío
-  </div>
-  <table id="cartTable" class="hidden">
-    <thead>
-    <tr>
-      <th>Producto</th>
-      <th>Cantidad</th>
-      <th>Precio</th>
-      <th>Subtotal</th>
-      <th>Acción</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- Items del carrito -->
-    </tbody>
-  </table>
-  <p class="cart-total" id="cartTotal">Total: $0</p>
-  <div class="cart-actions hidden" id="cartActions">
-    <button id="btnEmptyCart" class="btn btn-danger">Vaciar Carrito</button>
-    <button id="btnCheckout" class="btn btn-success">Proceder al Pago</button>
-  </div>
-</div>
-
-<!-- Sección Checkout -->
-<div id="checkoutSection" class="hidden">
-  <h2>Completar Compra</h2>
-
-  <div class="client-selector">
-    <h3>Seleccionar Cliente</h3>
-    <select id="clientSelect">
-      <option value="">Seleccione un cliente</option>
-    </select>
-    <button id="btnNewClient" class="btn">Cliente Nuevo</button>
-  </div>
-
-  <div id="newClientForm" class="hidden">
-    <h3>Datos del Cliente</h3>
-    <form id="checkoutClientForm">
-      <!--  Este ID no se usaba en el JS, pero es buena práctica tenerlo -->
-      <div class="form-row">
-        <div>
-          <label for="checkoutNombre">Nombre</label>
-          <input type="text" id="checkoutNombre" required>
-        </div>
-        <div>
-          <label for="checkoutTelefono">Teléfono</label>
-          <input type="text" id="checkoutTelefono" required>
-        </div>
-      </div>
-      <div>
-        <label for="checkoutDireccion">Dirección</label>
-        <input type="text" id="checkoutDireccion" required>
-      </div>
-      <button id="btnConfirmClientData" class="btn hidden">Confirmar Datos</button>
-    </form>
-  </div>
-
-  <div class="cart" id="checkoutCartSection">
-    <h3>Resumen del Pedido</h3>
-    <table id="checkoutCartTable">
+  <!-- Sección Carrito -->
+  <div id="cartSection" class="cart hidden">
+    <h3>Carrito de Compra</h3>
+    <div id="emptyCart" class="cart-empty">
+      El carrito está vacío
+    </div>
+    <table id="cartTable" class="hidden">
       <thead>
-      <tr>
-        <th>Producto</th>
-        <th>Cantidad</th>
-        <th>Precio</th>
-        <th>Subtotal</th>
-      </tr>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Subtotal</th>
+          <th>Acción</th>
+        </tr>
       </thead>
       <tbody>
-      <!-- Items del carrito -->
+        <!-- Items del carrito -->
       </tbody>
     </table>
-    <p class="cart-total" id="checkoutTotal">Total: $0</p>
-    <div class="cart-actions">
-      <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>
-      <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>
+    <p class="cart-total" id="cartTotal">Total: $0</p>
+    <div class="cart-actions hidden" id="cartActions">
+      <button id="btnEmptyCart" class="btn btn-danger">Vaciar Carrito</button>
+      <button id="btnCheckout" class="btn btn-success">Proceder al Pago</button>
     </div>
   </div>
-</div>
 
-<!-- Sección Factura -->
-<div id="invoiceSection" class="hidden">
-  <div class="invoice">
-    <span class="invoice-close" id="btnCloseInvoice">×</span>
-    <div id="invoiceDetails">
-      <!-- Se mostrará la factura generada -->
-    </div>
-  </div>
-</div>
+  <!-- Sección Checkout -->
+  <div id="checkoutSection" class="hidden">
+    <h2>Completar Compra</h2>
 
-
-<!-- Sección Administrador -->
-<div id="admin" class="container hidden">
-  <h2>Panel Administrador</h2>
-
-  <div class="admin-tabs">
-    <div class="admin-tab active" data-tab="categorias">Categorías</div>
-    <div class="admin-tab" data-tab="marcas">Marcas</div>
-    <div class="admin-tab" data-tab="proveedores">Proveedores</div>
-    <div class="admin-tab" data-tab="clientes">Clientes</div>
-    <div class="admin-tab" data-tab="productos">Productos</div>
-    <div class="admin-tab" data-tab="ventas">Historial de Ventas</div>
-  </div>
-
-  <div class="admin-panel">
-    <!-- Administrar Categorías -->
-    <div class="admin-section" id="adminCategorias">
-      <h3>Gestión de Categorías</h3>
-      <form id="formCategoria">
-        <input type="hidden" id="categoriaId">
-        <div>
-          <label for="categoriaNombre">Nombre de Categoría</label>
-          <input type="text" id="categoriaNombre" placeholder="Nombre de Categoría" required>
-        </div>
-        <div class="form-actions">
-          <button type="button" id="resetCategoriaForm" class="btn btn-danger">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar Categoría</button>
-        </div>
-      </form>
-      <table id="tablaCategorias">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Lista de categorías -->
-        </tbody>
-      </table>
+    <div class="client-selector">
+      <h3>Seleccionar Cliente</h3>
+      <select id="clientSelect">
+        <option value="">Seleccione un cliente</option>
+      </select>
+      <button id="btnNewClient" class="btn">Cliente Nuevo</button>
     </div>
 
-    <!-- Administrar Marcas -->
-    <div class="admin-section hidden" id="adminMarcas">
-      <h3>Gestión de Marcas</h3>
-      <form id="formMarca">
-        <input type="hidden" id="marcaId">
-        <div>
-          <label for="marcaNombre">Nombre de Marca</label>
-          <input type="text" id="marcaNombre" placeholder="Nombre de Marca" required>
-        </div>
-        <div class="form-actions">
-          <button type="button" id="resetMarcaForm" class="btn btn-danger">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar Marca</button>
-        </div>
-      </form>
-      <table id="tablaMarcas">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Lista de marcas -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Administrar Proveedores -->
-    <div class="admin-section hidden" id="adminProveedores">
-      <h3>Gestión de Proveedores</h3>
-      <form id="formProveedor">
-        <input type="hidden" id="proveedorId">
-        <div>
-          <label for="proveedorNombre">Nombre</label>
-          <input type="text" id="proveedorNombre" placeholder="Nombre Completo" required>
-        </div>
-        <div>
-          <label for="proveedorTelefono">Teléfono</label>
-          <input type="text" id="proveedorTelefono" placeholder="Teléfono de contacto">
-        </div>
-        <div>
-          <label for="proveedorContacto">Dirección</label>
-          <input type="text" id="proveedorContacto" placeholder="Dirección Completa" required>
-        </div>
-        <div class="form-actions">
-          <button type="button" id="resetProveedorForm" class="btn btn-danger">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar Proveedor</button>
-        </div>
-      </form>
-      <table id="tablaProveedores">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Lista de proveedores -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Administrar Clientes -->
-    <div class="admin-section hidden" id="adminClientes">
-      <h3>Gestión de Clientes</h3>
-      <form id="formCliente">
-        <input type="hidden" id="clienteId">
-        <div>
-          <label for="clienteNombre">Nombre</label>
-          <input type="text" id="clienteNombre" placeholder="Nombre completo" required>
-        </div>
-        <div>
-          <label for="clienteTelefono">Teléfono</label>
-          <input type="text" id="clienteTelefono" placeholder="Teléfono de contacto">
-        </div>
-        <div>
-          <label for="clienteDireccion">Dirección</label>
-          <input type="text" id="clienteDireccion" placeholder="Dirección completa" required>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" id="resetClienteForm" class="btn btn-danger">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar Cliente</button>
-        </div>
-      </form>
-      <table id="tablaClientes">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Teléfono</th>
-          <th>Dirección</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Lista de clientes -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Administrar Productos -->
-    <div class="admin-section hidden" id="adminProductos">
-      <h3>Gestión de Productos</h3>
-      <form id="formProducto">
-        <input type="hidden" id="productoId">
+    <div id="newClientForm" class="hidden">
+      <h3>Datos del Cliente</h3>
+      <form id="checkoutClientForm">
+        <!--  Este ID no se usaba en el JS, pero es buena práctica tenerlo -->
         <div class="form-row">
           <div>
-            <label for="productoNombre">Nombre del Producto *</label>
-            <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
+            <label for="checkoutNombre">Nombre</label>
+            <input type="text" id="checkoutNombre" required>
           </div>
           <div>
-            <label for="productoPrecio">Precio *</label>
-            <input type="number" id="productoPrecio" placeholder="Precio" step="0.01" min="0" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div>
-            <label for="productoCategoria">Categoría *</label>
-            <select id="productoCategoria" required>
-              <option value="">Seleccione Categoría</option>
-            </select>
-          </div>
-          <div>
-            <label for="productoMarca">Marca *</label>
-            <select id="productoMarca" required>
-              <option value="">Seleccione Marca</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div>
-            <label for="productoProveedor">Proveedor *</label>
-            <select id="productoProveedor" required>
-              <option value="">Seleccione Proveedor</option>
-            </select>
-          </div>
-          <div>
-            <label for="productoStock">Stock *</label>
-            <input type="number" id="productoStock" placeholder="Cantidad en stock" min="0" required>
+            <label for="checkoutTelefono">Teléfono</label>
+            <input type="text" id="checkoutTelefono" required>
           </div>
         </div>
         <div>
-          <label for="productoPVP">PVP *</label>
-          <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
+          <label for="checkoutDireccion">Dirección</label>
+          <input type="text" id="checkoutDireccion" required>
         </div>
-        <div>
-          <label for="productoDescripcion">Descripción</label>
-          <textarea id="productoDescripcion" placeholder="Descripción del producto"></textarea>
-        </div>
-        <div>
-          <label for="productoImagen">URL de Imagen</label>
-          <input type="text" id="productoImagen" placeholder="URL de la imagen">
-        </div>
-        <div class="form-actions">
-          <button type="button" id="resetProductoForm" class="btn btn-danger">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar Producto</button>
-        </div>
+        <button id="btnConfirmClientData" class="btn hidden">Confirmar Datos</button>
       </form>
-      <table id="tablaProductos">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Categoría</th>
-          <th>Marca</th>
-          <th>Precio</th>
-          <th>Proveedor</th>
-          <th>Stock</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Lista de productos -->
-        </tbody>
-      </table>
     </div>
 
-    <!-- Historial de Ventas -->
-    <div class="admin-section hidden" id="adminVentas">
-      <h3>Historial de Ventas</h3>
-      <table id="tablaVentas">
+    <div class="cart" id="checkoutCartSection">
+      <h3>Resumen del Pedido</h3>
+      <table id="checkoutCartTable">
         <thead>
-        <tr>
-          <th>Factura #</th>
-          <th>Fecha</th>
-          <th>Cliente</th>
-          <th>Total</th>
-          <th>Acciones</th>
-        </tr>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Subtotal</th>
+          </tr>
         </thead>
         <tbody>
-        <!-- Lista de ventas -->
+          <!-- Items del carrito -->
         </tbody>
       </table>
+      <p class="cart-total" id="checkoutTotal">Total: $0</p>
+      <div class="cart-actions">
+        <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>
+        <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-
-  /***********************
-   * APLICACIÓN PRINCIPAL *
-   ***********************/
-  document.addEventListener('DOMContentLoaded', async () => {
-    const idGeneratorService = new IdGeneratorService(); // Create an instance
-    //Ensure Ids exist
-    await idGeneratorService.ensureIdExists('Categoria');
-    await idGeneratorService.ensureIdExists('Marca');
-    await idGeneratorService.ensureIdExists('Proveedor');
-    await idGeneratorService.ensureIdExists('Cliente');
-    await idGeneratorService.ensureIdExists('Producto');
-    await idGeneratorService.ensureIdExists('Factura');
-    await idGeneratorService.ensureIdExists('ProductoSerial');
-
-    const categoriaService = new CategoriaService();
-    const marcaService = new MarcaService();
-    const proveedorService = new ProveedorService();
-    const clienteService = new ClienteService();
-    const productoService = new ProductoService(
-      categoriaService,
-      marcaService,
-      proveedorService
-    );
-
-    // FacturaService
-    const facturaService = new FacturaService(productoService, clienteService, idGeneratorService); // Instancia Factura Service
-
-    //Carrito Global
-    const carrito = new Carrito();
-
-    // Referencias DOM, simplificado
-    const tiendaSection = document.getElementById('tienda');
-    const adminSection = document.getElementById('admin');
-    const cartSection = document.getElementById('cartSection');
-    const productList = document.getElementById('productList');
-    const cartTable = document.getElementById('cartTable');
-    const cartTotal = document.getElementById('cartTotal');
-    const cartCount = document.getElementById('cartCount');
-    const emptyCart = document.getElementById('emptyCart');
-    const cartActions = document.getElementById('cartActions');
-    const checkoutSection = document.getElementById('checkoutSection');
-    const checkoutCartTable = document.getElementById('checkoutCartTable');
-    const checkoutTotal = document.getElementById('checkoutTotal');
-    const invoiceSection = document.getElementById('invoiceSection');
-    const invoiceDetails = document.getElementById('invoiceDetails');
-    const newClientForm = document.getElementById('newClientForm');
-
-    // Variable para rastrear el estado
-    let esNuevoCliente = false; // <--  ¡VARIABLE IMPORTANTE! Inicia en false.
-    const clientSelect = document.getElementById('clientSelect');
-
-    // Referencia a los tabs del administrador
-    const adminTabs = document.querySelectorAll('.admin-tab');
-    const adminSections = document.querySelectorAll('.admin-section');
-
-    async function handleAsyncOperation(operation, errorMessage, defaultValue = null) {
-      try {
-        return await operation();
-      } catch (error) {
-        console.error(errorMessage, error);
-        alert(`Error: ${errorMessage}`);
-        return defaultValue;
-      }
-    }
-
-    // NAVEGACIÓN
-    document.getElementById('btnTienda').addEventListener('click', async () => {
-      tiendaSection.classList.remove('hidden');
-      adminSection.classList.add('hidden');
-      await cargarProductos();
-    });
-
-    document.getElementById('btnAdmin').addEventListener('click', () => {
-      tiendaSection.classList.add('hidden');
-      adminSection.classList.remove('hidden');
-      loadAdminSection('categorias');
-    });
-
-    document.getElementById('btnCarrito').addEventListener('click', () => {
-      cartSection.classList.remove('hidden');
-      actualizarCarrito();
-      window.scrollTo(0, cartSection.offsetTop - 20);
-    });
-
-    // Navegación por tabs del administrador
-    adminTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        loadAdminSection(tab.dataset.tab);
-      });
-    });
-
-    async function cargarProductos(filters = {}) {
-      const productos = await handleAsyncOperation(() => productoService.getProducts(filters), "Error fetching products", []);
-      productList.innerHTML = '';
-
-      if (!productos || productos.length === 0) {
-        productList.innerHTML = '<div class="cart-empty">No se encontraron productos</div>';
-        return;
-      }
-
-      if (!Array.isArray(productos)) {
-        console.error("Error: productos is not an array.");
-        return;
-      }
-
-      for (const producto of productos) {
-        const productElement = document.createElement('div');
-        productElement.className = 'product';
-        productElement.innerHTML = `
-                        <img src="${producto.imagen}" alt="${producto.nombre}" class="product-image">
-                        <div class="product-info">
-                            <div class="product-title">${producto.nombre}</div>
-                            <div class="product-category">Categoría: ${producto.categoriaNombre}</div>
-                            <div class="product-brand">Marca: ${producto.marcaNombre}</div>
-                            <div class="product-price">$${producto.pvp.toFixed(2)}</div>
-                            <div class="product-description">${producto.descripcion}</div>
-                            <button class="btn btn-primary btn-block add-to-cart" data-id="${producto.id}">
-                                Agregar al Carrito
-                            </button>
-                        </div>
-                    `;
-        productList.appendChild(productElement);
-      }
-
-      document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const productoId = parseInt(e.target.dataset.id);
-          const producto = await handleAsyncOperation(() => productoService.getById(productoId), "Error retrieving product");
-
-          if (producto && producto.stock > 0) {
-            carrito.agregarItem(producto);
-            actualizarContadorCarrito();
-            e.target.textContent = "✓ Agregado";
-            setTimeout(() => {
-              e.target.textContent = "Agregar al Carrito";
-            }, 1500);
-          } else {
-            alert("Lo sentimos, no hay stock disponible para este producto.");
-          }
-        });
-      });
-    }
-
-    // FILTROS Y BÚSQUEDA
-    async function cargarFiltros() {
-      const categoriaSelect = document.getElementById('filterCategoria');
-      const marcaSelect = document.getElementById('filterMarca');
-
-      const categorias = await handleAsyncOperation(() => categoriaService.getAll(), "Error loading categories");
-      if (categorias) {
-        categoriaSelect.innerHTML = '<option value="">Todas las categorías</option>';
-        categorias.forEach(categoria => {
-          categoriaSelect.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
-        });
-      }
-
-      const marcas = await handleAsyncOperation(() => marcaService.getAll(), "Error loading brands");
-      if (marcas) {
-        marcaSelect.innerHTML = '<option value="">Todas las marcas</option>';
-        marcas.forEach(marca => {
-          marcaSelect.innerHTML += `<option value="${marca.id}">${marca.nombre}</option>`;
-        });
-      }
-    }
-
-    // Evento para búsqueda
-    document.getElementById('searchButton').addEventListener('click', () => {
-      aplicarFiltros();
-    });
-
-    document.getElementById('searchInput').addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') {
-        aplicarFiltros();
-      }
-    });
-
-    // Eventos para filtros
-    document.getElementById('filterCategoria').addEventListener('change', aplicarFiltros);
-    document.getElementById('filterMarca').addEventListener('change', aplicarFiltros);
-    document.getElementById('sortBy').addEventListener('change', aplicarFiltros);
-
-    function aplicarFiltros() {
-      const categoriaValue = document.getElementById('filterCategoria').value;
-      const marcaValue = document.getElementById('filterMarca').value;
-      const searchValue = document.getElementById('searchInput').value;
-      const sortValue = document.getElementById('sortBy').value;
-
-      const filters = {
-        categoria: categoriaValue ? parseInt(categoriaValue) : null,
-        marca: marcaValue ? parseInt(marcaValue) : null,
-        search: searchValue,
-        sort: sortValue !== 'default' ? sortValue : null
-      };
-
-      cargarProductos(filters);
-    }
-
-    // GESTIÓN DEL CARRITO
-    function actualizarCarrito() {
-      if (carrito.items.length === 0) {
-        cartTable.classList.add('hidden');
-        cartActions.classList.add('hidden');
-        emptyCart.classList.remove('hidden');
-        cartTotal.textContent = "Total: $0";
-      } else {
-        emptyCart.classList.add('hidden');
-        cartTable.classList.remove('hidden');
-        cartActions.classList.remove('hidden');
-
-        const tbody = cartTable.querySelector('tbody');
-        tbody.innerHTML = '';
-
-        carrito.items.forEach(item => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-                        <td>${item.producto.nombre}</td>
-                        <td>${item.cantidad}</td>
-                        <td>$${item.precio.toFixed(2)}</td>
-                        <td>$${item.subtotal.toFixed(2)}</td>
-                        <td>
-                          <button class="action-button delete-button remove-item" data-id="${item.producto.id}">
-                            X
-                          </button>
-                        </td>
-                      `;
-          tbody.appendChild(tr);
-        });
-
-        cartTotal.textContent = `Total: $${carrito.total.toFixed(2)}`;
-
-        document.querySelectorAll('.remove-item').forEach(button => {
-          button.addEventListener('click', (e) => {
-            const productoId = parseInt(e.target.dataset.id);
-            carrito.eliminarItem(productoId);
-            actualizarCarrito();
-            actualizarContadorCarrito();
-          });
-        });
-      }
-    }
-
-    function actualizarContadorCarrito() {
-      cartCount.textContent = carrito.obtenerCantidadItems();
-    }
-
-    // Vaciar carrito
-    document.getElementById('btnEmptyCart').addEventListener('click', () => {
-      if (confirm("¿Estás seguro de vaciar el carrito?")) {
-        carrito.vaciar();
-        actualizarCarrito();
-        actualizarContadorCarrito();
-      }
-    });
-
-    //*****************************
-    // CHECKOUT (COMPLETO/UNIFICADO)
-    //*****************************
-    document.getElementById('btnCheckout').addEventListener('click', async () => {
-
-      if (carrito.items.length === 0) {
-        alert('El carrito está vacío'); //Mensaje
-        return; //Salimos
-      }
-
-      cartSection.classList.add('hidden'); // ocultar carrito, mostrar checkout
-      checkoutSection.classList.remove('hidden');
-      clientSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
-      const clientes = await handleAsyncOperation(() => clienteService.getAll(),
-        "Error", []
-      );
-
-      if (clientes && Array.isArray(clientes)) {
-        clientes.forEach(cliente => {
-          clientSelect.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`;
-
-        });
-
-      }
-
-      const tbody = checkoutCartTable.querySelector('tbody'); //elemento agregar compra:
-      tbody.innerHTML = '';//antes, limpieza!
-      carrito.items.forEach(item => {
-        const tr = document.createElement('tr'); //Creamos fila:
-        tr.innerHTML = `
-               <td>${item.producto.nombre}</td>
-              <td>${item.cantidad}</td>
-              <td>$${item.precio.toFixed(2)}</td>
-				<td>$${item.subtotal.toFixed(2)}</td>
-            `;
-
-        tbody.appendChild(tr); //Se añade como hijo, como el final de esta tabla:
-
-      });
-
-      checkoutTotal.textContent = `Total: $${carrito.total.toFixed(2)}`;//mostramos total:
-    });
-    // Si damos click , y NO hay opciones selecionadas:
-    document.getElementById('btnNewClient').addEventListener('click', () => {
-      newClientForm.classList.remove('hidden');
-      clientSelect.value = ''; // Limpiar cualquier seleccion, o existente
-      esNuevoCliente = true;// indicativo.
-    });
-
-    //--- NUEVO --- Evento para confirmar datos del nuevo cliente
-    btnConfirmClientData.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      const nombre = document.getElementById('checkoutNombre').value;
-      const telefono = document.getElementById('checkoutTelefono').value;
-      const direccion = document.getElementById('checkoutDireccion').value;
-
-      if (!nombre || !telefono || !direccion) {
-        alert('Por favor, complete todos los campos del cliente.');
-        return;
-      }
-      //uso de try catch
-      try {
-        const cliente = new Cliente(nombre, telefono, direccion);
-        cliente.id = await Model.generateId('Cliente', idGeneratorService);
-        const nuevoCliente = await clienteService.add(cliente);
-
-        if (nuevoCliente) {
-          //  Añadir directamente al 'clientSelect' global  -- ¡CORREGIDO!
-          const option = document.createElement('option');
-          option.value = nuevoCliente.id;       // Usar .id, no solo el objeto.
-          option.textContent = nuevoCliente.nombre; // Usar la propiedad .nombre.
-          clientSelect.appendChild(option);      // 'clientSelect' global
-          clientSelect.value = nuevoCliente.id;  //  Seleccionar
-
-          //Notificacion
-          alert("Cliente registrado con éxito. Ahora puedes Confirmar la Compra");
-        }
-
-      } catch (error) {
-        console.error("Error al registrar el cliente:", error);
-        alert("Hubo un error al registrar el cliente. Revisa la consola.");
-      }
-    });
-
-    // Seleccionar cliente existente
-    document.getElementById('clientSelect').addEventListener('change', () => {
-      const clienteId = document.getElementById("clientSelect").value;// valor actual
-      if (clienteId) { //si Existe.
-        newClientForm.classList.add('hidden');
-        esNuevoCliente = false;// Marcamos a falso. Ya no *intencion* Nuevo Cliente, sino *existente en lista*
-      }
-
-    });
-    // cancelar checkout
-    document.getElementById('btnCancelCheckout').addEventListener('click', () => //Cerrar la ventana del Checkout:
-    { //ocultamos esta seccion.
-      checkoutSection.classList.add('hidden');
-
-      //limpiar variables/elementos para nuevos procesos/valores:
-      // Limpiar datos
-      cartSection.classList.remove('hidden');
-      clientSelect.value = ''; // Reset
-      newClientForm.classList.add('hidden');
-      document.getElementById('checkoutNombre').value = ''; // reset cliente
-      document.getElementById('checkoutTelefono').value = '';//
-      document.getElementById('checkoutDireccion').value = '';//
-      esNuevoCliente = false;// restaurar.
-
-    });
-
-    // --- Confirmar Compra (¡AHORA HACE TODO!) ---
-    document.getElementById('btnConfirmCheckout').addEventListener('click', async () => {
-      //1. -----FLUJO------
-      //Obtener desde *ORIGEN CORRECTO* del valor.  ya Sea  Nuevo Registro / Ya Existente y seleccionado en: clienteSelect:
-      let clienteId = clientSelect.value;
-
-
-      if (esNuevoCliente) {
-        const nombre = document.getElementById('checkoutNombre').value;
-        const telefono = document.getElementById('checkoutTelefono').value;
-        const direccion = document.getElementById('checkoutDireccion').value;
-
-        if (!nombre || !telefono || !direccion) { //si hay un dato sin completar:
-
-          alert('Complete datos del cliente, o si existe , seleccione desde la Lista.'); //mostrarlo al usuario.
-
-          return;  // Salida.
-        }
-
-        try {
-          const cliente = new Cliente(nombre, telefono, direccion);
-          cliente.id = await Model.generateId('Cliente', idGeneratorService);
-
-          const nuevoCliente = await clienteService.add(cliente);
-          if (nuevoCliente) { // si existe:
-            //Actualizar con nuevo registro
-            const option = document.createElement('option'); //creamos el obj
-            option.value = nuevoCliente.id;//
-            option.textContent = nuevoCliente.nombre; // Texto del Objeto en HTML:
-
-            clientSelect.appendChild(option); //añadir
-
-            clientSelect.value = nuevoCliente.id; // ASIGNAR EN EL CLIENTE SELECT, AHORA CLIENTE SELECT, ES ORIGEN.
-
-          }
-
-        } catch (error) {
-          console.error('Error Registrar Cliente:', error);
-          return; // Salimos.
-        }
-
-      }
-
-      // --Obtener conversion desde select, ya selecciono uno, o nuevo
-
-      let parsedClienteId = parseInt(clienteId);
-
-      //Si despues de ese flujo, aun sigue *sin una ID Válida*:
-      if (isNaN(parsedClienteId)) {
-        alert("Seleccione o registre un cliente Por Favor"); //Mostrar msj
-        return;//Salimos;
-      }
-      try {
-        //Obtener ya despues con la ID FINAL del select de: nuevo / existente.
-
-        const factura = await facturaService.generarFactura(parsedClienteId, carrito); //lamamos al generador.
-
-        if (!factura) { //Mensajes:
-          throw new Error('Error al Generar la factura!');
-        }
-
-        await mostrarFactura(factura);
-        carrito.vaciar();//
-        actualizarContadorCarrito();//
-        checkoutSection.classList.add('hidden'); //ocultar compra.
-        clientSelect.value = '';
-        esNuevoCliente = false;//retornar;
-
-        newClientForm.classList.add('hidden');
-
-        document.getElementById('checkoutNombre').value = '';
-        document.getElementById('checkoutTelefono').value = '';//tel
-        document.getElementById('checkoutDireccion').value = ''; //
-
-      } catch (error) { //error para el programador
-
-        console.error('Error during checkout:', error); //
-        alert(`Checkout failed: ${error.message}`);
-
-      }
-
-    });
-
-    // Mostrar factura generada
-    async function mostrarFactura(factura) {
-
-      if (!factura) return; //si no, sale
-      const fecha = new Date(factura.fecha).toLocaleDateString();
-
-      let detallesHTML = '';  // Aqui es donde agregaremos las filas
-
-      // Iteramos
-      for (const detalle of factura.detalles) { // Loop through the details array
-
-        detallesHTML += `
-
-              <tr>
-                <td>${detalle.producto.nombre}</td>
-                 <td>${detalle.cantidad}</td>
-                <td>$${detalle.precio.toFixed(2)}</td>
-                  <td>$${detalle.subtotal.toFixed(2)}</td>
-                    </tr>
-                         `; //
-      }
-
-      const cliente = await clienteService.getById(factura.cliente);
-
-      if (!cliente) {
-
-        console.error("Error,  factura ID", factura.cliente);
-        invoiceDetails.innerHTML = "<p>No hay Cliente Asociado a Factura.</p>";//mensaje error.
-        invoiceSection.classList.remove('hidden'); //ocultar.
-        return; //Salir
-      }
-      invoiceDetails.innerHTML = `
-           <div class="invoice-header">
-
-                  <div>
-
-                  <div class="invoice-id">Factura #${factura.id}</div>
-                  <div class="invoice-date">Fecha: ${fecha}</div>
-                </div>
-
-             </div>
-                <div class="invoice-client">
-                  <h3>Cliente</h3>
-                   <p><strong>Nombre:</strong> ${cliente.nombre}</p>
-                 <p><strong>Telefono:</strong> ${cliente.telefono}</p>
-                     <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+  <!-- Sección Factura -->
+  <div id="invoiceSection" class="hidden">
+    <div class="invoice">
+      <span class="invoice-close" id="btnCloseInvoice">×</span>
+      <div id="invoiceDetails">
+        <!-- Se mostrará la factura generada -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Sección Administrador -->
+  <div id="admin" class="container hidden">
+    <h2>Panel Administrador</h2>
+
+    <div class="admin-tabs">
+      <div class="admin-tab active" data-tab="categorias">Categorías</div>
+      <div class="admin-tab" data-tab="marcas">Marcas</div>
+      <div class="admin-tab" data-tab="proveedores">Proveedores</div>
+      <div class="admin-tab" data-tab="clientes">Clientes</div>
+      <div class="admin-tab" data-tab="productos">Productos</div>
+      <div class="admin-tab" data-tab="ventas">Historial de Ventas</div>
+    </div>
+
+    <div class="admin-panel">
+      <!-- Administrar Categorías -->
+      <div class="admin-section" id="adminCategorias">
+        <h3>Gestión de Categorías</h3>
+        <form id="formCategoria">
+          <input type="hidden" id="categoriaId">
+          <div>
+            <label for="categoriaNombre">Nombre de Categoría</label>
+            <input type="text" id="categoriaNombre" placeholder="Nombre de Categoría" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="resetCategoriaForm" class="btn btn-danger">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar Categoría</button>
+          </div>
+        </form>
+        <table id="tablaCategorias">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Lista de categorías -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Administrar Marcas -->
+      <div class="admin-section hidden" id="adminMarcas">
+        <h3>Gestión de Marcas</h3>
+        <form id="formMarca">
+          <input type="hidden" id="marcaId">
+          <div>
+            <label for="marcaNombre">Nombre de Marca</label>
+            <input type="text" id="marcaNombre" placeholder="Nombre de Marca" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="resetMarcaForm" class="btn btn-danger">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar Marca</button>
+          </div>
+        </form>
+        <table id="tablaMarcas">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Lista de marcas -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Administrar Proveedores -->
+      <div class="admin-section hidden" id="adminProveedores">
+        <h3>Gestión de Proveedores</h3>
+        <form id="formProveedor">
+          <input type="hidden" id="proveedorId">
+          <div>
+            <label for="proveedorNombre">Nombre</label>
+            <input type="text" id="proveedorNombre" placeholder="Nombre Completo" required>
+          </div>
+          <div>
+            <label for="proveedorTelefono">Teléfono</label>
+            <input type="text" id="proveedorTelefono" placeholder="Teléfono de contacto">
+          </div>
+          <div>
+            <label for="proveedorContacto">Dirección</label>
+            <input type="text" id="proveedorContacto" placeholder="Dirección Completa" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="resetProveedorForm" class="btn btn-danger">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar Proveedor</button>
+          </div>
+        </form>
+        <table id="tablaProveedores">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Lista de proveedores -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Administrar Clientes -->
+      <div class="admin-section hidden" id="adminClientes">
+        <h3>Gestión de Clientes</h3>
+        <form id="formCliente">
+          <input type="hidden" id="clienteId">
+          <div>
+            <label for="clienteNombre">Nombre</label>
+            <input type="text" id="clienteNombre" placeholder="Nombre completo" required>
+          </div>
+          <div>
+            <label for="clienteTelefono">Teléfono</label>
+            <input type="text" id="clienteTelefono" placeholder="Teléfono de contacto">
+          </div>
+          <div>
+            <label for="clienteDireccion">Dirección</label>
+            <input type="text" id="clienteDireccion" placeholder="Dirección completa" required>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="resetClienteForm" class="btn btn-danger">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar Cliente</button>
+          </div>
+        </form>
+        <table id="tablaClientes">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Lista de clientes -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Administrar Productos -->
+      <div class="admin-section hidden" id="adminProductos">
+        <h3>Gestión de Productos</h3>
+        <form id="formProducto">
+          <input type="hidden" id="productoId">
+          <div class="form-row">
+            <div>
+              <label for="productoNombre">Nombre del Producto *</label>
+              <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
             </div>
-
-                  <h3>Detalle de Compra</h3>
-
-            <table>
-
-              <thead>
-                  <tr>
-                       <th>Producto</th>
-                         <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                   <th>Subtotal</th>
-
-                        </tr>
-                  </thead>
-
-                  <tbody>
-                     ${detallesHTML}
-                </tbody>
-
-             </table>
-
-             <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
-               `;
-      invoiceSection.classList.remove('hidden');
-
-    }
-
-    // Cerrar factura
-    document.getElementById('btnCloseInvoice').addEventListener('click', () => {
-      invoiceSection.classList.add('hidden');
-      cargarProductos();
-    });
-
-    // PANEL DE ADMINISTRADOR
-    async function loadAdminSection(tabName) {
-      adminSections.forEach(section => section.classList.add('hidden'));
-      document.getElementById('admin' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
-      adminTabs.forEach(tab => tab.classList.remove('active'));
-      document.querySelector(`.admin-tab[data-tab="${tabName}"]`).classList.add('active');
-
-      await handleAsyncOperation(() => {
-        switch (tabName) {
-          case 'categorias':
-            return loadCategorias();
-          case 'marcas':
-            return loadMarcas();
-          case 'proveedores':
-            return loadProveedores();
-          case 'clientes':
-            return loadClientes();
-          case 'productos':
-            return loadProductos();
-          case 'ventas':
-            return loadVentas();
-          default:
-            return Promise.resolve();
-        }
-      }, `Error loading ${tabName} section`);
-
-    }
-
-    async function loadCategorias() {
-      const categorias = await handleAsyncOperation(() => categoriaService.getAll(), "Error loading categories");
-      if (!categorias) return;
-
-      const tablaCategorias = document.getElementById('tablaCategorias').querySelector('tbody');
-      tablaCategorias.innerHTML = '';
-
-      if (!Array.isArray(categorias)) {
-        console.error("Error: categorias is not an array.");
-        return;
-      }
-
-
-      categorias.forEach(categoria => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-                  <td>${categoria.id}</td>
-                  <td>${categoria.nombre}</td>
-                  <td class="action-buttons">
-                    <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">Editar</button>
-                    <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">Eliminar</button>
-                  </td>
-                `;
-        tablaCategorias.appendChild(tr);
-      });
-
-      document.querySelectorAll('.edit-categoria').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const categoriaId = parseInt(e.target.dataset.id);
-          const categoria = await handleAsyncOperation(() => categoriaService.getById(categoriaId), "Error retrieving category");
-          if (categoria) {
-            document.getElementById('categoriaId').value = categoria.id;
-            document.getElementById('categoriaNombre').value = categoria.nombre;
-          }
-        });
-      });
-
-      document.querySelectorAll('.delete-categoria').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const categoriaId = parseInt(e.target.dataset.id);
-          if (confirm("¿Estás seguro de eliminar esta categoría?")) {
-            await handleAsyncOperation(() => categoriaService.delete(categoriaId), "Error deleting category");
-            await loadCategorias();
-            await cargarOpcionesProductoForm();
-            await cargarFiltros();
-          }
-        });
-      });
-    }
-
-    // Formulario de Categoría
-    document.getElementById('formCategoria').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const categoriaId = document.getElementById('categoriaId').value;
-      const nombre = document.getElementById('categoriaNombre').value;
-
-      if (!nombre) {
-        alert("El nombre de la categoría es obligatorio");
-        return;
-      }
-      let result;
-      if (categoriaId) {
-        result = await categoriaService.update(parseInt(categoriaId), {
-          id: parseInt(categoriaId),
-          nombre: nombre
-        });
-      } else {
-        const newCat = new Categoria(nombre);
-        newCat.id = await Model.generateId('Categoria', idGeneratorService); // Generate and assign the ID
-        result = await categoriaService.add(newCat);
-      }
-      if (result) {
-        await loadCategorias();
-        resetCategoriaForm();
-        await cargarOpcionesProductoForm();
-        await cargarFiltros();
-      } else {
-        //Handle
-      }
-
-    });
-
-    // Reset Formulario Categoria
-    function resetCategoriaForm() {
-      document.getElementById('categoriaId').value = '';
-      document.getElementById('categoriaNombre').value = '';
-    }
-
-    document.getElementById('resetCategoriaForm').addEventListener('click', resetCategoriaForm);
-
-    // Gestión de marcas
-    async function loadMarcas() {
-      const marcas = await marcaService.getAll();
-      const tablaMarcas = document.getElementById('tablaMarcas').querySelector('tbody');
-      tablaMarcas.innerHTML = '';
-
-      marcas.forEach(marca => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-                  <td>${marca.id}</td>
-                  <td>${marca.nombre}</td>
-                  <td class="action-buttons">
-                    <button class="action-button edit-button edit-marca" data-id="${marca.id}">Editar</button>
-                    <button class="action-button delete-button delete-marca" data-id="${marca.id}">Eliminar</button>
-                  </td>
-                `;
-        tablaMarcas.appendChild(tr);
-      });
-
-      document.querySelectorAll('.edit-marca').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const marcaId = parseInt(e.target.dataset.id);
-          const marca = await marcaService.getById(marcaId);
-
-          document.getElementById('marcaId').value = marca.id;
-          document.getElementById('marcaNombre').value = marca.nombre;
-        });
-      });
-
-      document.querySelectorAll('.delete-marca').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const marcaId = parseInt(e.target.dataset.id);
-
-          if (confirm("¿Estás seguro de eliminar esta marca?")) {
-            await marcaService.delete(marcaId);
-            await loadMarcas();
-            await cargarOpcionesProductoForm();
-            await cargarFiltros();
-          }
-        });
-      });
-    }
-
-    // Formulario de Marca
-    document.getElementById('formMarca').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const marcaId = document.getElementById('marcaId').value;
-      const nombre = document.getElementById('marcaNombre').value;
-
-      if (!nombre) {
-        alert("El nombre de la marca es obligatorio");
-        return;
-      }
-      let result;
-      if (marcaId) {
-        result = await marcaService.update(parseInt(marcaId), {id: parseInt(marcaId), nombre: nombre});
-      } else {
-        const newMarca = new Marca(nombre);
-        newMarca.id = await Model.generateId('Marca', idGeneratorService); // Generate ID here
-        result = await marcaService.add(newMarca);
-      }
-      if (result) {
-        await loadMarcas();
-        resetMarcaForm();
-        await cargarOpcionesProductoForm();
-        await cargarFiltros();
-      }
-
-
-    });
-
-    // Reset Formulario Marca
-    function resetMarcaForm() {
-      document.getElementById('marcaId').value = '';
-      document.getElementById('marcaNombre').value = '';
-    }
-
-    document.getElementById('resetMarcaForm').addEventListener('click', resetMarcaForm);
-
-    // Gestión de proveedores
-    async function loadProveedores() {
-      const proveedores = await proveedorService.getAll();
-      const tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
-      tablaProveedores.innerHTML = '';
-
-      proveedores.forEach(proveedor => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-                  <td>${proveedor.id}</td>
-                  <td>${proveedor.nombre}</td>
-                  <td>${proveedor.direccion}</td>
-                  <td>${proveedor.telefono}</td>
-                  <td class="action-buttons">
-                    <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}">Editar</button>
-                    <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}">Eliminar</button>
-                  </td>
-                `;
-        tablaProveedores.appendChild(tr);
-      });
-
-      document.querySelectorAll('.edit-proveedor').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const proveedorId = parseInt(e.target.dataset.id);
-          const proveedor = await proveedorService.getById(proveedorId);
-
-          document.getElementById('proveedorId').value = proveedor.id;
-          document.getElementById('proveedorNombre').value = proveedor.nombre;
-          document.getElementById('proveedorContacto').value = proveedor.direccion;
-          document.getElementById('proveedorTelefono').value = proveedor.telefono;
-        });
-      });
-
-      document.querySelectorAll('.delete-proveedor').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const proveedorId = parseInt(e.target.dataset.id);
-
-          if (confirm("¿Estás seguro de eliminar este proveedor?")) {
-            await proveedorService.delete(proveedorId);
-            await loadProveedores();
-            await cargarOpcionesProductoForm();
-          }
-        });
-      });
-    }
-
-    // Formulario de Proveedor
-    document.getElementById('formProveedor').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const proveedorId = document.getElementById('proveedorId').value;
-      const nombre = document.getElementById('proveedorNombre').value;
-      const direccion = document.getElementById('proveedorContacto').value;
-      const telefono = document.getElementById('proveedorTelefono').value;
-
-      if (!nombre || !direccion) {
-        alert("El nombre y la dirección del proveedor son obligatorios");
-        return;
-      }
-      let result;
-      if (proveedorId) {
-        result = await proveedorService.update(parseInt(proveedorId), {
-          id: parseInt(proveedorId),
-          nombre: nombre,
-          direccion: direccion,
-          telefono: telefono
-        });
-
-      } else {
-        const prov = new Proveedor(nombre, direccion, telefono);
-        prov.id = await Model.generateId('Proveedor', idGeneratorService);
-        result = await proveedorService.add(prov);
-      }
-      if (result) {
-        await loadProveedores();
-        resetProveedorForm();
-        await cargarOpcionesProductoForm();
-      }
-
-    });
-
-    // Reset Formulario Proveedor
-    function resetProveedorForm() {
-      document.getElementById('proveedorId').value = '';
-      document.getElementById('proveedorNombre').value = '';
-      document.getElementById('proveedorContacto').value = '';
-      document.getElementById('proveedorTelefono').value = '';
-    }
-
-    document.getElementById('resetProveedorForm').addEventListener('click', resetProveedorForm);
-
-    // Gestión de clientes
-    async function loadClientes() {
-      const clientes = await clienteService.getAll();
-      const tablaClientes = document.getElementById('tablaClientes').querySelector('tbody');
-      tablaClientes.innerHTML = '';
-
-      clientes.forEach(cliente => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-                  <td>${cliente.id}</td>
-                  <td>${cliente.nombre}</td>
-                  <td>${cliente.telefono}</td>
-                  <td>${cliente.direccion}</td>
-                  <td class="action-buttons">
-                    <button class="action-button edit-button edit-cliente" data-id="${cliente.id}">Editar</button>
-                    <button class="action-button delete-button delete-cliente" data-id="${cliente.id}">Eliminar</button>
-                  </td>
-                `;
-        tablaClientes.appendChild(tr);
-      });
-
-      document.querySelectorAll('.edit-cliente').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const clienteId = parseInt(e.target.dataset.id);
-          const cliente = await clienteService.getById(clienteId);
-
-          document.getElementById('clienteId').value = cliente.id;
-          document.getElementById('clienteNombre').value = cliente.nombre;
-          document.getElementById('clienteTelefono').value = cliente.telefono;
-          document.getElementById('clienteDireccion').value = cliente.direccion;
-
-        });
-      });
-
-      document.querySelectorAll('.delete-cliente').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const clienteId = parseInt(e.target.dataset.id);
-
-          if (confirm("¿Estás seguro de eliminar este cliente?")) {
-            await clienteService.delete(clienteId);
-            await loadClientes();
-          }
-        });
-      });
-    }
-
-    // Formulario de Cliente
-    document.getElementById('formCliente').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const clienteId = document.getElementById('clienteId').value;
-      const nombre = document.getElementById('clienteNombre').value;
-      const telefono = document.getElementById('clienteTelefono').value;
-      const direccion = document.getElementById('clienteDireccion').value;
-
-
-      if (!nombre || !telefono || !direccion) {
-        alert("Nombre, telefono y dirección del cliente son obligatorios");
-        return;
-      }
-      let result;
-      if (clienteId) {
-        result = await clienteService.update(parseInt(clienteId), {
-          id: parseInt(clienteId),
-          nombre: nombre,
-          telefono: telefono,
-          direccion: direccion
-        });
-      } else {
-        const cli = new Cliente(nombre, telefono, direccion);
-        cli.id = await Model.generateId('Cliente', idGeneratorService); // Generate ID here
-        result = await clienteService.add(cli);
-
-      }
-      if (result) {
-        await loadClientes();
-        resetClienteForm();
-      }
-
-    });
-
-    // Reset Formulario Cliente
-    function resetClienteForm() {
-      document.getElementById('clienteId').value = '';
-      document.getElementById('clienteNombre').value = '';
-      document.getElementById('clienteTelefono').value = '';
-      document.getElementById('clienteDireccion').value = '';
-    }
-
-    document.getElementById('resetClienteForm').addEventListener('click', resetClienteForm);
-
-    // Gestión de productos
-    async function loadProductos() {
-      const productos = await productoService.getProducts();
-      const tablaProductos = document.getElementById('tablaProductos').querySelector('tbody');
-      tablaProductos.innerHTML = '';
-
-      for (const producto of productos) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-                  <td>${producto.id}</td>
-                  <td>${producto.nombre}</td>
-                  <td>${producto.categoriaNombre}</td>
-                  <td>${producto.marcaNombre}</td>
-                  <td>$${producto.pvp.toFixed(2)}</td>
-                  <td>${producto.proveedorNombre}</td>
-                  <td>${producto.stock}</td>
-                  <td class="action-buttons">
-                    <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
-                    <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
-                  </td>
-                `;
-        tablaProductos.appendChild(tr);
-      }
-
-      document.querySelectorAll('.edit-producto').forEach(button => {
-        button.addEventListener('click', async (e) => {
-
-
-          const productoId = parseInt(e.target.dataset.id);
-          const producto = await productoService.getById(productoId);
-
-          document.getElementById('productoId').value = producto.id;
-          document.getElementById('productoNombre').value = producto.nombre;
-          document.getElementById('productoPrecio').value = producto.precio;
-          document.getElementById('productoCategoria').value = producto.categoriaId;
-          document.getElementById('productoMarca').value = producto.marcaId;
-          document.getElementById('productoProveedor').value = producto.proveedorId;
-          document.getElementById('productoStock').value = producto.stock;
-          document.getElementById('productoPVP').value = producto.pvp;
-          document.getElementById('productoDescripcion').value = producto.descripcion;
-          document.getElementById('productoImagen').value = producto.imagen;
-        });
-
-      });
-
-      document.querySelectorAll('.delete-producto').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const productoId = parseInt(e.target.dataset.id);
-
-          if (confirm("¿Estás seguro de eliminar este producto?")) {
-            await productoService.delete(productoId);
-            await loadProductos();
-            await cargarProductos();
-          }
-        });
-      });
-    }
-
-    // Cargar opciones de categorías, marcas y proveedores en el formulario de productos
-    async function cargarOpcionesProductoForm() {
-      const categoriaSelect = document.getElementById('productoCategoria');
-      const marcaSelect = document.getElementById('productoMarca');
-      const proveedorSelect = document.getElementById('productoProveedor');
-
-      categoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>';
-      (await categoriaService.getAll()).forEach(categoria => {
-        categoriaSelect.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
-      });
-
-      marcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';
-      (await marcaService.getAll()).forEach(marca => {
-        marcaSelect.innerHTML += `<option value="${marca.id}">${marca.nombre}</option>`;
-      });
-
-      proveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';
-      (await proveedorService.getAll()).forEach(proveedor => {
-        proveedorSelect.innerHTML += `<option value="${proveedor.id}">${proveedor.nombre}</option>`;
-      });
-    }
-
-    // Formulario de Producto
-    document.getElementById('formProducto').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const productoId = document.getElementById('productoId').value;
-      const nombre = document.getElementById('productoNombre').value;
-      const precio = document.getElementById('productoPrecio').value;
-      const categoriaId = document.getElementById('productoCategoria').value;
-      const marcaId = document.getElementById('productoMarca').value;
-      const proveedorId = document.getElementById('productoProveedor').value;
-      const stock = document.getElementById('productoStock').value;
-      const pvp = document.getElementById('productoPVP').value;
-      const descripcion = document.getElementById('productoDescripcion').value;
-      const imagen = document.getElementById('productoImagen').value;
-
-      if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
-        alert("Todos los campos marcados con (*) son obligatorios");
-        return;
-      }
-      const categoria = await categoriaService.getById(parseInt(categoriaId));
-      const marca = await marcaService.getById(parseInt(marcaId));
-      const proveedor = await proveedorService.getById(parseInt(proveedorId));
-
-      let result;
-      if (productoId) {
-        const existingProduct = await productoService.getById(parseInt(productoId));
-        const productoData = {
-          id: parseInt(productoId),
-          serial: existingProduct.serial,
-          nombre: nombre,
-          precio: parseFloat(precio),
-          categoriaId: parseInt(categoriaId),
-          categoriaNombre: categoria.nombre,
-          marcaId: parseInt(marcaId),
-          marcaNombre: marca.nombre,
-          proveedorId: parseInt(proveedorId),
-          proveedorNombre: proveedor.nombre,
-          stock: parseInt(stock),
-          pvp: parseFloat(pvp),
-          descripcion: descripcion,
-          imagen: imagen
-        };
-        result = await productoService.update(parseInt(productoId), productoData);
-      } else {
-
-        const prod = new Producto(
-          nombre,
-          parseInt(categoriaId),
-          categoria.nombre,
-          parseInt(marcaId),
-          marca.nombre,
-          parseInt(proveedorId),
-          proveedor.nombre,
-          parseFloat(precio),
-          parseFloat(pvp),
-          parseInt(stock),
-          descripcion,
-          imagen
-        );
-        prod.id = await Model.generateId('Producto', idGeneratorService);
-        prod.serial = await Producto.generarSerial(idGeneratorService);
-        result = await productoService.add(prod);
-      }
-
-      if (result) {
-        await loadProductos();
-        resetProductoForm();
-        await cargarProductos();
-      }
-
-    });
-
-    // Reset Formulario Producto
-    function resetProductoForm() {
-      document.getElementById('productoId').value = '';
-      document.getElementById('productoNombre').value = '';
-      document.getElementById('productoPrecio').value = '';
-      document.getElementById('productoCategoria').value = '';
-      document.getElementById('productoMarca').value = '';
-      document.getElementById('productoProveedor').value = '';
-      document.getElementById('productoStock').value = '';
-      document.getElementById('productoPVP').value = '';
-      document.getElementById('productoDescripcion').value = '';
-      document.getElementById('productoImagen').value = '';
-    }
-
-    document.getElementById('resetProductoForm').addEventListener('click', resetProductoForm);
-
-    // Historial de ventas
-    async function loadVentas() {
-      const ventas = await facturaService.getFacturas();
-      const tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
-      tablaVentas.innerHTML = '';
-
-      for (const venta of ventas) {
-        const fecha = new Date(venta.fecha).toLocaleDateString();
-        const clienteNombre = await facturaService.getClienteName(venta.cliente);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-              <td>${venta.id}</td>
-              <td>${fecha}</td>
-              <td>${clienteNombre}</td>
-              <td>$${venta.total.toFixed(2)}</td>
-              <td class="action-buttons">
-                <button class="action-button edit-button view-venta" data-id="${venta.id}">Ver Detalle</button>
-              </td>
-            `;
-        tablaVentas.appendChild(tr);
-      }
-
-      document.querySelectorAll('.view-venta').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const ventaId = parseInt(e.target.dataset.id);
-          const venta = await facturaService.getById(ventaId);
-          await mostrarFactura(venta);
-          tiendaSection.classList.add('hidden');
-          adminSection.classList.add('hidden');
-          invoiceSection.classList.remove('hidden');
-        });
-      });
-    }
-
-    // Inicialización
-    async function init() {
-      await cargarProductos();
-      await cargarFiltros();
-      actualizarContadorCarrito();
-      await cargarOpcionesProductoForm();
-    }
-
-    init();
-  });
-</script>
-
+            <div>
+              <label for="productoPrecio">Precio *</label>
+              <input type="number" id="productoPrecio" placeholder="Precio" step="0.01" min="0" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="productoCategoria">Categoría *</label>
+              <select id="productoCategoria" required>
+                <option value="">Seleccione Categoría</option>
+              </select>
+            </div>
+            <div>
+              <label for="productoMarca">Marca *</label>
+              <select id="productoMarca" required>
+                <option value="">Seleccione Marca</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="productoProveedor">Proveedor *</label>
+              <select id="productoProveedor" required>
+                <option value="">Seleccione Proveedor</option>
+              </select>
+            </div>
+            <div>
+              <label for="productoStock">Stock *</label>
+              <input type="number" id="productoStock" placeholder="Cantidad en stock" min="0" required>
+            </div>
+          </div>
+          <div>
+            <label for="productoPVP">PVP *</label>
+            <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
+          </div>
+          <div>
+            <label for="productoDescripcion">Descripción</label>
+            <textarea id="productoDescripcion" placeholder="Descripción del producto"></textarea>
+          </div>
+          <div>
+            <label for="productoImagen">URL de Imagen</label>
+            <input type="text" id="productoImagen" placeholder="URL de la imagen">
+          </div>
+          <div class="form-actions">
+            <button type="button" id="resetProductoForm" class="btn btn-danger">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar Producto</button>
+          </div>
+        </form>
+        <table id="tablaProductos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Marca</th>
+              <th>Precio</th>
+              <th>Proveedor</th>
+              <th>Stock</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Lista de productos -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Historial de Ventas -->
+      <div class="admin-section hidden" id="adminVentas">
+        <h3>Historial de Ventas</h3>
+        <table id="tablaVentas">
+          <thead>
+            <tr>
+              <th>Factura #</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Lista de ventas -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+    <script type="module" src="../ui/ui.js"></script>
 </body>
 </html>

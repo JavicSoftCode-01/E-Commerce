@@ -37,12 +37,10 @@ class ProductoService extends IndexedDB {
       const pvpValidado = Validar.precio(producto.pvp);
       const cantidadValidada = Validar.cantidadStock(producto.cantidad);
       const descripcionValidada = Validar.descripcion(producto.descripcion);
-
       if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
         !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
         return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
       }
-
       // Actualiza el producto con los valores validos
       producto.nombre = nombreValidado;
       producto.categoriaNombre = categoriaValida.nombre;
@@ -53,7 +51,6 @@ class ProductoService extends IndexedDB {
       producto.cantidad = cantidadValidada;
       producto.stock = producto.cantidad; // Inicializa
       producto.descripcion = descripcionValidada;
-
       const id = await super.add(producto);
       console.info(`Producto agregado con ID: ${id}`);
       return id;
@@ -88,7 +85,6 @@ class ProductoService extends IndexedDB {
         !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
         return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
       }
-
       //Asigna datos validos
       productoActualizado.nombre = nombreValidado;
       productoActualizado.categoriaNombre = categoriaValida.nombre;
@@ -98,7 +94,6 @@ class ProductoService extends IndexedDB {
       productoActualizado.pvp = pvpValidado;
       productoActualizado.cantidad = cantidadValidada;
       productoActualizado.descripcion = descripcionValidada;
-
       const updatedId = await super.update(id, productoActualizado);
       console.info(`Producto con ID ${id} actualizado correctamente.`);
       return updatedId;
@@ -120,17 +115,14 @@ class ProductoService extends IndexedDB {
   async obtenerProductos(filtros = {}) {
     try {
       let productos = await super.getAll();
-
       // Filtro por categoría (usando el ID)
       if (filtros.categoria) {
         productos = productos.filter(producto => producto.categoriaId === filtros.categoria);
       }
-
       // Filtro por marca (usando el ID)
       if (filtros.marca) {
         productos = productos.filter(producto => producto.marcaId === filtros.marca);
       }
-
       // Filtro por texto
       if (filtros.search) {
         const busqueda = filtros.search.toLowerCase();
@@ -139,7 +131,6 @@ class ProductoService extends IndexedDB {
           (producto.descripcion && producto.descripcion.toLowerCase().includes(busqueda))
         );
       }
-
       // Ordenamiento
       if (filtros.sort) {
         switch (filtros.sort) {
@@ -157,7 +148,6 @@ class ProductoService extends IndexedDB {
             break;
         }
       }
-
       console.info('Productos obtenidos:', productos);
       return productos;
     } catch (error) {
@@ -199,20 +189,16 @@ class ProductoService extends IndexedDB {
       if (!producto) {
         return null // Ya se registró un mensaje de advertencia.
       }
-
       const cantidadValidada = Validar.cantidadStock(cantidad); // Validar
       if (cantidadValidada === null) return null // Si hay error
-
       // Verifica que el stock no se vuelva negativo
       if (producto.stock + cantidadValidada < 0) { // Verifica si la operacion resulta en un stock negativo
         console.error("Error: No se puede reducir el stock por debajo de cero.");
         return null;
       }
-
       // Actualiza
       producto.stock += cantidadValidada; // Incrementa/Reduce el stock con la validación
       const updatedId = await super.update(productoId, producto);
-
       if (updatedId !== undefined) { // Comprobar si se actualizó
         console.info(`Stock del producto con ID ${productoId} actualizado. Nuevo stock: ${producto.stock}`);
         return true; // Éxito
@@ -220,7 +206,6 @@ class ProductoService extends IndexedDB {
         console.error(`Error al actualizar el stock del producto con ID ${productoId}.`);
         return null;
       }
-
     } catch (error) {
       console.error("Error al actualizar el stock:", error);
       return null;

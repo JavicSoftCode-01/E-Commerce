@@ -1,16 +1,13 @@
 // BackEnd/src/services/ProveedorService.js
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
-import {Proveedor} from '../models/Proveedor.js'; // Importa la clase Proveedor
+import {Proveedor} from '../models/Proveedor.js';
 
 /**
  * 🔰 Servicio para la gestión de proveedores.
  * Extiende de IndexedDB para interactuar con la base de datos.
  */
 class ProveedorService extends IndexedDB {
-  /**
-   * Constructor del servicio de Proveedor.
-   */
   constructor() {
     super('mydb', 'proveedores');
   }
@@ -25,15 +22,12 @@ class ProveedorService extends IndexedDB {
       const nombreValidado = await Validar.nombreBP(proveedor.nombre);
       const direccionValidada = Validar.direccionBP(proveedor.direccion);
       const telefonoValidado = await Validar.telefonoBP(proveedor.telefono, this);
-
       if (!nombreValidado || !direccionValidada || !telefonoValidado) {
         return null; // Los errores de validación se manejan en los métodos de Validar.
       }
-
       // Crear instancia de Proveedor.
       const nuevoProveedor = new Proveedor(nombreValidado, telefonoValidado, direccionValidada);
       nuevoProveedor.id = await super.add(nuevoProveedor);  // Guarda instancia.
-
       console.info(`Proveedor agregado con ID: ${nuevoProveedor.id}`);
       return nuevoProveedor.id;
     } catch (error) {
@@ -53,20 +47,18 @@ class ProveedorService extends IndexedDB {
       const nombreValidado = await Validar.nombreBP(proveedorActualizado.nombre);
       const direccionValidada = Validar.direccionBP(proveedorActualizado.direccion);
       const telefonoValidado = await Validar.telefonoBP(proveedorActualizado.telefono, this, id);
-
       if (!nombreValidado || !direccionValidada || !telefonoValidado) {
         return null; // Los errores de validación se manejan en los métodos de Validar.
       }
       //Obtener instancia
       const proveedorExistente = await this.obtenerProveedorPorId(id);
-        if(!proveedorExistente) {
-          return null
-        }
+      if (!proveedorExistente) {
+        return null
+      }
       //Actualizar datos.
       proveedorExistente.nombre = nombreValidado;
       proveedorExistente.direccion = direccionValidada;
       proveedorExistente.telefono = telefonoValidado;
-
       const updatedId = await super.update(id, proveedorExistente); // Guarda instancia
       console.info(`Proveedor con ID ${id} actualizado correctamente.`);
       return updatedId;
@@ -83,12 +75,12 @@ class ProveedorService extends IndexedDB {
   async obtenerTodosLosProveedores() {
     try {
       const proveedores = await super.getAll();
-       // Convertir a instancias de Proveedor.
-       const proveedoresInstancias = proveedores.map(proveedor => {
-           const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion);
-           nuevoProveedor.id = proveedor.id
-           return nuevoProveedor
-       });
+      // Convertir a instancias de Proveedor.
+      const proveedoresInstancias = proveedores.map(proveedor => {
+        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion);
+        nuevoProveedor.id = proveedor.id
+        return nuevoProveedor
+      });
       console.info('Proveedores obtenidos:', proveedoresInstancias);
       return proveedoresInstancias; // Devuelve el array de instancias
     } catch (error) {

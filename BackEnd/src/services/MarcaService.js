@@ -1,16 +1,13 @@
 // BackEnd/src/services/MarcaService.js
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
-import {Marca} from '../models/Marca.js'; // Importa la clase Marca
+import {Marca} from '../models/Marca.js';
 
 /**
- * 🔰 Servicio para la gestión de marcas.
- *  Extiende de IndexedDB para interactuar con la base de datos.
+ * 🔰🔰Servicio para la gestión de marcas.
+ *  Extiende de IndexedDB para interactuar con la base de datos.🔰🔰
  */
 class MarcaService extends IndexedDB {
-  /**
-   * Constructor del servicio de Marca.
-   */
   constructor() {
     super('mydb', 'marcas');
   }
@@ -26,10 +23,8 @@ class MarcaService extends IndexedDB {
       if (!nombreValidado) {
         return null; // Ya se registró el error en Validar.nombreBM
       }
-
       const nuevaMarca = new Marca(nombreValidado); // Crea una instancia de la clase Marca.
       nuevaMarca.id = await super.add(nuevaMarca);
-
       console.info(`Marca agregada con ID: ${nuevaMarca.id}`);
       return nuevaMarca.id;
     } catch (error) {
@@ -52,9 +47,9 @@ class MarcaService extends IndexedDB {
       }
       // Obtiene la marca de la DB
       const marcaExistente = await this.obtenerMarcaPorId(id);
-        if (!marcaExistente) {
-            return null;
-        }
+      if (!marcaExistente) {
+        return null;
+      }
       marcaExistente.nombre = nombreValidado; // Actualiza
       const updatedId = await super.update(id, marcaExistente); // Guarda los cambios
       console.info(`Marca con ID ${id} actualizada correctamente.`);
@@ -109,20 +104,20 @@ class MarcaService extends IndexedDB {
     }
   }
 
-    /**
-     * Elimina una marca por su ID.
-     * @param {number} id - ID de la marca a eliminar.
-     * @returns {Promise<void|null>} - Devuelve void si se elimina, o null si falla.
-     */
-    async eliminarMarca(id) {
-        try {
-            await super.delete(id);
-            console.info(`La marca con ID ${id} fue eliminada correctamente.`);
-        } catch (error) {
-            console.error(`Error al intentar eliminar la marca con ID ${id}:`, error);
-            return null;
-        }
+  /**
+   * Elimina una marca por su ID.
+   * @param {number} id - ID de la marca a eliminar.
+   * @returns {Promise<void|null>} - Devuelve void si se elimina, o null si falla.
+   */
+  async eliminarMarca(id) {
+    try {
+      await super.delete(id);
+      console.info(`La marca con ID ${id} fue eliminada correctamente.`);
+    } catch (error) {
+      console.error(`Error al intentar eliminar la marca con ID ${id}:`, error);
+      return null;
     }
+  }
 }
 
 export {MarcaService};

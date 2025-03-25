@@ -1,16 +1,13 @@
 // BackEnd/src/services/CategoriaService.js
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
-import {Categoria} from '../models/Categoria.js'; // Importa la clase Categoria
+import {Categoria} from '../models/Categoria.js';
 
 /**
- * 🔰 Servicio para la gestión de categorías.
- *  Extiende de IndexedDB para interactuar con la base de datos.
+ * 🔰🔰Servicio para la gestión de categorías.
+ *  Extiende de IndexedDB para interactuar con la base de datos.🔰🔰
  */
 class CategoriaService extends IndexedDB {
-  /**
-   * Constructor del servicio de Categoría.
-   */
   constructor() {
     super('mydb', 'categorias');
   }
@@ -26,10 +23,8 @@ class CategoriaService extends IndexedDB {
       if (!nombreValidado) {
         return null; // Ya se registró el error en Validar.nombreBM
       }
-
       const nuevaCategoria = new Categoria(nombreValidado); // Crea una instancia de la clase Categoria
       nuevaCategoria.id = await super.add(nuevaCategoria); //
-
       console.info(`Categoría agregada con ID: ${nuevaCategoria.id}`);
       return nuevaCategoria.id;
     } catch (error) {
@@ -50,14 +45,12 @@ class CategoriaService extends IndexedDB {
       if (!nombreValidado) {
         return null;  // Ya se registró el error en Validar.nombreBM
       }
-            // Obtener la categoría actual de la base de datos.
-            const categoriaExistente = await this.obtenerCategoriaPorId(id);
-            if (!categoriaExistente) {
-                return null; // No existe -> obtenerCategoriaPorId ya muestra el warn
-            }
-
+      // Obtener la categoría actual de la base de datos.
+      const categoriaExistente = await this.obtenerCategoriaPorId(id);
+      if (!categoriaExistente) {
+        return null; // No existe -> obtenerCategoriaPorId ya muestra el warn
+      }
       categoriaExistente.nombre = nombreValidado; // Actualiza solo el nombre
-
       const updatedId = await super.update(id, categoriaExistente); // Actualiza
       console.info(`Categoría con ID ${id} actualizada correctamente.`);
       return updatedId;
@@ -96,9 +89,9 @@ class CategoriaService extends IndexedDB {
     try {
       const categoria = await super.getById(id);
       if (categoria) {
-          const nuevaCategoria = new Categoria(categoria.nombre);  // Crea una instancia de Categoria
-          nuevaCategoria.id = categoria.id; // Asigna el ID
-          console.info(`Categoría con ID ${id} obtenida:`, nuevaCategoria);
+        const nuevaCategoria = new Categoria(categoria.nombre);  // Crea una instancia de Categoria
+        nuevaCategoria.id = categoria.id; // Asigna el ID
+        console.info(`Categoría con ID ${id} obtenida:`, nuevaCategoria);
         return nuevaCategoria; // Devuelve una instancia
       } else {
         console.warn(`No se encontró ninguna categoría con ID ${id}.`);
@@ -110,20 +103,20 @@ class CategoriaService extends IndexedDB {
     }
   }
 
-    /**
+  /**
    * Elimina una categoría por su ID.
    * @param {number} id - ID de la categoría a eliminar.
    * @returns {Promise<void|null>} - Devuelve void si la categoría se eliminó correctamente, o null en caso de error..
    */
-    async eliminarCategoria(id) {
-        try {
-            await super.delete(id);
-            console.info(`La categoría con ID ${id} ha sido eliminada correctamente.`);
-        } catch (error) {
-            console.error(`Error al eliminar la categoría con ID ${id}:`, error);
-            return null
-        }
+  async eliminarCategoria(id) {
+    try {
+      await super.delete(id);
+      console.info(`La categoría con ID ${id} ha sido eliminada correctamente.`);
+    } catch (error) {
+      console.error(`Error al eliminar la categoría con ID ${id}:`, error);
+      return null
     }
+  }
 }
 
 export {CategoriaService};
