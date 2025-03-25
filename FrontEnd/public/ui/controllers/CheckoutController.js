@@ -1,20 +1,15 @@
 // FrontEnd/ui/controllers/CheckoutController.js
-import {TiendaController} from './TiendaController.js'; // Importa para el carrito y actualizar contador
+// import {TiendaController} from './TiendaController.js';
 import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
-import {appService} from '../services/UшымтаService.js';
-import {app} from '../AppFactory.js'; // Importar app
+import {app} from '../AppFactory.js';
 
 class CheckoutController {
   constructor(facturaService, clienteService) {
     this.facturaService = facturaService;
     this.clienteService = clienteService;
 
-    // Elementos del DOM (¡Buena práctica!)
+    // Elementos del DOM
     this.checkoutSection = document.getElementById('checkoutSection');
-    this.clientSelect = document.getElementById('clientSelect');
-    this.btnNewClient = document.getElementById('btnNewClient');
-    this.newClientForm = document.getElementById('newClientForm');
-    this.btnConfirmClientData = document.getElementById('btnConfirmClientData');
     this.checkoutCartTable = document.getElementById('checkoutCartTable');
     this.checkoutTotal = document.getElementById('checkoutTotal');
     this.btnCancelCheckout = document.getElementById('btnCancelCheckout');
@@ -23,17 +18,13 @@ class CheckoutController {
     this.invoiceDetails = document.getElementById('invoiceDetails');
     this.btnCloseInvoice = document.getElementById('btnCloseInvoice');
 
-    // Estado
-    this.esNuevoCliente = false;
-
-    // Configurar listeners (¡Buena práctica!)
+    // Configurar listeners
+    // this.tiendaCarrito = new TiendaController()
     this.setupEventListeners();
   }
 
+  // setupEventListeners, mostrarSeccionCheckout, cancelarCheckout, limpiarFormularioCliente, mostrarFactura, cerrarFactura (sin cambios)
   setupEventListeners() {
-    this.btnNewClient.addEventListener('click', () => this.crearNuevoCliente());
-    this.btnConfirmClientData.addEventListener('click', (e) => this.confirmarDatosCliente(e)); // Pasas el evento (e)
-    this.clientSelect.addEventListener('change', () => this.seleccionarClienteExistente());
     this.btnCancelCheckout.addEventListener('click', () => this.cancelarCheckout());
     this.btnConfirmCheckout.addEventListener('click', () => this.confirmarCompra());
     this.btnCloseInvoice.addEventListener('click', () => this.cerrarFactura());
@@ -44,55 +35,50 @@ class CheckoutController {
     document.getElementById('cartSection').classList.add('hidden');
     this.checkoutSection.classList.remove('hidden');
 
-    // Obtener la lista de clientes desde el caché
-    this.clientSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
-    const clientes = appService.getClientes();
-
-    if (clientes && Array.isArray(clientes)) {
-      clientes.forEach(cliente => {
-        this.clientSelect.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`;
-      });
-    }
-
     // tbody del carrito en checkout
     const tbody = this.checkoutCartTable.querySelector('tbody');
     tbody.innerHTML = '';
-
-    // Usar el carrito desde app
     const carrito = app.carritoController.carrito;
 
     if (carrito && carrito.items) {
       carrito.items.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-                <td>${item.producto.nombre}</td>
-                <td>${item.cantidad}</td>
-                <td>$${item.precio.toFixed(2)}</td>
-                <td>$${item.subtotal.toFixed(2)}</td>
-            `;
+          <td>${item.producto.nombre}</td>
+          <td>${item.cantidad}</td>
+          <td>$${item.precio.toFixed(2)}</td>
+          <td>$${item.subtotal.toFixed(2)}</td>
+        `;
         tbody.appendChild(tr);
       });
-
-      // Calcular total de manera segura
       this.checkoutTotal.textContent = `Total: $${carrito.calcularTotalCarrito().toFixed(2)}`;
     } else {
       console.error('Carrito no está definido o no tiene items');
       this.checkoutTotal.textContent = 'Total: $0.00';
     }
+
+    // Limpiar el formulario del cliente al mostrar la sección
+    this.limpiarFormularioCliente();
   }
 
-  crearNuevoCliente() {
-    this.newClientForm.classList.remove('hidden');
-    this.clientSelect.value = ''; // Limpiar, o Reset.
-    this.esNuevoCliente = true;     //  bandera logica
+
+  cancelarCheckout() {
+    this.checkoutSection.classList.add('hidden');
+    document.getElementById('cartSection').classList.remove('hidden');
+    this.limpiarFormularioCliente(); // Limpiar formulario al cancelar
   }
 
-  async confirmarDatosCliente(e) {
-    e.preventDefault();  // Importante para evitar que el formulario se envíe de forma tradicional.
+  limpiarFormularioCliente() {
+    document.getElementById('checkoutNombre').value = '';
+    document.getElementById('checkoutTelefono').value = '';
+    document.getElementById('checkoutDireccion').value = '';
+  }
 
+  async confirmarCompra() {
     const nombre = document.getElementById('checkoutNombre').value;
     const telefono = document.getElementById('checkoutTelefono').value;
     const direccion = document.getElementById('checkoutDireccion').value;
+
     if (!nombre || !telefono || !direccion) {
       alert('Por favor, complete todos los campos del cliente.');
       return;
@@ -100,86 +86,26 @@ class CheckoutController {
 
     try {
       const cliente = new Cliente(nombre, telefono, direccion);
-      //  cliente.id = await Model.generateId('Cliente', app.idGeneratorService); //  <- YA NO
       const nuevoCliente = await this.clienteService.agregarCliente(cliente);
 
-      if (nuevoCliente) {
-        // Actualizar la lista desplegable de clientes
-        const option = document.createElement('option');
-        option.value = nuevoCliente; // Usar el *ID* como valor.  Ya no es .id
-        option.textContent = cliente.nombre; // Usar el *nombre* como texto visible.
-        this.clientSelect.appendChild(option);
-        this.clientSelect.value = nuevoCliente; // Seleccionar el nuevo cliente.  Ya no es .id
-
-        alert('Cliente registrado con éxito. Ahora puedes confirmar la compra.');
+      if (!nuevoCliente) {
+        throw new Error('El cliente no pudo ser registrado.');
       }
 
-    } catch (error) {
-      console.error("Error al registrar el cliente:", error);
-      alert("Hubo un error al registrar el cliente.  Revisa la consola."); // Mejor mensaje.
-    }
-  }
-
-  seleccionarClienteExistente() {
-    const clienteId = this.clientSelect.value;
-    if (clienteId) {
-      this.newClientForm.classList.add('hidden');
-      this.esNuevoCliente = false;
-    }
-
-  }
-
-  cancelarCheckout() {
-    this.checkoutSection.classList.add('hidden');
-    document.getElementById('cartSection').classList.remove('hidden');
-    this.clientSelect.value = ''; // Reset campo seleccion
-    this.newClientForm.classList.add('hidden');           // Limpiar form.
-    document.getElementById('checkoutNombre').value = '';   // reset cliente nombre.
-    document.getElementById('checkoutTelefono').value = '';
-    document.getElementById('checkoutDireccion').value = '';
-    this.esNuevoCliente = false;
-  }
-
-  async confirmarCompra() {
-    let clienteId = this.clientSelect.value;
-
-    if (!clienteId && !this.esNuevoCliente) {
-      alert('Por favor, seleccione un cliente existente o registre uno nuevo.');
-      return;
-    }
-
-    // Si es un nuevo cliente, los datos ya están validados y el cliente ya estaría creado.
-    // Si es un cliente existente, el ID ya está en clienteId.
-
-    try {
-      const parsedClienteId = parseInt(clienteId); //Convertir
-      if (isNaN(parsedClienteId)) {
-        alert("Por favor, seleccione o registre un cliente.");
-        return;
-      }
-      const factura = await this.facturaService.generarFactura(parsedClienteId, TiendaController.carrito);
+      //  CORRECCIÓN:  Pasar el ID del cliente, no el objeto completo.
+      const carrito = app.carritoController.carrito;
+      const factura = await this.facturaService.generarFactura(nuevoCliente, carrito); //  <-- Aquí
 
       if (!factura) {
-        throw new Error('La factura no pudo ser generada.'); // Mejor mensaje de error.
+        throw new Error('La factura no pudo ser generada.');
       }
-      // Mostrar Factura
+
       await this.mostrarFactura(factura);
-
-      // Limpiar Carrito y actualizar
-      TiendaController.carrito.vaciarCarrito();
-      TiendaController.actualizarContadorCarrito();
-
-      // Ocultar Checkout
+      carrito.vaciarCarrito();
+      // this.tiendaCarrito.actualizarContadorCarrito();
+      app.tiendaController.actualizarContadorCarrito();  //  <-- Así
       this.checkoutSection.classList.add('hidden');
-      this.clientSelect.value = ''; // Limpiar
-      this.esNuevoCliente = false;
-
-      // Limpiar el formulario del cliente
-      this.newClientForm.classList.add('hidden');
-      document.getElementById('checkoutNombre').value = '';
-      document.getElementById('checkoutTelefono').value = '';
-      document.getElementById('checkoutDireccion').value = '';
-
+      this.limpiarFormularioCliente();
 
     } catch (error) {
       console.error('Error durante el checkout:', error);
@@ -247,9 +173,8 @@ class CheckoutController {
 
   async cerrarFactura() {
     this.invoiceSection.classList.add('hidden');
-    await TiendaController.cargarProductos();
+    await app.tiendaController.cargarProductos();
   }
-
 }
 
 export {CheckoutController};

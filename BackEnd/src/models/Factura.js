@@ -31,7 +31,6 @@ class Factura   {
    * @param {Date} [fecha=new Date()] - Fecha de la factura.
    */
   constructor(clienteId, detalles = [], fecha = new Date()) {
-    this.id = null; // Se asigna al guardar.
     this.cliente = clienteId;
     this.detalles = detalles;
     this.fecha = fecha;

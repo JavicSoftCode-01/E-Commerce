@@ -83,61 +83,110 @@
   </div>
 
   <!-- Sección Checkout -->
-  <div id="checkoutSection" class="hidden">
-    <h2>Completar Compra</h2>
+<!--  <div id="checkoutSection" class="hidden">-->
+<!--    <h2>Completar Compra</h2>-->
 
-    <div class="client-selector">
-      <h3>Seleccionar Cliente</h3>
-      <select id="clientSelect">
-        <option value="">Seleccione un cliente</option>
-      </select>
-      <button id="btnNewClient" class="btn">Cliente Nuevo</button>
-    </div>
+<!--    <div class="client-selector">-->
+<!--      <h3>Seleccionar Cliente</h3>-->
+<!--      <select id="clientSelect">-->
+<!--        <option value="">Seleccione un cliente</option>-->
+<!--      </select>-->
+<!--      <button id="btnNewClient" class="btn">Cliente Nuevo</button>-->
+<!--    </div>-->
 
-    <div id="newClientForm" class="hidden">
-      <h3>Datos del Cliente</h3>
-      <form id="checkoutClientForm">
-        <!--  Este ID no se usaba en el JS, pero es buena práctica tenerlo -->
-        <div class="form-row">
-          <div>
-            <label for="checkoutNombre">Nombre</label>
-            <input type="text" id="checkoutNombre" required>
-          </div>
-          <div>
-            <label for="checkoutTelefono">Teléfono</label>
-            <input type="text" id="checkoutTelefono" required>
-          </div>
+<!--    <div id="newClientForm" class="hidden">-->
+<!--      <h3>Datos del Cliente</h3>-->
+<!--      <form id="checkoutClientForm">-->
+<!--        &lt;!&ndash;  Este ID no se usaba en el JS, pero es buena práctica tenerlo &ndash;&gt;-->
+<!--        <div class="form-row">-->
+<!--          <div>-->
+<!--            <label for="checkoutNombre">Nombre</label>-->
+<!--            <input type="text" id="checkoutNombre" required>-->
+<!--          </div>-->
+<!--          <div>-->
+<!--            <label for="checkoutTelefono">Teléfono</label>-->
+<!--            <input type="text" id="checkoutTelefono" required>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--          <label for="checkoutDireccion">Dirección</label>-->
+<!--          <input type="text" id="checkoutDireccion" required>-->
+<!--        </div>-->
+<!--        <button id="btnConfirmClientData" class="btn hidden">Confirmar Datos</button>-->
+<!--      </form>-->
+<!--    </div>-->
+
+<!--    <div class="cart" id="checkoutCartSection">-->
+<!--      <h3>Resumen del Pedido</h3>-->
+<!--      <table id="checkoutCartTable">-->
+<!--        <thead>-->
+<!--          <tr>-->
+<!--            <th>Producto</th>-->
+<!--            <th>Cantidad</th>-->
+<!--            <th>Precio</th>-->
+<!--            <th>Subtotal</th>-->
+<!--          </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--          &lt;!&ndash; Items del carrito &ndash;&gt;-->
+<!--        </tbody>-->
+<!--      </table>-->
+<!--      <p class="cart-total" id="checkoutTotal">Total: $0</p>-->
+<!--      <div class="cart-actions">-->
+<!--        <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>-->
+<!--        <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+  <!-- Sección Checkout -->
+<div id="checkoutSection" class="hidden">
+  <h2>Completar Compra</h2>
+
+  <div id="newClientForm">  <!--  Simplificado:  Siempre visible en checkout -->
+    <h3>Datos del Cliente</h3>
+    <form id="checkoutClientForm">
+      <div class="form-row">
+        <div>
+          <label for="checkoutNombre">Nombre</label>
+          <input type="text" id="checkoutNombre" required>
         </div>
         <div>
-          <label for="checkoutDireccion">Dirección</label>
-          <input type="text" id="checkoutDireccion" required>
+          <label for="checkoutTelefono">Teléfono</label>
+          <input type="text" id="checkoutTelefono" required>
         </div>
-        <button id="btnConfirmClientData" class="btn hidden">Confirmar Datos</button>
-      </form>
-    </div>
-
-    <div class="cart" id="checkoutCartSection">
-      <h3>Resumen del Pedido</h3>
-      <table id="checkoutCartTable">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio</th>
-            <th>Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Items del carrito -->
-        </tbody>
-      </table>
-      <p class="cart-total" id="checkoutTotal">Total: $0</p>
-      <div class="cart-actions">
-        <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>
-        <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>
       </div>
+      <div>
+        <label for="checkoutDireccion">Dirección</label>
+        <input type="text" id="checkoutDireccion" required>
+      </div>
+      <!--  El botón "Confirmar Datos" ya no es necesario aquí -->
+    </form>
+  </div>
+
+  <div class="cart" id="checkoutCartSection">
+    <h3>Resumen del Pedido</h3>
+    <table id="checkoutCartTable">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Items del carrito -->
+      </tbody>
+    </table>
+    <p class="cart-total" id="checkoutTotal">Total: $0</p>
+    <div class="cart-actions">
+      <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>
+      <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>
     </div>
   </div>
+</div>
+
+<!--  Resto del HTML (sin cambios) -->
 
   <!-- Sección Factura -->
   <div id="invoiceSection" class="hidden">

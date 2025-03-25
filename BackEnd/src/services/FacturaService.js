@@ -26,6 +26,47 @@ class FacturaService extends IndexedDB {
    * @param {Carrito} carrito - Carrito de compras con los productos a facturar.
    * @returns {Promise<Factura|null>} - La factura generada o null si falla.
    */
+  // async generarFactura(clienteId, carrito) {
+  //   try {
+  //     const cliente = await this.clienteService.obtenerClientePorId(clienteId);
+  //     if (!cliente) {
+  //       console.warn(`No se encontró un cliente con ID ${clienteId}.`);
+  //       return null;
+  //     }
+  //     // Verificar stock de todos los productos *antes* de actualizar nada.
+  //     for (const item of carrito.items) {
+  //       const producto = await this.productoService.obtenerProductoPorId(item.producto.id);
+  //       if (!producto || producto.stock < item.cantidad) {
+  //         console.error(`No hay suficiente stock para ${producto ? producto.nombre : 'un producto'}. Stock actual: ${producto ? producto.stock : 'N/A'}, Cantidad requerida: ${item.cantidad}`);
+  //         return null;
+  //       }
+  //     }
+  //     // Actualizar stock y crear detalles de factura *después* de verificar.
+  //     const detallesFactura = [];
+  //     for (const item of carrito.items) {
+  //       const resultadoActualizacion = await this.productoService.actualizarStock(item.producto.id, item.cantidad);
+  //       if (!resultadoActualizacion) { // Si actualizarStock Devuelve false
+  //         console.error(`Error: No se pudo actualizar el stock correctamente.`);
+  //         return null; //  No se continua el proceso.
+  //       }
+  //       const productoActualizado = await this.productoService.obtenerProductoPorId(item.producto.id);
+  //       detallesFactura.push(new DetalleFactura(productoActualizado, item.cantidad));
+  //     }
+  //     // Crear y guardar la factura
+  //     const factura = new Factura(clienteId, detallesFactura);
+  //     factura.id = await Model.generateId('Factura', this.idGeneratorService);
+  //     const idFactura = await this.add(factura); // Guarda la factura
+  //     if (!idFactura) {
+  //       console.error(`Error: No se pudo agregar correctamente la factura a la base de datos.`);
+  //       return null
+  //     }
+  //     console.info(`Factura generada con ID: ${idFactura}:`, factura);
+  //     return factura;
+  //   } catch (error) {
+  //     console.error("Error al generar la factura:", error);
+  //     return null;
+  //   }
+  // }
   async generarFactura(clienteId, carrito) {
     try {
       const cliente = await this.clienteService.obtenerClientePorId(clienteId);
@@ -33,32 +74,36 @@ class FacturaService extends IndexedDB {
         console.warn(`No se encontró un cliente con ID ${clienteId}.`);
         return null;
       }
-      // Verificar stock de todos los productos *antes* de actualizar nada.
+
       for (const item of carrito.items) {
         const producto = await this.productoService.obtenerProductoPorId(item.producto.id);
         if (!producto || producto.stock < item.cantidad) {
-          console.error(`No hay suficiente stock para ${producto ? producto.nombre : 'un producto'}. Stock actual: ${producto ? producto.stock : 'N/A'}, Cantidad requerida: ${item.cantidad}`);
+          console.error(`No hay suficiente stock para ${producto ? producto.nombre : 'un producto'}.  Stock actual: ${producto ? producto.stock : 'N/A'}, Cantidad requerida: ${item.cantidad}`);
           return null;
         }
       }
-      // Actualizar stock y crear detalles de factura *después* de verificar.
+
       const detallesFactura = [];
       for (const item of carrito.items) {
         const resultadoActualizacion = await this.productoService.actualizarStock(item.producto.id, item.cantidad);
-        if (!resultadoActualizacion) { // Si actualizarStock Devuelve false
+        if (!resultadoActualizacion) {
           console.error(`Error: No se pudo actualizar el stock correctamente.`);
-          return null; //  No se continua el proceso.
+          return null;
         }
         const productoActualizado = await this.productoService.obtenerProductoPorId(item.producto.id);
         detallesFactura.push(new DetalleFactura(productoActualizado, item.cantidad));
       }
-      // Crear y guardar la factura
+
       const factura = new Factura(clienteId, detallesFactura);
-      factura.id = await Model.generateId('Factura', this.idGeneratorService);
-      const idFactura = await this.add(factura); // Guarda la factura
+      //  CORRECCIÓN:  Usar idGeneratorService directamente
+      factura.id = await this.idGeneratorService.getLastId('Factura');
+      factura.id++;
+      await this.idGeneratorService.setLastId('Factura', factura.id);
+
+      const idFactura = await this.add(factura);
       if (!idFactura) {
         console.error(`Error: No se pudo agregar correctamente la factura a la base de datos.`);
-        return null
+        return null;
       }
       console.info(`Factura generada con ID: ${idFactura}:`, factura);
       return factura;
@@ -82,6 +127,7 @@ class FacturaService extends IndexedDB {
       return []; // Devuelve un array vacío en caso de error.
     }
   }
+
 
   /**
    * Obtiene una factura por su ID.
