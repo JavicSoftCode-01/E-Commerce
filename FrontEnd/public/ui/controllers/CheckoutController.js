@@ -239,6 +239,5 @@ class CheckoutController {
     }
 
 }
-//const checkoutController = new CheckoutController(app.facturaService, app.clienteService); //YA NO SE EXPORTA
 
-export { CheckoutController }; //Ahora exportamos la clase
+export { CheckoutController };

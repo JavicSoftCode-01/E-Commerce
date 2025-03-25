@@ -797,9 +797,120 @@ class AdminController {
   } //cierra metodo
 
   // Enviar Formulario Producto:  CREATE y UPDATE:
-  async guardarProducto(e) { // METODO, RECIBE EL EVENTO
-    e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
-    // Obtener los datos para un nuevo producto.
+  // async guardarProducto(e) { // METODO, RECIBE EL EVENTO
+  //   e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
+  //   // Obtener los datos para un nuevo producto.
+  //   const productoId = this.productoIdInput.value;
+  //   const nombre = this.productoNombreInput.value;
+  //   const precio = this.productoPrecioInput.value;
+  //   const categoriaId = this.productoCategoriaSelect.value;
+  //   const marcaId = this.productoMarcaSelect.value;
+  //   const proveedorId = this.productoProveedorSelect.value;
+  //   const stock = this.productoStockInput.value;
+  //   const pvp = this.productoPVPInput.value;
+  //   const descripcion = this.productoDescripcionInput.value;
+  //   const imagen = this.productoImagenInput.value;
+  //
+  //   if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
+  //     alert("Todos los campos marcados con (*) son obligatorios");
+  //     return;
+  //   }
+  //   // Convertir datos.
+  //   const precioNumerico = parseFloat(precio);
+  //   const pvpNumerico = parseFloat(pvp);
+  //   const stockNumerico = parseInt(stock, 10); // Asegurarse de que stock sea un entero.
+  //   const categoriaIdNumerico = parseInt(categoriaId, 10);
+  //   const marcaIdNumerico = parseInt(marcaId, 10);
+  //   const proveedorIdNumerico = parseInt(proveedorId, 10);
+  //   let resultado;
+  //   try {
+  //     if (productoId) {  // Si ya  id , es para:  *ACTUALIZACION*:
+  //
+  //       const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId)); //Buscar
+  //       //Cambiar, segun  *NUEVO* VALOR:
+  //       const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico)
+  //       const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
+  //       const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
+  //
+  //       productoExistente.nombre = nombre;
+  //       productoExistente.precio = precioNumerico;
+  //       productoExistente.categoriaId = categoriaIdNumerico;
+  //       productoExistente.categoriaNombre = categoria.nombre
+  //       productoExistente.marcaId = marcaIdNumerico;
+  //       productoExistente.marcaNombre = marca.nombre;
+  //       productoExistente.proveedorId = proveedorIdNumerico;
+  //       productoExistente.proveedorNombre = proveedor.nombre
+  //       productoExistente.stock = stockNumerico;
+  //       productoExistente.pvp = pvpNumerico;
+  //       productoExistente.descripcion = descripcion
+  //       productoExistente.imagen = imagen
+  //
+  //       resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoExistente); // Persistir cambios
+  //       //Actualizar Vista:
+  //       alert("Producto ACTUALIZADO") //Feedback al usuario!
+  //
+  //
+  //     } else { // Si NO, ... CREAR
+  //
+  //       // Crear Instancia, pasar todos los datos que necesita:
+  //
+  //       const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico); //
+  //       const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);             //
+  //       const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);   //
+  //
+  //
+  //       const nuevoProducto = new Producto( // Instancia!!:
+  //         nombre,  // nombre
+  //         categoriaIdNumerico,     // Categoria ID  *Entero*!
+  //         categoria.nombre,  // categoriaNombre
+  //         marcaIdNumerico,        //
+  //         marca.nombre,   //
+  //         proveedorIdNumerico,      //
+  //         proveedor.nombre,//
+  //         precioNumerico,      //
+  //         pvpNumerico,         // pvp
+  //         stockNumerico,         //
+  //         descripcion,   // Descripcion.
+  //         imagen     // imagen.
+  //       );
+  //
+  //       // MUY IMPORTANTE:
+  //
+  //       // indexedDB Asigna
+  //       nuevoProducto.serial = await Producto.generarSerialProducto(app.idGeneratorService);
+  //       resultado = await this.productoService.agregarProducto(nuevoProducto);    //
+  //
+  //       //Solo Si id *EXISTE* despues de haber sido agregado
+  //       if (resultado) {
+  //
+  //         //Añadir Fila
+  //         alert(`EXITO Agregando Producto, ID ${resultado} `);
+  //
+  //       } else { // Fallo registro,  por  razon
+  //         throw new Error('Errores en Datos o Validacion.');
+  //
+  //       } // cierra else
+  //
+  //     }
+  //     // Fin  if-else
+  //
+  //     if (resultado) {
+  //       this.resetFormProducto()
+  //       //Cargar Opciones actualizadas
+  //       await this.cargarProductos();// llama, volver cargar los datos, *ACTUALIZADOS*.
+  //       await appService.refreshCache();
+  //     }
+  //
+  //   } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
+  //     console.error("Error :", error); // Programador
+  //     alert("Revise consola") // Feedback al Usuario
+  //   }
+  // } //CIERRA METODO  guardarProducto()
+  // Enviar Formulario Producto:  CREATE y UPDATE:
+// En AdminController.js
+
+  async guardarProducto(e) {
+    e.preventDefault();
     const productoId = this.productoIdInput.value;
     const nombre = this.productoNombreInput.value;
     const precio = this.productoPrecioInput.value;
@@ -811,101 +922,117 @@ class AdminController {
     const descripcion = this.productoDescripcionInput.value;
     const imagen = this.productoImagenInput.value;
 
+
+    //1.  Validaciones *previas* a la conversión:
     if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
       alert("Todos los campos marcados con (*) son obligatorios");
-      return;
+      return;  // Salida temprana si faltan campos
     }
-    // Convertir datos.
+
+    // 2. Conversión de datos *antes* de crear la instancia:
     const precioNumerico = parseFloat(precio);
     const pvpNumerico = parseFloat(pvp);
-    const stockNumerico = parseInt(stock, 10); // Asegurarse de que stock sea un entero.
+    const stockNumerico = parseInt(stock, 10);
     const categoriaIdNumerico = parseInt(categoriaId, 10);
     const marcaIdNumerico = parseInt(marcaId, 10);
     const proveedorIdNumerico = parseInt(proveedorId, 10);
-    let resultado;
-    try {
-      if (productoId) {  // Si ya  id , es para:  *ACTUALIZACION*:
 
-        const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId)); //Buscar
-        //Cambiar, segun  *NUEVO* VALOR:
-        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico)
-        const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
-        const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-
-        productoExistente.nombre = nombre;
-        productoExistente.precio = precioNumerico;
-        productoExistente.categoriaId = categoriaIdNumerico;
-        productoExistente.categoriaNombre = categoria.nombre
-        productoExistente.marcaId = marcaIdNumerico;
-        productoExistente.marcaNombre = marca.nombre;
-        productoExistente.proveedorId = proveedorIdNumerico;
-        productoExistente.proveedorNombre = proveedor.nombre
-        productoExistente.stock = stockNumerico;
-        productoExistente.pvp = pvpNumerico;
-        productoExistente.descripcion = descripcion
-        productoExistente.imagen = imagen
-
-        resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoExistente); // Persistir cambios
-        //Actualizar Vista:
-        alert("Producto ACTUALIZADO") //Feedback al usuario!
-
-
-      } else { // Si NO, ... CREAR
-
-        // Crear Instancia, pasar todos los datos que necesita:
-
-        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico); //
-        const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);             //
-        const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);   //
-
-
-        const nuevoProducto = new Producto( // Instancia!!:
-          nombre,  // nombre
-          categoriaIdNumerico,     // Categoria ID  *Entero*!
-          categoria.nombre,  // categoriaNombre
-          marcaIdNumerico,        //
-          marca.nombre,   //
-          proveedorIdNumerico,      //
-          proveedor.nombre,//
-          precioNumerico,      //
-          pvpNumerico,         // pvp
-          stockNumerico,         //
-          descripcion,   // Descripcion.
-          imagen     // imagen.
-        );
-
-        // MUY IMPORTANTE:
-
-        // indexedDB Asigna
-        nuevoProducto.serial = await Producto.generarSerialProducto(app.idGeneratorService);
-        resultado = await this.productoService.agregarProducto(nuevoProducto);    //
-
-        //Solo Si id *EXISTE* despues de haber sido agregado
-        if (resultado) {
-
-          //Añadir Fila
-          alert(`EXITO Agregando Producto, ID ${resultado} `);
-
-        } else { // Fallo registro,  por  razon
-          throw new Error('Errores en Datos o Validacion.');
-
-        } // cierra else
-
-      }
-      // Fin  if-else
-
-      if (resultado) {
-        this.resetFormProducto()
-        //Cargar Opciones actualizadas
-        await this.cargarProductos();// llama, volver cargar los datos, *ACTUALIZADOS*.
-        await appService.refreshCache();
-      }
-
-    } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-      console.error("Error :", error); // Programador
-      alert("Revise consola") // Feedback al Usuario
+    // Comprobaciones *adicionales* (que deberían estar en las validaciones, idealmente):
+    if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
+        isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
+      alert("Error:  Valores numéricos inválidos.");
+      return; // Salida temprana
     }
-  } //CIERRA METODO  guardarProducto()
+    if(precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0){
+      alert('No se permiten números negativos')
+      return
+    }
+
+    let resultado; // Declaración de resultado
+    try {
+
+        // 3.  Lógica para crear/actualizar:
+        if (productoId) {
+            // ACTUALIZAR
+            const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
+            if (!productoExistente) {
+                alert("Error: Producto no encontrado."); // Mejor mensaje
+                return;
+            }
+
+             // *No* modificamos productoExistente directamente todavía.
+             const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
+             const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
+             const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
+
+            //  *Aquí*, crea un *nuevo* objeto con los datos actualizados
+            const productoActualizado = {
+              ...productoExistente,  // Copia todas las propiedades existentes
+              nombre: nombre,          // Valores actualizados/convertidos:
+              precio: precioNumerico,
+              categoriaId: categoriaIdNumerico,
+              categoriaNombre: categoria.nombre,  // <- Usar los datos de las búsquedas.
+              marcaId: marcaIdNumerico,
+              marcaNombre: marca.nombre,          // <- Usar los datos de las búsquedas.
+              proveedorId: proveedorIdNumerico,
+              proveedorNombre: proveedor.nombre, // <- Usar los datos de las búsquedas
+              stock: stockNumerico,
+              pvp: pvpNumerico,
+              descripcion: descripcion,
+              imagen: imagen,
+              id: parseInt(productoId),     //  MUY IMPORTANTE, para el update
+
+          };
+
+            resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
+            if (resultado !== null) {
+                alert("Producto ACTUALIZADO");
+             }
+
+        } else {
+            // CREAR
+
+             //  *Aquí* se crea el *nuevo* producto *antes* de llamar al servicio.
+            const nuevoProducto = new Producto(
+                nombre,
+                categoriaIdNumerico, // Usar ya los valores *numéricos*.
+                '', //  temporal
+                marcaIdNumerico,
+                '',
+                proveedorIdNumerico,
+                '',
+                precioNumerico,
+                pvpNumerico,
+                stockNumerico,
+                descripcion,
+                imagen
+            );
+             // Ya no necesitas idGenerator
+            resultado = await this.productoService.agregarProducto(nuevoProducto);
+            if (resultado) {
+              alert(`EXITO Agregando Producto, ID ${resultado} `); //Muestra id creado.
+            }
+        } //  else/crear
+
+
+        // 4.  *Después* de agregar/actualizar, y *si* fue exitoso:
+
+        if (resultado !== null && resultado !== undefined) {
+            this.resetFormProducto();
+            await this.cargarProductos();
+            await this.cargarOpcionesProductoForm(); // <-  Para actualizar los selects!
+            await appService.refreshCache(); // <- ¡Importante!
+        }
+        else{ // Si resultado es null
+          throw new Error('Errores en Datos o Validacion.');
+        }
+
+    } catch (error) {
+        console.error("Error :", error);
+        alert("Revise consola");  // Mejor feedback
+    }
+}
+
   // Reset
   resetFormProducto() {
     this.productoIdInput.value = ''
@@ -1043,4 +1170,4 @@ const adminController = new AdminController(
   app.facturaService
 );
 
-export {adminController}; // Exporta la *instancia*.
+export {adminController};

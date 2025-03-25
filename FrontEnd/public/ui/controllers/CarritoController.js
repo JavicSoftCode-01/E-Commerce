@@ -1,5 +1,5 @@
 // FrontEnd/ui/controllers/CarritoController.js
-import {app} from '../AppFactory.js'; //  INSTANCIA ÚNICA!
+import {app} from '../AppFactory.js';
 import {Carrito} from '../../../../BackEnd/src/models/Carrito.js';
 
 /**
@@ -87,26 +87,28 @@ class CarritoController {
     }
 
   }
-    async procederAlPago(){
-      if (this.carrito.items.length === 0) {
-        alert('El carrito está vacío');
-        return;
-      }
-// Ocultar el carrito y mostrar la sección de checkout
-      this.ocultarCarrito(); // Oculta antes de mostrar el checkout.
-      await app.checkoutController.mostrarSeccionCheckout(); // instancia correcta.
-    }
-    mostrarCarrito()
-    {
-      this.cartSection.classList.remove('hidden'); // Mostrar
-      this.actualizarCarrito(); // Actualizar visualización.
-      window.scrollTo(0, this.cartSection.offsetTop - 20);
-    }
 
-    ocultarCarrito()
-    {
-      this.cartSection.classList.add('hidden'); // Metodo Ocultar
+  async procederAlPago() {
+    if (this.carrito.items.length === 0) {
+      alert('El carrito está vacío');
+      return;
     }
-    //const carritoController = new CarritoController(); // INSTANCIA YA NO SE CREA AQUI
+// Ocultar el carrito y mostrar la sección de checkout
+    this.ocultarCarrito(); // Oculta antes de mostrar el checkout.
+    await app.checkoutController.mostrarSeccionCheckout(); // instancia correcta.
+  }
+
+  mostrarCarrito() {
+    this.cartSection.classList.remove('hidden'); // Mostrar
+    this.actualizarCarrito(); // Actualizar visualización.
+    window.scrollTo(0, this.cartSection.offsetTop - 20);
+  }
+
+  ocultarCarrito() {
+    this.cartSection.classList.add('hidden'); // Metodo Ocultar
+  }
+
+  //const carritoController = new CarritoController(); // INSTANCIA YA NO SE CREA AQUI
 }
+
 export {CarritoController}; // Exporta la clase

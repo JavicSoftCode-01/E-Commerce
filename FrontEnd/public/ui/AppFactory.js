@@ -1,13 +1,13 @@
-import { CategoriaService } from '../../../BackEnd/src/services/CategoriaService.js';
-import { MarcaService } from '../../../BackEnd/src/services/MarcaService.js';
-import { ProveedorService } from '../../../BackEnd/src/services/ProveedorService.js';
-import { ClienteService } from '../../../BackEnd/src/services/ClienteService.js';
-import { ProductoService } from '../../../BackEnd/src/services/ProductoService.js';
-import { FacturaService } from '../../../BackEnd/src/services/FacturaService.js';
-import { IdGenerator } from '../../../BackEnd/src/database/indexdDB.js';
-import { CheckoutController } from './controllers/CheckoutController.js';
-import { CarritoController } from './controllers/CarritoController.js';
-import { TiendaController } from './controllers/TiendaController.js';
+import {CategoriaService} from '../../../BackEnd/src/services/CategoriaService.js';
+import {MarcaService} from '../../../BackEnd/src/services/MarcaService.js';
+import {ProveedorService} from '../../../BackEnd/src/services/ProveedorService.js';
+import {ClienteService} from '../../../BackEnd/src/services/ClienteService.js';
+import {ProductoService} from '../../../BackEnd/src/services/ProductoService.js';
+import {FacturaService} from '../../../BackEnd/src/services/FacturaService.js';
+import {IdGenerator} from '../../../BackEnd/src/database/indexdDB.js';
+import {CheckoutController} from './controllers/CheckoutController.js';
+import {CarritoController} from './controllers/CarritoController.js';
+import {TiendaController} from './controllers/TiendaController.js';
 
 class AppFactory {
   constructor() {
@@ -39,10 +39,8 @@ class AppFactory {
 
     // Initialize TiendaController AFTER productoService is created
     this.tiendaController = new TiendaController(this.productoService);
-
-
   }
 }
 
 const app = new AppFactory();
-export { app };
+export {app};

@@ -8,7 +8,7 @@ export class Validar {
 
 
   /**
-   * Valida un nombre para categorías o marcas, con restricciones avanzadas de formato
+   * Valida un nombre para categorías o marcas o producto, con restricciones avanzadas de formato
    * @param {string} nombre - El nombre a validar.
    * @param {IndexedDB} service  Instancia del servicio (CategoriaService, MarcaService, etc.).
    * @param {number} [id=null] -  ID para excluir en la validación de duplicados (para actualizaciones).
@@ -30,46 +30,50 @@ export class Validar {
       return null;
     }
 
-    // Expresión regular mejorada:
-    // - Solo letras (incluyendo acentuadas y Ñ)
-    // - Permite espacios solo entre palabras
-    // - No permite números ni símbolos
-    const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:\s+[A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
-
+    // Expresion regular mejorada: Solo letras, números, espacios.  Comienza/termina con letra/número.
+    const regex = /^[a-zA-Z0-9][a-zA-Z0-9\s]*[a-zA-Z0-9]$/; //Ahora permite numeros y letras
     if (!regex.test(nombreFormateado)) {
-      console.error('El nombre solo debe contener letras (con acentos y Ñ). No se permiten números, símbolos o espacios al inicio/final.');
+      console.error('El nombre no es válido.  Solo letras, números, y espacios. No espacios al inicio/final.');
       return null;
     }
+
 
     try {
       // Determinar qué método getAll usar según el tipo de servicio
       let items = [];
       if (service instanceof service.constructor) {
+
         if (service.storeName === 'categorias') {
           items = await service.obtenerTodasLasCategorias();
         } else if (service.storeName === 'marcas') {
           items = await service.obtenerTodasLasMarcas();
+
+        } else if (service.storeName === 'productos') { //  <--- Aquí se valida los productos
+          items = await service.obtenerProductos()
+
         } else {
           console.error('Servicio no reconocido en validación de nombre.');
-          return null;
+          return null; //  importante en caso de un service no esperado.
         }
       }
 
-      // Verificación de nombre duplicado (case-insensitive)
-      const existe = items.some(item =>
-        item.nombre.toLowerCase() === nombreFormateado.toLowerCase() && item.id !== id
-      );
 
+      // Adaptación para manejar la verificación para edición o creación
+      const existe = items.some(item => {
+
+        // Si estamos actualizando (id !== null), excluimos el item actual
+        // Si estamos creando un nuevo item (id === null), se verifican todos.
+        return item.nombre.toLowerCase() === nombreFormateado.toLowerCase() && item.id !== id;
+      });
       if (existe) {
         console.error(`Ya existe un registro con el nombre: ${nombreFormateado}.`);
         return null;
       }
-
       console.info(`Nombre ${nombreFormateado} validado`);
       return nombreFormateado;
     } catch (error) {
       console.error("Error al validar el nombre:", error);
-      return null;
+      return null; //  retorna null
     }
   }
 
@@ -308,107 +312,107 @@ export class Validar {
   //   console.info('Teléfono validado y formateado: ${formatoFinal}');
   //   return formatoFinal;
   // }
-                                                                                             static async telefonoBP(telefono, service, id = null) {
-  if (!telefono || telefono.trim() === '') {
-    console.error("Error: El número de teléfono no puede estar vacío.");
-    return false;
-  }
-  let telefonoLimpio = telefono.trim().replace(/[^0-9+]/g, ''); // Elimina caracteres no numéricos excepto '+'
-  let formatoFinal = '';
+  static async telefonoBP(telefono, service, id = null) {
+    if (!telefono || telefono.trim() === '') {
+      console.error("Error: El número de teléfono no puede estar vacío.");
+      return false;
+    }
+    let telefonoLimpio = telefono.trim().replace(/[^0-9+]/g, ''); // Elimina caracteres no numéricos excepto '+'
+    let formatoFinal = '';
 
-  if (telefonoLimpio.startsWith('+593')) { // Formato Internacional
-    telefonoLimpio = telefonoLimpio.slice(4); // Elimina '+593' al inicio
-    if (telefonoLimpio.length === 9 && telefonoLimpio.startsWith('9')) {
-      // Celular internacional: agrupar 2-3-4 dígitos
-      formatoFinal = `+593 ${telefonoLimpio.substring(0, 2)} ${telefonoLimpio.substring(2, 5)} ${telefonoLimpio.substring(5, 9)}`;
-    } else if (telefonoLimpio.length === 9 && !telefonoLimpio.startsWith('9')) {
-      // Convencional internacional de 9 dígitos
-      const codigoProvincia = telefonoLimpio.substring(0, 1);
-      if (['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
-        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5, 9)}`;
+    if (telefonoLimpio.startsWith('+593')) { // Formato Internacional
+      telefonoLimpio = telefonoLimpio.slice(4); // Elimina '+593' al inicio
+      if (telefonoLimpio.length === 9 && telefonoLimpio.startsWith('9')) {
+        // Celular internacional: agrupar 2-3-4 dígitos
+        formatoFinal = `+593 ${telefonoLimpio.substring(0, 2)} ${telefonoLimpio.substring(2, 5)} ${telefonoLimpio.substring(5, 9)}`;
+      } else if (telefonoLimpio.length === 9 && !telefonoLimpio.startsWith('9')) {
+        // Convencional internacional de 9 dígitos
+        const codigoProvincia = telefonoLimpio.substring(0, 1);
+        if (['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
+          formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5, 9)}`;
+        } else {
+          console.error("Error: Formato de número convencional incorrecto.");
+          return false;
+        }
+      } else if (telefonoLimpio.length === 8 && !telefonoLimpio.startsWith('9')) {
+        // Convencional internacional de 8 dígitos
+        let codigoProvincia = telefonoLimpio.substring(0, 1);
+        formatoFinal = `(0${codigoProvincia})${telefonoLimpio.substring(1, 2)}-${telefonoLimpio.substring(2, 4)}-${telefonoLimpio.substring(4, 8)}`;
       } else {
-        console.error("Error: Formato de número convencional incorrecto.");
+        console.error("Error: Formato de número internacional incorrecto.");
         return false;
       }
-    } else if (telefonoLimpio.length === 8 && !telefonoLimpio.startsWith('9')) {
-      // Convencional internacional de 8 dígitos
-      let codigoProvincia = telefonoLimpio.substring(0, 1);
-      formatoFinal = `(0${codigoProvincia})${telefonoLimpio.substring(1, 2)}-${telefonoLimpio.substring(2, 4)}-${telefonoLimpio.substring(4, 8)}`;
-    } else {
-      console.error("Error: Formato de número internacional incorrecto.");
-      return false;
-    }
-  } else if (telefonoLimpio.startsWith('09')) { // Formato celular local (con 09)
-    if (telefonoLimpio.length !== 10) {
-      console.error("Error: El número de celular debe tener 10 dígitos (incluyendo el 0 inicial).");
-      return false;
-    }
-    formatoFinal = `+593 ${telefonoLimpio.substring(1, 3)} ${telefonoLimpio.substring(3, 6)} ${telefonoLimpio.substring(6)}`;
-  } else if (telefonoLimpio.startsWith('0')) {  // Formato convencional con 0 inicial
-    const codigoProvincia = telefonoLimpio.substring(1, 2);
-    if (!['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
-      console.error("Error: Código de provincia inválido.");
-      return false;
-    }
-    if (telefonoLimpio.length === 8) { // Convencional de 8 dígitos
-      formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
-    } else if (telefonoLimpio.length === 9) { // Convencional de 9 dígitos
-      formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 6)} - ${telefonoLimpio.substring(6)}`;
-    } else if (telefonoLimpio.length === 7) { // Formato local
-      formatoFinal = `(${telefonoLimpio.substring(0, 1)})${telefonoLimpio.substring(1, 3)}-${telefonoLimpio.substring(3, 5)}-${telefonoLimpio.substring(5, 7)}`;
-    } else {
-      console.error("Error: El número convencional tiene que tener un formato correcto (ej: (02) xx-xx-xx o (02) xxx-xxxx ).");
-      return false;
-    }
-  } else if (telefonoLimpio.length >= 7 && telefonoLimpio.length <= 10) {
-    // Podría ser un celular sin '09' o convencional
-    if (/^09\d{8}$/.test(telefonoLimpio)) { // Es celular sin '09'
-      formatoFinal = '+593 ' + telefonoLimpio.substring(0, 1) + " " + telefonoLimpio.substring(1, 5) + " " + telefonoLimpio.substring(5, 9);
-    } else { // Verificar convencional sin 0
-      const posiblesCodigos = ['2', '3', '4', '5', '6', '7'];
-      let codigoEncontrado = false;
-      for (const cod of posiblesCodigos) {
-        if (telefonoLimpio.startsWith(cod)) {
-          if (telefonoLimpio.length === 8) {
-            formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 8)}`;
-            codigoEncontrado = true;
+    } else if (telefonoLimpio.startsWith('09')) { // Formato celular local (con 09)
+      if (telefonoLimpio.length !== 10) {
+        console.error("Error: El número de celular debe tener 10 dígitos (incluyendo el 0 inicial).");
+        return false;
+      }
+      formatoFinal = `+593 ${telefonoLimpio.substring(1, 3)} ${telefonoLimpio.substring(3, 6)} ${telefonoLimpio.substring(6)}`;
+    } else if (telefonoLimpio.startsWith('0')) {  // Formato convencional con 0 inicial
+      const codigoProvincia = telefonoLimpio.substring(1, 2);
+      if (!['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
+        console.error("Error: Código de provincia inválido.");
+        return false;
+      }
+      if (telefonoLimpio.length === 8) { // Convencional de 8 dígitos
+        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
+      } else if (telefonoLimpio.length === 9) { // Convencional de 9 dígitos
+        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 6)} - ${telefonoLimpio.substring(6)}`;
+      } else if (telefonoLimpio.length === 7) { // Formato local
+        formatoFinal = `(${telefonoLimpio.substring(0, 1)})${telefonoLimpio.substring(1, 3)}-${telefonoLimpio.substring(3, 5)}-${telefonoLimpio.substring(5, 7)}`;
+      } else {
+        console.error("Error: El número convencional tiene que tener un formato correcto (ej: (02) xx-xx-xx o (02) xxx-xxxx ).");
+        return false;
+      }
+    } else if (telefonoLimpio.length >= 7 && telefonoLimpio.length <= 10) {
+      // Podría ser un celular sin '09' o convencional
+      if (/^09\d{8}$/.test(telefonoLimpio)) { // Es celular sin '09'
+        formatoFinal = '+593 ' + telefonoLimpio.substring(0, 1) + " " + telefonoLimpio.substring(1, 5) + " " + telefonoLimpio.substring(5, 9);
+      } else { // Verificar convencional sin 0
+        const posiblesCodigos = ['2', '3', '4', '5', '6', '7'];
+        let codigoEncontrado = false;
+        for (const cod of posiblesCodigos) {
+          if (telefonoLimpio.startsWith(cod)) {
+            if (telefonoLimpio.length === 8) {
+              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 8)}`;
+              codigoEncontrado = true;
+              break;
+            } else if (telefonoLimpio.length === 7) {
+              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
+              codigoEncontrado = true;
+            } else if (telefonoLimpio.length === 6) {
+              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4)}`;
+              codigoEncontrado = true;
+            }
             break;
-          } else if (telefonoLimpio.length === 7) {
-            formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
-            codigoEncontrado = true;
-          } else if (telefonoLimpio.length === 6) {
-            formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4)}`;
-            codigoEncontrado = true;
           }
-          break;
         }
       }
-    }
-  } else { // Si no inicia por nada conocido.
-    console.error("Error, formato desconocido");
-    return false;
-  }
-
-  if (!formatoFinal) {
-    return false;
-  }
-
-  // Verificar duplicados *excluyendo* el elemento actual que se está editando (si lo hay)
-  try {
-    const allItems = await service.getAll();
-    const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
-    if (isDuplicate) {
-      console.error("Error: El número de teléfono ya está registrado.");
+    } else { // Si no inicia por nada conocido.
+      console.error("Error, formato desconocido");
       return false;
     }
-  } catch (error) {
-    console.error(`Error al validar teléfono ${telefono}:`, error);
-    return false; // Falso en caso de error de DB.
-  }
 
-  console.info(`Teléfono validado y formateado: ${formatoFinal}`);
-  return formatoFinal;
-}
+    if (!formatoFinal) {
+      return false;
+    }
+
+    // Verificar duplicados *excluyendo* el elemento actual que se está editando (si lo hay)
+    try {
+      const allItems = await service.getAll();
+      const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
+      if (isDuplicate) {
+        console.error("Error: El número de teléfono ya está registrado.");
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error al validar teléfono ${telefono}:`, error);
+      return false; // Falso en caso de error de DB.
+    }
+
+    console.info(`Teléfono validado y formateado: ${formatoFinal}`);
+    return formatoFinal;
+  }
 
   /**
    * Valida una dirección, permite letras, números, espacios y algunos caracteres especiales

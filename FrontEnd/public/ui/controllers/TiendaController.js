@@ -1,6 +1,6 @@
 // FrontEnd/ui/controllers/TiendaController.js
-import { app } from '../AppFactory.js';
-import { appService } from '../services/UшымтаService.js';
+import {app} from '../AppFactory.js';
+import {appService} from '../services/UшымтаService.js';
 
 export class TiendaController {
   constructor(productoService) {
@@ -171,11 +171,11 @@ export class TiendaController {
     document.getElementById('admin').classList.add('hidden');          // Ocultar.
     document.getElementById('cartSection').classList.add('hidden'); // Se oculta.
     document.getElementById('checkoutSection').classList.add('hidden');
-    this.tiendaSection.classList.remove('hidden');    // Hace visible <div id="tienda"...
+    this.tiendaSection.classList.remove('hidden');
 
-    await this.cargarProductos();   //  <--  ¡SIEMPRE AWAIT!
+    await this.cargarProductos();
 
-    this.tiendaSection.scrollTo(0, 0);  //  inicio.  con  srollTop = 0
+    this.tiendaSection.scrollTo(0, 0);
   }
 }
 

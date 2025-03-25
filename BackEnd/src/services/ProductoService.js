@@ -26,10 +26,62 @@ class ProductoService extends IndexedDB {
    * @param {Producto} producto - Objeto producto a agregar.
    * @returns {Promise<number|null>} - El ID del producto agregado o null si falla.
    */
+  // async agregarProducto(producto) {
+  //     try {
+  //         // Validaciones
+  //         const nombreValidado = await Validar.nombreBM(producto.nombre, this);
+  //         const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(producto.categoriaId);
+  //         const marcaValida = await this.marcaService.obtenerMarcaPorId(producto.marcaId);
+  //         const proveedorValido = await this.proveedorService.obtenerProveedorPorId(producto.proveedorId);
+  //         const precioValidado = Validar.precio(producto.precio);
+  //         const pvpValidado = Validar.precio(producto.pvp);
+  //         const cantidadValidada = Validar.cantidadStock(producto.cantidad);
+  //         const descripcionValidada = Validar.descripcion(producto.descripcion);
+  //
+  //         if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
+  //             !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
+  //             return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
+  //         }
+  //
+  //
+  //         // 2. Creación del objeto *DESPUÉS* de las validaciones:
+  //         const nuevoProducto = new Producto(
+  //             nombreValidado,
+  //             categoriaValida.id,        // Usar los IDs, *NO* los nombres
+  //             categoriaValida.nombre,
+  //             marcaValida.id,
+  //             marcaValida.nombre,
+  //             proveedorValido.id,
+  //             proveedorValido.nombre,
+  //             precioValidado,
+  //             pvpValidado,
+  //             cantidadValidada,       // Usar la cantidad *validada*
+  //             descripcionValidada,
+  //             producto.imagen        //  URL de la imagen
+  //         );
+  //
+  //
+  //         const newId = await super.add(nuevoProducto); // IndexedDB asigna el ID.
+  //         console.info(`Producto agregado con ID: ${newId}`);
+  //         return newId;
+  //
+  //     } catch (error) {
+  //         console.error('Error al agregar producto:', error);
+  //         return null; // Importante en caso de error.
+  //     }
+  // }
+  // ... (dentro de agregarProducto)
   async agregarProducto(producto) {
     try {
       // Validaciones
       const nombreValidado = await Validar.nombreBM(producto.nombre, this);
+
+      //  *antes* de acceder a producto.categoriaId, etc.:
+      if (!producto.categoriaId || !producto.marcaId || !producto.proveedorId) {
+        console.error("Error: categoriaId, marcaId o proveedorId son nulos o no definidos.", producto);
+        return null;
+      }
+
       const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(producto.categoriaId);
       const marcaValida = await this.marcaService.obtenerMarcaPorId(producto.marcaId);
       const proveedorValido = await this.proveedorService.obtenerProveedorPorId(producto.proveedorId);
@@ -37,23 +89,44 @@ class ProductoService extends IndexedDB {
       const pvpValidado = Validar.precio(producto.pvp);
       const cantidadValidada = Validar.cantidadStock(producto.cantidad);
       const descripcionValidada = Validar.descripcion(producto.descripcion);
+      // const imagenValidada = Validar.imagen(producto.imagen); //  validar la URL
+
+      // Comprobación de *todas* las validaciones
       if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
         !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
-        return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
+        console.error("Error: Alguna validación falló.", {
+          nombreValidado,
+          categoriaValida,
+          marcaValida,
+          proveedorValido,
+          precioValidado,
+          pvpValidado,
+          cantidadValidada,
+          descripcionValidada
+        });
+        return null;
       }
-      // Actualiza el producto con los valores validos
-      producto.nombre = nombreValidado;
-      producto.categoriaNombre = categoriaValida.nombre;
-      producto.marcaNombre = marcaValida.nombre;
-      producto.proveedorNombre = proveedorValido.nombre;
-      producto.precio = precioValidado;
-      producto.pvp = pvpValidado;
-      producto.cantidad = cantidadValidada;
-      producto.stock = producto.cantidad; // Inicializa
-      producto.descripcion = descripcionValidada;
-      const id = await super.add(producto);
-      console.info(`Producto agregado con ID: ${id}`);
-      return id;
+
+      //  *Después* de las validaciones (y solo si todas son exitosas), construir el *nuevo* objeto.
+      const nuevoProducto = new Producto(
+        nombreValidado,
+        categoriaValida.id,        // Usar los IDs, *NO* los nombres
+        categoriaValida.nombre,
+        marcaValida.id,
+        marcaValida.nombre,
+        proveedorValido.id,
+        proveedorValido.nombre,
+        precioValidado,
+        pvpValidado,
+        cantidadValidada,       // Usar la cantidad *validada*
+        descripcionValidada,
+        producto.imagen        //  URL de la imagen
+      )
+
+      const newId = await super.add(nuevoProducto); // IndexedDB asigna el ID
+      console.info(`Producto agregado con ID: ${newId}`);
+      return newId;
+
     } catch (error) {
       console.error('Error al agregar producto:', error);
       return null;
@@ -66,35 +139,110 @@ class ProductoService extends IndexedDB {
    * @param {Producto} productoActualizado - Objeto producto con los datos actualizados.
    * @returns {Promise<number|null>} - El ID del producto actualizado o null si falla.
    */
+  // async actualizarProducto(id, productoActualizado) {
+  //   try {
+  //     const nombreValidado = await Validar.nombreBM(productoActualizado.nombre, this, id);
+  //     const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(productoActualizado.categoriaId);
+  //     const marcaValida = await this.marcaService.obtenerMarcaPorId(productoActualizado.marcaId);
+  //     const proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoActualizado.proveedorId);
+  //     const precioValidado = Validar.precio(productoActualizado.precio);
+  //     const pvpValidado = Validar.precio(productoActualizado.pvp);
+  //     const cantidadValidada = Validar.cantidadStock(productoActualizado.cantidad);
+  //     const descripcionValidada = Validar.descripcion(productoActualizado.descripcion);
+  //     //No se debe poder cambiar el stock directamente, se usa el metodo updateStock
+  //     if (productoActualizado.hasOwnProperty('stock')) {
+  //       console.warn('Advertencia: El stock no se puede actualizar directamente aquí. Utiliza la función para actualizar el Stock.');
+  //       delete productoActualizado.stock;
+  //     }
+  //     if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
+  //       !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
+  //       return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
+  //     }
+  //     //Asigna datos validos
+  //     productoActualizado.nombre = nombreValidado;
+  //     productoActualizado.categoriaNombre = categoriaValida.nombre;
+  //     productoActualizado.marcaNombre = marcaValida.nombre;
+  //     productoActualizado.proveedorNombre = proveedorValido.nombre;
+  //     productoActualizado.precio = precioValidado;
+  //     productoActualizado.pvp = pvpValidado;
+  //     productoActualizado.cantidad = cantidadValidada;
+  //     productoActualizado.descripcion = descripcionValidada;
+  //     const updatedId = await super.update(id, productoActualizado);
+  //     console.info(`Producto con ID ${id} actualizado correctamente.`);
+  //     return updatedId;
+  //   } catch (error) {
+  //     console.error(`Error al actualizar producto con ID ${id}:`, error);
+  //     return null;
+  //   }
+  // }
+  // ... (dentro de actualizarProducto)
   async actualizarProducto(id, productoActualizado) {
     try {
+      //  *antes* de acceder a producto.categoriaId, etc.:
+      if (!productoActualizado.categoriaId || !productoActualizado.marcaId || !productoActualizado.proveedorId) {
+        console.error("Error: categoriaId, marcaId o proveedorId son nulos o no definidos.", productoActualizado);
+        return null;
+      }
       const nombreValidado = await Validar.nombreBM(productoActualizado.nombre, this, id);
       const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(productoActualizado.categoriaId);
       const marcaValida = await this.marcaService.obtenerMarcaPorId(productoActualizado.marcaId);
       const proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoActualizado.proveedorId);
       const precioValidado = Validar.precio(productoActualizado.precio);
       const pvpValidado = Validar.precio(productoActualizado.pvp);
-      const cantidadValidada = Validar.cantidadStock(productoActualizado.cantidad);
+      const cantidadValidada = Validar.cantidadStock(productoActualizado.stock); //Se corrigio el stock
       const descripcionValidada = Validar.descripcion(productoActualizado.descripcion);
       //No se debe poder cambiar el stock directamente, se usa el metodo updateStock
-      if (productoActualizado.hasOwnProperty('stock')) {
-        console.warn('Advertencia: El stock no se puede actualizar directamente aquí. Utiliza la función para actualizar el Stock.');
-        delete productoActualizado.stock;
-      }
+
+      // Comprobación de *todas* las validaciones
       if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
         !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
-        return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
+        console.error("Error: Alguna validación falló.", {
+          nombreValidado,
+          categoriaValida,
+          marcaValida,
+          proveedorValido,
+          precioValidado,
+          pvpValidado,
+          cantidadValidada,
+          descripcionValidada
+        });
+        return null;
       }
+
       //Asigna datos validos
       productoActualizado.nombre = nombreValidado;
+      productoActualizado.categoriaId = categoriaValida.id
       productoActualizado.categoriaNombre = categoriaValida.nombre;
+      productoActualizado.marcaId = marcaValida.id
       productoActualizado.marcaNombre = marcaValida.nombre;
+      productoActualizado.proveedorId = proveedorValido.id
       productoActualizado.proveedorNombre = proveedorValido.nombre;
       productoActualizado.precio = precioValidado;
       productoActualizado.pvp = pvpValidado;
-      productoActualizado.cantidad = cantidadValidada;
+      productoActualizado.stock = cantidadValidada;//Se corrigio el stock
       productoActualizado.descripcion = descripcionValidada;
-      const updatedId = await super.update(id, productoActualizado);
+
+      //  *Después* de las validaciones (y solo si todas son exitosas), construir el *nuevo* objeto.
+      const nuevoProducto = new Producto(
+        nombreValidado,
+        categoriaValida.id,        // Usar los IDs, *NO* los nombres
+        categoriaValida.nombre,
+        marcaValida.id,
+        marcaValida.nombre,
+        proveedorValido.id,
+        proveedorValido.nombre,
+        precioValidado,
+        pvpValidado,
+        cantidadValidada,       // Usar la cantidad *validada*
+        descripcionValidada,
+        productoActualizado.imagen        //  URL de la imagen
+      )
+
+      //Asignamos nuevamente la id, al producto nuevo que hemos creado, para que lo pueda actualizar correctamente.
+      nuevoProducto.id = id;
+      //Se lo pasa para actualizar
+
+      const updatedId = await super.update(id, nuevoProducto);
       console.info(`Producto con ID ${id} actualizado correctamente.`);
       return updatedId;
     } catch (error) {
