@@ -5,84 +5,87 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>E-commerce JSC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 
 <body>
 
-  <!-- Navegación -->
-  <header>
-    <div class="nav-container">
-      <div class="logo">Mi E-Commerce</div>
-      <div class="nav-buttons">
-        <button id="btnTienda">Tienda</button>
-        <button id="btnAdmin">Panel Admin</button>
-        <button id="btnCarrito" class="cart-icon">
-          🛒 Carrito
-          <span class="cart-count" id="cartCount">0</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Sección Tienda -->
-  <div id="tienda" class="container">
-    <h2>Catálogo de Productos</h2>
-
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Buscar productos...">
-      <button id="searchButton">Buscar</button>
-    </div>
-
-    <div class="filters">
-      <select id="filterCategoria">
-        <option value="">Todas las categorías</option>
-      </select>
-      <select id="filterMarca">
-        <option value="">Todas las marcas</option>
-      </select>
-      <select id="sortBy">
-        <option value="default">Ordenar por</option>
-        <option value="price-asc">Precio: Menor a Mayor</option>
-        <option value="price-desc">Precio: Mayor a Menor</option>
-        <option value="name-asc">Nombre: A-Z</option>
-        <option value="name-desc">Nombre: Z-A</option>
-      </select>
-    </div>
-
-    <div class="products" id="productList">
-      <!-- Aquí se cargarán los productos -->
+<!-- Navegación -->
+<header>
+  <div class="nav-container">
+    <div class="logo">Mi E-Commerce</div>
+    <div class="nav-buttons">
+      <button id="btnTienda">Tienda</button>
+      <button id="btnAdmin">Panel Admin</button>
+      <button id="btnCarrito" class="cart-icon">
+        🛒 Carrito
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
     </div>
   </div>
+</header>
 
-  <!-- Sección Carrito -->
-  <div id="cartSection" class="cart hidden">
-    <h3>Carrito de Compra</h3>
-    <div id="emptyCart" class="cart-empty">
-      El carrito está vacío
-    </div>
-    <table id="cartTable" class="hidden">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Subtotal</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Items del carrito -->
-      </tbody>
-    </table>
-    <p class="cart-total" id="cartTotal">Total: $0</p>
-    <div class="cart-actions hidden" id="cartActions">
-      <button id="btnEmptyCart" class="btn btn-danger">Vaciar Carrito</button>
-      <button id="btnCheckout" class="btn btn-success">Proceder al Pago</button>
-    </div>
+<!-- Sección Tienda -->
+<div id="tienda" class="container">
+  <h2>Catálogo de Productos</h2>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Buscar productos...">
+    <button id="searchButton">Buscar</button>
   </div>
 
-  <!-- Sección Checkout -->
+  <div class="filters">
+    <select id="filterCategoria">
+      <option value="">Todas las categorías</option>
+    </select>
+    <select id="filterMarca">
+      <option value="">Todas las marcas</option>
+    </select>
+    <select id="sortBy">
+      <option value="default">Ordenar por</option>
+      <option value="price-asc">Precio: Menor a Mayor</option>
+      <option value="price-desc">Precio: Mayor a Menor</option>
+      <option value="name-asc">Nombre: A-Z</option>
+      <option value="name-desc">Nombre: Z-A</option>
+    </select>
+  </div>
+
+  <div class="products" id="productList">
+    <!-- Aquí se cargarán los productos -->
+  </div>
+</div>
+
+<!-- Sección Carrito -->
+<div id="cartSection" class="cart hidden">
+  <h3>Carrito de Compra</h3>
+  <div id="emptyCart" class="cart-empty">
+    El carrito está vacío
+  </div>
+  <table id="cartTable" class="hidden">
+    <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Precio</th>
+      <th>Subtotal</th>
+      <th>Acción</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Items del carrito -->
+    </tbody>
+  </table>
+  <p class="cart-total" id="cartTotal">Total: $0</p>
+  <div class="cart-actions hidden" id="cartActions">
+    <button id="btnEmptyCart" class="btn btn-danger">Vaciar Carrito</button>
+    <button id="btnCheckout" class="btn btn-success">Proceder al Pago</button>
+  </div>
+</div>
+
+<!-- Sección Checkout -->
 <!--  <div id="checkoutSection" class="hidden">-->
 <!--    <h2>Completar Compra</h2>-->
 
@@ -138,311 +141,623 @@
 <!--      </div>-->
 <!--    </div>-->
 <!--  </div>-->
-  <!-- Sección Checkout -->
-<div id="checkoutSection" class="hidden">
-  <h2>Completar Compra</h2>
 
-  <div id="newClientForm">  <!--  Simplificado:  Siempre visible en checkout -->
-    <h3>Datos del Cliente</h3>
+<!--  &lt;!&ndash; Sección Checkout &ndash;&gt;-->
+<!--<div id="checkoutSection" class="hidden">-->
+<!--  <h2>Completar Compra</h2>-->
+
+<!--  <div id="newClientForm">  &lt;!&ndash;  Simplificado:  Siempre visible en checkout &ndash;&gt;-->
+<!--    <h3>Datos del Cliente</h3>-->
+<!--    <form id="checkoutClientForm">-->
+<!--      <div class="form-row">-->
+<!--        <div>-->
+<!--          <label for="checkoutNombre">Nombre</label>-->
+<!--          <input type="text" id="checkoutNombre" required>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--          <label for="checkoutTelefono">Teléfono</label>-->
+<!--          <input type="text" id="checkoutTelefono" required>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div>-->
+<!--        <label for="checkoutDireccion">Dirección</label>-->
+<!--        <input type="text" id="checkoutDireccion" required>-->
+<!--      </div>-->
+<!--      &lt;!&ndash;  El botón "Confirmar Datos" ya no es necesario aquí &ndash;&gt;-->
+<!--    </form>-->
+<!--  </div>-->
+
+<!--  <div class="cart" id="checkoutCartSection">-->
+<!--    <h3>Resumen del Pedido</h3>-->
+<!--    <table id="checkoutCartTable">-->
+<!--      <thead>-->
+<!--        <tr>-->
+<!--          <th>Producto</th>-->
+<!--          <th>Cantidad</th>-->
+<!--          <th>Precio</th>-->
+<!--          <th>Subtotal</th>-->
+<!--        </tr>-->
+<!--      </thead>-->
+<!--      <tbody>-->
+<!--        &lt;!&ndash; Items del carrito &ndash;&gt;-->
+<!--      </tbody>-->
+<!--    </table>-->
+<!--    <p class="cart-total" id="checkoutTotal">Total: $0</p>-->
+<!--    <div class="cart-actions">-->
+<!--      <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>-->
+<!--      <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<style>
+    /* --- Checkout Section Specific Styles --- */
+
+    .checkout-container {
+        max-width: 900px; /* Adjust width as needed */
+        margin: 30px auto;
+        padding: 15px; /* Padding for the overall container */
+    }
+
+    .checkout-main-title {
+        text-align: center;
+        color: var(--dark);
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+        border-bottom: none; /* Override default h2 border if needed */
+    }
+
+    .checkout-card {
+        background: white;
+        border-radius: 8px;
+        padding: 25px 30px; /* More padding inside cards */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px; /* Space between cards */
+    }
+
+    .checkout-subtitle {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: var(--primary);
+        font-size: 1.3rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
+    }
+
+    /* Client Data Form Styles */
+    #checkoutClientForm .form-group {
+        margin-bottom: 15px; /* Space between form fields */
+    }
+
+    #checkoutClientForm label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    #checkoutClientForm input[type="text"] {
+        width: 100%;
+        padding: 12px 15px; /* Slightly larger padding */
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #checkoutClientForm input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2); /* Subtle focus ring */
+    }
+
+    /* Use your existing form-row grid */
+    #checkoutClientForm .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px; /* Slightly more gap */
+    }
+
+    /* Order Summary Table */
+    .table-responsive-container {
+        overflow-x: auto; /* Enable horizontal scroll on small screens */
+    }
+
+    .checkout-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        font-size: 0.95rem;
+    }
+
+    .checkout-table th {
+        background-color: var(--light);
+        padding: 12px 15px;
+        border-bottom: 2px solid var(--border);
+        font-weight: 600;
+        text-align: left;
+        color: #495057;
+    }
+
+    .checkout-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        color: var(--text);
+    }
+
+    .checkout-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Table text alignment utilities */
+    .checkout-table .text-center {
+        text-align: center;
+    }
+
+    .checkout-table .text-right {
+        text-align: right;
+    }
+
+    /* Totals Summary Block */
+    .checkout-summary {
+        max-width: 350px; /* Control width of summary */
+        margin-left: auto; /* Align block to the right */
+        margin-top: 20px;
+        font-size: 1.05rem; /* Slightly larger text */
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        color: var(--text);
+    }
+
+    .summary-item span:first-child {
+        color: #555; /* Label color */
+        font-weight: 500;
+    }
+
+    .summary-item span:last-child {
+        font-weight: 600; /* Value color */
+    }
+
+    .summary-divider {
+        border: none;
+        border-top: 1px dashed var(--border);
+        margin: 10px 0;
+    }
+
+    .summary-item.total-item span {
+        font-weight: bold;
+        font-size: 1.2em; /* Make Total stand out */
+        color: var(--primary); /* Highlight color for total */
+    }
+
+
+    /* Checkout Actions / Buttons */
+    .checkout-actions {
+        display: flex;
+        justify-content: space-between; /* Space out buttons */
+        align-items: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border); /* Separator line above buttons */
+    }
+
+    /* Styles for buttons with icons */
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px; /* Space between icon and text */
+        padding: 10px 20px; /* Adjust padding */
+        font-size: 1rem;
+    }
+
+    /* Use your existing btn classes for colors .btn-danger, .btn-success */
+
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        #checkoutClientForm .form-row {
+            grid-template-columns: 1fr; /* Stack form fields */
+            gap: 0; /* Remove gap when stacked */
+        }
+
+        .checkout-card {
+            padding: 20px;
+        }
+
+        .checkout-actions {
+            flex-direction: column-reverse; /* Stack buttons */
+            gap: 15px;
+            align-items: stretch; /* Make buttons full width when stacked */
+        }
+
+        .checkout-actions .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .checkout-main-title {
+            font-size: 1.5rem;
+        }
+
+        .checkout-subtitle {
+            font-size: 1.15rem;
+        }
+
+        .checkout-table {
+            font-size: 0.9rem; /* Smaller font in table on small screens */
+        }
+
+        .checkout-table th, .checkout-table td {
+            padding: 10px 8px; /* Reduce padding */
+        }
+
+        /* Optionally hide less critical columns on very small screens */
+        /* .checkout-table th:nth-child(3), .checkout-table td:nth-child(3) { display: none; } */
+    }
+
+    /* Ensure hidden class works */
+    .hidden {
+        display: none !important;
+    }
+</style>
+
+<!-- Sección Checkout Mejorada -->
+<div id="checkoutSection" class="checkout-container hidden">
+  <!-- Main title -->
+  <h2 class="checkout-main-title">Completar Compra</h2>
+
+  <!-- Client Data Section -->
+  <div id="newClientForm" class="checkout-card client-data-section">
+    <h3 class="checkout-subtitle">Datos del Cliente</h3>
     <form id="checkoutClientForm">
+      <!-- Using form-group for better spacing/structure -->
       <div class="form-row">
-        <div>
+        <div class="form-group">
           <label for="checkoutNombre">Nombre</label>
-          <input type="text" id="checkoutNombre" required>
+          <input type="text" id="checkoutNombre" placeholder="Ingrese su nombre completo" required>
         </div>
-        <div>
+        <div class="form-group">
           <label for="checkoutTelefono">Teléfono</label>
-          <input type="text" id="checkoutTelefono" required>
+          <input type="text" id="checkoutTelefono" placeholder="Ingrese su número de teléfono" required>
         </div>
       </div>
-      <div>
+      <div class="form-group">
         <label for="checkoutDireccion">Dirección</label>
-        <input type="text" id="checkoutDireccion" required>
+        <input type="text" id="checkoutDireccion" placeholder="Ingrese su dirección de entrega" required>
       </div>
-      <!--  El botón "Confirmar Datos" ya no es necesario aquí -->
+      <!-- No confirmation button needed here based on previous comment -->
     </form>
   </div>
 
-  <div class="cart" id="checkoutCartSection">
-    <h3>Resumen del Pedido</h3>
-    <table id="checkoutCartTable">
-      <thead>
-        <tr>
+  <!-- Order Summary Section -->
+  <div class="checkout-card order-summary-section" id="checkoutCartSection"> <!-- Existing ID kept -->
+    <h3 class="checkout-subtitle">Resumen del Pedido</h3>
+    <div class="table-responsive-container">
+      <table id="checkoutCartTable" class="checkout-table">
+        <thead >
+        <tr style="text-align: center">
           <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Subtotal</th>
+          <th >Cantidad</th>
+          <th >Precio</th>
+          <th title="Total de la cantidad del producto por su precio">Total de C/P</th>
         </tr>
-      </thead>
-      <tbody>
-        <!-- Items del carrito -->
-      </tbody>
-    </table>
-    <p class="cart-total" id="checkoutTotal">Total: $0</p>
-    <div class="cart-actions">
-      <button id="btnCancelCheckout" class="btn btn-danger">Cancelar</button>
-      <button id="btnConfirmCheckout" class="btn btn-success">Confirmar Compra</button>
+        </thead>
+        <tbody>
+        <!-- Items del carrito se insertarán dinámicamente aquí -->
+        <!-- Ejemplo de cómo se vería una fila (para diseño):
+        <tr>
+          <td>Nombre del Producto Ejemplo</td>
+          <td class="text-center">2</td>
+          <td class="text-right">$15.00</td>
+          <td class="text-right">$30.00</td>
+        </tr>
+        -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals Summary -->
+    <div class="checkout-summary">
+      <div class="summary-item">
+        <span>Subtotal:</span>
+        <!-- ID can be added here if JS needs to target it specifically -->
+        <span id="checkoutSubtotalValue">$0.00</span>
+      </div>
+      <!-- Assuming 0% IVA based on image -->
+<!--      <div class="summary-item">-->
+<!--        <span>IVA (0%):</span>-->
+<!--        &lt;!&ndash; ID can be added here if JS needs to target it specifically &ndash;&gt;-->
+<!--        <span id="checkoutIVAValue">$0.00</span>-->
+<!--      </div>-->
+      <hr class="summary-divider">
+      <div class="summary-item total-item">
+        <span>Total:</span>
+        <!-- IMPORTANT: Updated span for total value -->
+        <span id="checkoutTotal">$0.00</span>
+        <!-- Note: The ID "checkoutTotal" is now on the SPAN holding the value -->
+        <!-- If your JS was targeting a <p> with this ID, it might need slight adjustment -->
+        <!-- OR, keep the old <p id="checkoutTotal" class="hidden">...</p> if absolutely necessary -->
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="cart-actions checkout-actions">
+      <!-- Mapping original IDs to new button text/style based on target image -->
+      <!-- Assuming btnCancelCheckout = Vaciar Carrito -->
+      <button id="btnCancelCheckout" class="btn btn-danger btn-icon">
+        <i class="fas fa-trash-alt"></i> Vaciar carrito
+      </button>
+      <!-- Assuming btnConfirmCheckout = Realizar Compra -->
+      <button id="btnConfirmCheckout" class="btn btn-success btn-icon">
+        <i class="fab fa-whatsapp"></i> Realizar compra
+      </button>
+    </div>
+  </div> <!-- End order-summary-section -->
+</div> <!-- End checkout-container -->
+
+
+<!-- Sección Factura -->
+<div id="invoiceSection" class="hidden">
+  <div class="invoice">
+    <span class="invoice-close" id="btnCloseInvoice">×</span>
+    <div id="invoiceDetails">
+      <!-- Se mostrará la factura generada -->
     </div>
   </div>
 </div>
 
-<!--  Resto del HTML (sin cambios) -->
 
-  <!-- Sección Factura -->
-  <div id="invoiceSection" class="hidden">
-    <div class="invoice">
-      <span class="invoice-close" id="btnCloseInvoice">×</span>
-      <div id="invoiceDetails">
-        <!-- Se mostrará la factura generada -->
-      </div>
-    </div>
+<!-- Sección Administrador -->
+<div id="admin" class="container hidden">
+  <h2>Panel Administrador</h2>
+
+  <div class="admin-tabs">
+    <div class="admin-tab active" data-tab="categorias">Categorías</div>
+    <div class="admin-tab" data-tab="marcas">Marcas</div>
+    <div class="admin-tab" data-tab="proveedores">Proveedores</div>
+    <div class="admin-tab" data-tab="clientes">Clientes</div>
+    <div class="admin-tab" data-tab="productos">Productos</div>
+    <div class="admin-tab" data-tab="ventas">Historial de Ventas</div>
   </div>
 
-
-  <!-- Sección Administrador -->
-  <div id="admin" class="container hidden">
-    <h2>Panel Administrador</h2>
-
-    <div class="admin-tabs">
-      <div class="admin-tab active" data-tab="categorias">Categorías</div>
-      <div class="admin-tab" data-tab="marcas">Marcas</div>
-      <div class="admin-tab" data-tab="proveedores">Proveedores</div>
-      <div class="admin-tab" data-tab="clientes">Clientes</div>
-      <div class="admin-tab" data-tab="productos">Productos</div>
-      <div class="admin-tab" data-tab="ventas">Historial de Ventas</div>
+  <div class="admin-panel">
+    <!-- Administrar Categorías -->
+    <div class="admin-section" id="adminCategorias">
+      <h3>Gestión de Categorías</h3>
+      <form id="formCategoria">
+        <input type="hidden" id="categoriaId">
+        <div>
+          <label for="categoriaNombre">Nombre de Categoría</label>
+          <input type="text" id="categoriaNombre" placeholder="Nombre de Categoría" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetCategoriaForm" class="btn btn-danger">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar Categoría</button>
+        </div>
+      </form>
+      <table id="tablaCategorias">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lista de categorías -->
+        </tbody>
+      </table>
     </div>
 
-    <div class="admin-panel">
-      <!-- Administrar Categorías -->
-      <div class="admin-section" id="adminCategorias">
-        <h3>Gestión de Categorías</h3>
-        <form id="formCategoria">
-          <input type="hidden" id="categoriaId">
-          <div>
-            <label for="categoriaNombre">Nombre de Categoría</label>
-            <input type="text" id="categoriaNombre" placeholder="Nombre de Categoría" required>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetCategoriaForm" class="btn btn-danger">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar Categoría</button>
-          </div>
-        </form>
-        <table id="tablaCategorias">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Lista de categorías -->
-          </tbody>
-        </table>
-      </div>
+    <!-- Administrar Marcas -->
+    <div class="admin-section hidden" id="adminMarcas">
+      <h3>Gestión de Marcas</h3>
+      <form id="formMarca">
+        <input type="hidden" id="marcaId">
+        <div>
+          <label for="marcaNombre">Nombre de Marca</label>
+          <input type="text" id="marcaNombre" placeholder="Nombre de Marca" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetMarcaForm" class="btn btn-danger">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar Marca</button>
+        </div>
+      </form>
+      <table id="tablaMarcas">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lista de marcas -->
+        </tbody>
+      </table>
+    </div>
 
-      <!-- Administrar Marcas -->
-      <div class="admin-section hidden" id="adminMarcas">
-        <h3>Gestión de Marcas</h3>
-        <form id="formMarca">
-          <input type="hidden" id="marcaId">
-          <div>
-            <label for="marcaNombre">Nombre de Marca</label>
-            <input type="text" id="marcaNombre" placeholder="Nombre de Marca" required>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetMarcaForm" class="btn btn-danger">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar Marca</button>
-          </div>
-        </form>
-        <table id="tablaMarcas">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Lista de marcas -->
-          </tbody>
-        </table>
-      </div>
+    <!-- Administrar Proveedores -->
+    <div class="admin-section hidden" id="adminProveedores">
+      <h3>Gestión de Proveedores</h3>
+      <form id="formProveedor">
+        <input type="hidden" id="proveedorId">
+        <div>
+          <label for="proveedorNombre">Nombre</label>
+          <input type="text" id="proveedorNombre" placeholder="Nombre Completo" required>
+        </div>
+        <div>
+          <label for="proveedorTelefono">Teléfono</label>
+          <input type="text" id="proveedorTelefono" placeholder="Teléfono de contacto">
+        </div>
+        <div>
+          <label for="proveedorContacto">Dirección</label>
+          <input type="text" id="proveedorContacto" placeholder="Dirección Completa" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetProveedorForm" class="btn btn-danger">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar Proveedor</button>
+        </div>
+      </form>
+      <table id="tablaProveedores">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Dirección</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lista de proveedores -->
+        </tbody>
+      </table>
+    </div>
 
-      <!-- Administrar Proveedores -->
-      <div class="admin-section hidden" id="adminProveedores">
-        <h3>Gestión de Proveedores</h3>
-        <form id="formProveedor">
-          <input type="hidden" id="proveedorId">
-          <div>
-            <label for="proveedorNombre">Nombre</label>
-            <input type="text" id="proveedorNombre" placeholder="Nombre Completo" required>
-          </div>
-          <div>
-            <label for="proveedorTelefono">Teléfono</label>
-            <input type="text" id="proveedorTelefono" placeholder="Teléfono de contacto">
-          </div>
-          <div>
-            <label for="proveedorContacto">Dirección</label>
-            <input type="text" id="proveedorContacto" placeholder="Dirección Completa" required>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetProveedorForm" class="btn btn-danger">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar Proveedor</button>
-          </div>
-        </form>
-        <table id="tablaProveedores">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Lista de proveedores -->
-          </tbody>
-        </table>
-      </div>
+    <!-- Administrar Clientes -->
+    <div class="admin-section hidden" id="adminClientes">
+      <h3>Gestión de Clientes</h3>
+      <form id="formCliente">
+        <input type="hidden" id="clienteId">
+        <div>
+          <label for="clienteNombre">Nombre</label>
+          <input type="text" id="clienteNombre" placeholder="Nombre completo" required>
+        </div>
+        <div>
+          <label for="clienteTelefono">Teléfono</label>
+          <input type="text" id="clienteTelefono" placeholder="Teléfono de contacto">
+        </div>
+        <div>
+          <label for="clienteDireccion">Dirección</label>
+          <input type="text" id="clienteDireccion" placeholder="Dirección completa" required>
+        </div>
 
-      <!-- Administrar Clientes -->
-      <div class="admin-section hidden" id="adminClientes">
-        <h3>Gestión de Clientes</h3>
-        <form id="formCliente">
-          <input type="hidden" id="clienteId">
-          <div>
-            <label for="clienteNombre">Nombre</label>
-            <input type="text" id="clienteNombre" placeholder="Nombre completo" required>
-          </div>
-          <div>
-            <label for="clienteTelefono">Teléfono</label>
-            <input type="text" id="clienteTelefono" placeholder="Teléfono de contacto">
-          </div>
-          <div>
-            <label for="clienteDireccion">Dirección</label>
-            <input type="text" id="clienteDireccion" placeholder="Dirección completa" required>
-          </div>
+        <div class="form-actions">
+          <button type="button" id="resetClienteForm" class="btn btn-danger">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar Cliente</button>
+        </div>
+      </form>
+      <table id="tablaClientes">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Dirección</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lista de clientes -->
+        </tbody>
+      </table>
+    </div>
 
-          <div class="form-actions">
-            <button type="button" id="resetClienteForm" class="btn btn-danger">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar Cliente</button>
+    <!-- Administrar Productos -->
+    <div class="admin-section hidden" id="adminProductos">
+      <h3>Gestión de Productos</h3>
+      <form id="formProducto">
+        <input type="hidden" id="productoId">
+        <div class="form-row">
+          <div>
+            <label for="productoNombre">Nombre del Producto *</label>
+            <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
           </div>
-        </form>
-        <table id="tablaClientes">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Lista de clientes -->
-          </tbody>
-        </table>
-      </div>
+          <div>
+            <label for="productoPrecio">Precio *</label>
+            <input type="number" id="productoPrecio" placeholder="Precio" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="productoCategoria">Categoría *</label>
+            <select id="productoCategoria" required>
+              <option value="">Seleccione Categoría</option>
+            </select>
+          </div>
+          <div>
+            <label for="productoMarca">Marca *</label>
+            <select id="productoMarca" required>
+              <option value="">Seleccione Marca</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="productoProveedor">Proveedor *</label>
+            <select id="productoProveedor" required>
+              <option value="">Seleccione Proveedor</option>
+            </select>
+          </div>
+          <div>
+            <label for="productoStock">Stock *</label>
+            <input type="number" id="productoStock" placeholder="Cantidad en stock" min="0" required>
+          </div>
+        </div>
+        <div>
+          <label for="productoPVP">PVP *</label>
+          <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
+        </div>
+        <div>
+          <label for="productoDescripcion">Descripción</label>
+          <textarea id="productoDescripcion" placeholder="Descripción del producto"></textarea>
+        </div>
+        <div>
+          <label for="productoImagen">URL de Imagen</label>
+          <input type="text" id="productoImagen" placeholder="URL de la imagen">
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetProductoForm" class="btn btn-danger">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar Producto</button>
+        </div>
+      </form>
+      <table id="tablaProductos">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Marca</th>
+          <th>Precio</th>
+          <th>Proveedor</th>
+          <th>Stock</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lista de productos -->
+        </tbody>
+      </table>
+    </div>
 
-      <!-- Administrar Productos -->
-      <div class="admin-section hidden" id="adminProductos">
-        <h3>Gestión de Productos</h3>
-        <form id="formProducto">
-          <input type="hidden" id="productoId">
-          <div class="form-row">
-            <div>
-              <label for="productoNombre">Nombre del Producto *</label>
-              <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
-            </div>
-            <div>
-              <label for="productoPrecio">Precio *</label>
-              <input type="number" id="productoPrecio" placeholder="Precio" step="0.01" min="0" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div>
-              <label for="productoCategoria">Categoría *</label>
-              <select id="productoCategoria" required>
-                <option value="">Seleccione Categoría</option>
-              </select>
-            </div>
-            <div>
-              <label for="productoMarca">Marca *</label>
-              <select id="productoMarca" required>
-                <option value="">Seleccione Marca</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div>
-              <label for="productoProveedor">Proveedor *</label>
-              <select id="productoProveedor" required>
-                <option value="">Seleccione Proveedor</option>
-              </select>
-            </div>
-            <div>
-              <label for="productoStock">Stock *</label>
-              <input type="number" id="productoStock" placeholder="Cantidad en stock" min="0" required>
-            </div>
-          </div>
-          <div>
-            <label for="productoPVP">PVP *</label>
-            <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
-          </div>
-          <div>
-            <label for="productoDescripcion">Descripción</label>
-            <textarea id="productoDescripcion" placeholder="Descripción del producto"></textarea>
-          </div>
-          <div>
-            <label for="productoImagen">URL de Imagen</label>
-            <input type="text" id="productoImagen" placeholder="URL de la imagen">
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetProductoForm" class="btn btn-danger">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar Producto</button>
-          </div>
-        </form>
-        <table id="tablaProductos">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Marca</th>
-              <th>Precio</th>
-              <th>Proveedor</th>
-              <th>Stock</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Lista de productos -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Historial de Ventas -->
-      <div class="admin-section hidden" id="adminVentas">
-        <h3>Historial de Ventas</h3>
-        <table id="tablaVentas">
-          <thead>
-            <tr>
-              <th>Factura #</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Total</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Lista de ventas -->
-          </tbody>
-        </table>
-      </div>
+    <!-- Historial de Ventas -->
+    <div class="admin-section hidden" id="adminVentas">
+      <h3>Historial de Ventas</h3>
+      <table id="tablaVentas">
+        <thead>
+        <tr>
+          <th>Factura #</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lista de ventas -->
+        </tbody>
+      </table>
     </div>
   </div>
-    <script type="module" src="../ui/ui.js"></script>
+</div>
+<script type="module" src="../ui/ui.js"></script>
 </body>
 </html>

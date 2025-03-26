@@ -60,7 +60,7 @@ class FacturaService extends IndexedDB {
             return null;
         }
     }
-    // ... (resto de FacturaService: obtenerFacturas, obtenerFacturaPorId - sin cambios)
+
     async obtenerFacturas() {
         try {
             const facturas = await super.getAll();

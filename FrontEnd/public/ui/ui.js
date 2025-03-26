@@ -20,9 +20,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       app.carritoController.mostrarCarrito();
     });
 
-    // document.getElementById('btnCheckout').addEventListener('click', () => {
-    //   app.checkoutController.procederAlPago();
-    // });
     document.getElementById('btnCheckout').addEventListener('click', () => {
       app.carritoController.procederAlPago();
     });

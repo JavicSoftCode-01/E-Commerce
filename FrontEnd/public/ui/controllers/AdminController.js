@@ -5,11 +5,7 @@ import {Marca} from '../../../../BackEnd/src/models/Marca.js';
 import {Proveedor} from '../../../../BackEnd/src/models/Proveedor.js';
 import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
 import {Producto} from '../../../../BackEnd/src/models/Producto.js';
-import {appService} from '../services/UшымтаService.js'; // Importar para usar la caché
-import {CheckoutController} from './CheckoutController.js';
-
-// import {TiendaController} from "./TiendaController.js";  // Importa tiendaController
-
+import {appService} from '../services/UшымтаService.js';
 
 class AdminController {
   constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService) {
@@ -70,13 +66,10 @@ class AdminController {
     this.productoDescripcionInput = document.getElementById('productoDescripcion');
     this.productoImagenInput = document.getElementById('productoImagen');
     this.tablaProductos = document.getElementById('tablaProductos').querySelector('tbody');
-    //this.btnResetProductoForm = document.getElementById('resetProductoForm'); //ya no es necesario
 
     // Elementos Ventas (factura)
     this.tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
 
-    // this.tiendaController = new TiendaController() // <-- ¡ELIMINAR ESTO!
-    this.tiendaController = app.tiendaController; // <-- ¡USAR ESTO!
     this.setupEventListeners();
   }
 
@@ -112,7 +105,6 @@ class AdminController {
       } else if (e.target.id === 'resetProductoForm') {
         this.resetFormProducto();
       }
-      // Aquí puedes agregar más listeners para otros botones de reset si los tienes
     });
   }
 
@@ -120,7 +112,7 @@ class AdminController {
     //Ocultar otros
     document.getElementById('tienda').classList.add('hidden');
     document.getElementById('cartSection').classList.add('hidden');
-    document.getElementById('checkoutSection').classList.add('hidden'); // Asegúrate de que esta línea esté presente
+    document.getElementById('checkoutSection').classList.add('hidden');
     this.adminSection.classList.remove('hidden');
     this.cargarSeccionAdmin('categorias');  // Por defecto
   }
@@ -128,7 +120,7 @@ class AdminController {
   async cargarSeccionAdmin(tabName) {
     this.adminSections.forEach(section => section.classList.add('hidden'));
     document.getElementById('admin' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
-    this.adminTabs.forEach(tab => tab.classList.remove('active')); //Desactivar otra tab
+    this.adminTabs.forEach(tab => tab.classList.remove('active'));
     document.querySelector(`.admin-tab[data-tab="${tabName}"]`).classList.add('active');
 
     switch (tabName) {
@@ -145,11 +137,11 @@ class AdminController {
         await this.cargarClientes();
         break;
       case 'productos':
-        await this.cargarOpcionesProductoForm(); //Selects
+        await this.cargarOpcionesProductoForm();
         await this.cargarProductos();
         break;
       case 'ventas':
-        await this.cargarVentas(); // Metodo.
+        await this.cargarVentas();
         break;
     }
   }
@@ -158,7 +150,6 @@ class AdminController {
   // Métodos CRUD para Categorías
   //---------------------------------------------------
 
-  //En AdminController, cargarCategorias y demas metodos que hacen la carga
   async cargarCategorias() {
     try {
       const categorias = await appService.getCategorias();
@@ -221,15 +212,12 @@ class AdminController {
             // Para actualizar select de Productos.
             await this.cargarOpcionesProductoForm(); //   productos
           }
-
-
         }  //Cierra confirm()
-
       }); //cierra Listener
-
     });  // cierra forEach, setupCategoriaListeners
 
   } //cierra metodo
+
   // Enviar Formulario Categoria:  CREATE y UPDATE:  (categorias)
   async guardarCategoria(e) {
     e.preventDefault();
@@ -278,7 +266,6 @@ class AdminController {
 
   // Reset
   resetFormCategoria() {
-
     this.categoriaIdInput.value = '';       // Reset ID (oculto)
     this.categoriaNombreInput.value = ''; // Reset Nombre (visible)
   }
@@ -352,15 +339,10 @@ class AdminController {
             await this.cargarMarcas();      // Vuelve a cargar marcas
             // Para actualizar select de Productos.
             await this.cargarOpcionesProductoForm(); //   productos
-
           }
-
         }  //Cierra confirm()
-
       }); //cierra Listener
-
     });  // cierra forEach, setupMarcaListeners
-
   } //cierra metodo
 
   // Enviar Formulario Marca:  CREATE y UPDATE:
@@ -646,11 +628,8 @@ class AdminController {
 
           }
         }  //Cierra confirm()
-
       }); //cierra Listener
-
     });  // cierra forEach, setupClienteListeners
-
   } //cierra metodo
 
   // Enviar Formulario Cliente:  CREATE y UPDATE:
@@ -714,37 +693,6 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Productos
   //---------------------------------------------------
-  // async cargarProductos() {
-  //   try {
-  //     const productos = await this.productoService.obtenerProductos();
-  //     this.tablaProductos.innerHTML = '';
-  //     if (!Array.isArray(productos)) {
-  //       console.error('Error: El resultado de obtenerProductos no es un array.');
-  //       return;
-  //     }
-  //     productos.forEach(producto => {
-  //       const tr = document.createElement('tr');
-  //       tr.innerHTML = `
-  //                  <td>${producto.id}</td>
-  //                  <td>${producto.nombre}</td>
-  //                <td>${producto.categoriaNombre}</td>
-  //                  <td>${producto.marcaNombre}</td>
-  //                    <td>$${producto.pvp.toFixed(2)}</td>
-  //                    <td>${producto.proveedorNombre}</td>
-  //                <td>${producto.stock}</td>
-  //                  <td class="action-buttons">
-  //                     <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
-  //                     <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
-  //                   </td>
-  //                  `;
-  //       this.tablaProductos.appendChild(tr); // Añade a tbody
-  //     });
-  //     this.setupProductoListeners();
-  //   } catch (error) {
-  //     console.error("Hubo un error obteniendo los productos:", error);
-  //     alert("Error al cargar los productos");
-  //   }
-  // }
   async cargarProductos() {
     try {
       const productos = await this.productoService.obtenerProductos();
@@ -777,57 +725,6 @@ class AdminController {
     }
   }
 
-  // setupProductoListeners() {
-  //   // Editar
-  //   this.tablaProductos.querySelectorAll('.edit-producto').forEach(button => {
-  //     button.addEventListener('click', async (e) => { // Pone Evento click
-  //
-  //       const productoId = parseInt(e.target.dataset.id);        // Obtiene
-  //
-  //       const producto = await this.productoService.obtenerProductoPorId(productoId); // producto por ID
-  //
-  //       if (producto) { // producto existe!
-  //         // Cargar  form
-  //         this.productoIdInput.value = producto.id;
-  //         this.productoNombreInput.value = producto.nombre;
-  //         this.productoPrecioInput.value = producto.precio;
-  //         this.productoCategoriaSelect.value = producto.categoriaId;
-  //         this.productoMarcaSelect.value = producto.marcaId;
-  //         this.productoProveedorSelect.value = producto.proveedorId;
-  //         this.productoStockInput.value = producto.stock;
-  //         this.productoPVPInput.value = producto.pvp;
-  //         this.productoDescripcionInput.value = producto.descripcion;
-  //         this.productoImagenInput.value = producto.imagen
-  //       }
-  //     });
-  //   });
-  //   // Eliminar Producto
-  //   this.tablaProductos.querySelectorAll('.delete-producto').forEach(button => { // forEach para el boton eliminar
-  //     button.addEventListener('click', async (e) => {               //
-  //       const productoId = parseInt(e.target.dataset.id);     //
-  //
-  //       // --- CONFIRMACION ---
-  //       if (confirm("Esta seguro de eliminar?")) { //
-  //
-  //         //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-  //         const result = await this.productoService.eliminarProducto(productoId);  //
-  //         //Actualiza
-  //         if (result !== null) {
-  //           await this.cargarProductos();      // Vuelve a cargar productos
-  //           //Verifica que tiendaController esté definido antes de usarlo
-  //           if (typeof this.tiendaController !== 'undefined' && this.tiendaController.cargarProductos) {
-  //             this.tiendaController.cargarProductos();
-  //           } else {
-  //             console.error("tiendaController no está definido o no tiene un método cargarProductos.");
-  //           }
-  //
-  //         }
-  //
-  //       }  //Cierra confirm()
-  //     }); //cierra Listener
-  //
-  //   });  // cierra forEach, setupProductoListeners
-  // } //cierra metodo
   setupProductoListeners() {
     // Editar
     this.tablaProductos.querySelectorAll('.edit-producto').forEach(button => {
@@ -876,241 +773,6 @@ class AdminController {
     });  // cierra forEach, setupProductoListeners
   } //cierra metodo
   // Enviar Formulario Producto:  CREATE y UPDATE:
-  // async guardarProducto(e) { // METODO, RECIBE EL EVENTO
-  //   e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
-  //   // Obtener los datos para un nuevo producto.
-  //   const productoId = this.productoIdInput.value;
-  //   const nombre = this.productoNombreInput.value;
-  //   const precio = this.productoPrecioInput.value;
-  //   const categoriaId = this.productoCategoriaSelect.value;
-  //   const marcaId = this.productoMarcaSelect.value;
-  //   const proveedorId = this.productoProveedorSelect.value;
-  //   const stock = this.productoStockInput.value;
-  //   const pvp = this.productoPVPInput.value;
-  //   const descripcion = this.productoDescripcionInput.value;
-  //   const imagen = this.productoImagenInput.value;
-  //
-  //   if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
-  //     alert("Todos los campos marcados con (*) son obligatorios");
-  //     return;
-  //   }
-  //   // Convertir datos.
-  //   const precioNumerico = parseFloat(precio);
-  //   const pvpNumerico = parseFloat(pvp);
-  //   const stockNumerico = parseInt(stock, 10); // Asegurarse de que stock sea un entero.
-  //   const categoriaIdNumerico = parseInt(categoriaId, 10);
-  //   const marcaIdNumerico = parseInt(marcaId, 10);
-  //   const proveedorIdNumerico = parseInt(proveedorId, 10);
-  //   let resultado;
-  //   try {
-  //     if (productoId) {  // Si ya  id , es para:  *ACTUALIZACION*:
-  //
-  //       const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId)); //Buscar
-  //       //Cambiar, segun  *NUEVO* VALOR:
-  //       const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico)
-  //       const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
-  //       const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-  //
-  //       productoExistente.nombre = nombre;
-  //       productoExistente.precio = precioNumerico;
-  //       productoExistente.categoriaId = categoriaIdNumerico;
-  //       productoExistente.categoriaNombre = categoria.nombre
-  //       productoExistente.marcaId = marcaIdNumerico;
-  //       productoExistente.marcaNombre = marca.nombre;
-  //       productoExistente.proveedorId = proveedorIdNumerico;
-  //       productoExistente.proveedorNombre = proveedor.nombre
-  //       productoExistente.stock = stockNumerico;
-  //       productoExistente.pvp = pvpNumerico;
-  //       productoExistente.descripcion = descripcion
-  //       productoExistente.imagen = imagen
-  //
-  //       resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoExistente); // Persistir cambios
-  //       //Actualizar Vista:
-  //       alert("Producto ACTUALIZADO") //Feedback al usuario!
-  //
-  //
-  //     } else { // Si NO, ... CREAR
-  //
-  //       // Crear Instancia, pasar todos los datos que necesita:
-  //
-  //       const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico); //
-  //       const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);             //
-  //       const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);   //
-  //
-  //
-  //       const nuevoProducto = new Producto( // Instancia!!:
-  //         nombre,  // nombre
-  //         categoriaIdNumerico,     // Categoria ID  *Entero*!
-  //         categoria.nombre,  // categoriaNombre
-  //         marcaIdNumerico,        //
-  //         marca.nombre,   //
-  //         proveedorIdNumerico,      //
-  //         proveedor.nombre,//
-  //         precioNumerico,      //
-  //         pvpNumerico,         // pvp
-  //         stockNumerico,         //
-  //         descripcion,   // Descripcion.
-  //         imagen     // imagen.
-  //       );
-  //
-  //       // MUY IMPORTANTE:
-  //
-  //       // indexedDB Asigna
-  //       nuevoProducto.serial = await Producto.generarSerialProducto(app.idGeneratorService);
-  //       resultado = await this.productoService.agregarProducto(nuevoProducto);    //
-  //
-  //       //Solo Si id *EXISTE* despues de haber sido agregado
-  //       if (resultado) {
-  //
-  //         //Añadir Fila
-  //         alert(`EXITO Agregando Producto, ID ${resultado} `);
-  //
-  //       } else { // Fallo registro,  por  razon
-  //         throw new Error('Errores en Datos o Validacion.');
-  //
-  //       } // cierra else
-  //
-  //     }
-  //     // Fin  if-else
-  //
-  //     if (resultado) {
-  //       this.resetFormProducto()
-  //       //Cargar Opciones actualizadas
-  //       await this.cargarProductos();// llama, volver cargar los datos, *ACTUALIZADOS*.
-  //       await appService.refreshCache();
-  //     }
-  //
-  //   } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-  //     console.error("Error :", error); // Programador
-  //     alert("Revise consola") // Feedback al Usuario
-  //   }
-  // } //CIERRA METODO  guardarProducto()
-  // Enviar Formulario Producto:  CREATE y UPDATE:
-// En AdminController.js
-
-//   async guardarProducto(e) {
-//     e.preventDefault();
-//     const productoId = this.productoIdInput.value;
-//     const nombre = this.productoNombreInput.value;
-//     const precio = this.productoPrecioInput.value;
-//     const categoriaId = this.productoCategoriaSelect.value;
-//     const marcaId = this.productoMarcaSelect.value;
-//     const proveedorId = this.productoProveedorSelect.value;
-//     const stock = this.productoStockInput.value;
-//     const pvp = this.productoPVPInput.value;
-//     const descripcion = this.productoDescripcionInput.value;
-//     const imagen = this.productoImagenInput.value;
-//
-//
-//     //1.  Validaciones *previas* a la conversión:
-//     if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
-//       alert("Todos los campos marcados con (*) son obligatorios");
-//       return;  // Salida temprana si faltan campos
-//     }
-//
-//     // 2. Conversión de datos *antes* de crear la instancia:
-//     const precioNumerico = parseFloat(precio);
-//     const pvpNumerico = parseFloat(pvp);
-//     const stockNumerico = parseInt(stock, 10);
-//     const categoriaIdNumerico = parseInt(categoriaId, 10);
-//     const marcaIdNumerico = parseInt(marcaId, 10);
-//     const proveedorIdNumerico = parseInt(proveedorId, 10);
-//
-//     // Comprobaciones *adicionales* (que deberían estar en las validaciones, idealmente):
-//     if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
-//         isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
-//       alert("Error:  Valores numéricos inválidos.");
-//       return; // Salida temprana
-//     }
-//     if(precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0){
-//       alert('No se permiten números negativos')
-//       return
-//     }
-//
-//     let resultado; // Declaración de resultado
-//     try {
-//
-//         // 3.  Lógica para crear/actualizar:
-//         if (productoId) {
-//             // ACTUALIZAR
-//             const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
-//             if (!productoExistente) {
-//                 alert("Error: Producto no encontrado."); // Mejor mensaje
-//                 return;
-//             }
-//
-//              // *No* modificamos productoExistente directamente todavía.
-//              const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
-//              const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
-//              const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-//
-//             //  *Aquí*, crea un *nuevo* objeto con los datos actualizados
-//             const productoActualizado = {
-//               ...productoExistente,  // Copia todas las propiedades existentes
-//               nombre: nombre,          // Valores actualizados/convertidos:
-//               precio: precioNumerico,
-//               categoriaId: categoriaIdNumerico,
-//               categoriaNombre: categoria.nombre,  // <- Usar los datos de las búsquedas.
-//               marcaId: marcaIdNumerico,
-//               marcaNombre: marca.nombre,          // <- Usar los datos de las búsquedas.
-//               proveedorId: proveedorIdNumerico,
-//               proveedorNombre: proveedor.nombre, // <- Usar los datos de las búsquedas
-//               stock: stockNumerico,
-//               pvp: pvpNumerico,
-//               descripcion: descripcion,
-//               imagen: imagen,
-//               id: parseInt(productoId),     //  MUY IMPORTANTE, para el update
-//
-//           };
-//
-//             resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
-//             if (resultado !== null) {
-//                 alert("Producto ACTUALIZADO");
-//              }
-//
-//         } else {
-//             // CREAR
-//
-//              //  *Aquí* se crea el *nuevo* producto *antes* de llamar al servicio.
-//             const nuevoProducto = new Producto(
-//                 nombre,
-//                 categoriaIdNumerico, // Usar ya los valores *numéricos*.
-//                 '', //  temporal
-//                 marcaIdNumerico,
-//                 '',
-//                 proveedorIdNumerico,
-//                 '',
-//                 precioNumerico,
-//                 pvpNumerico,
-//                 stockNumerico,
-//                 descripcion,
-//                 imagen
-//             );
-//              // Ya no necesitas idGenerator
-//             resultado = await this.productoService.agregarProducto(nuevoProducto);
-//             if (resultado) {
-//               alert(`EXITO Agregando Producto, ID ${resultado} `); //Muestra id creado.
-//             }
-//         } //  else/crear
-//
-//
-//         // 4.  *Después* de agregar/actualizar, y *si* fue exitoso:
-//
-//         if (resultado !== null && resultado !== undefined) {
-//             this.resetFormProducto();
-//             await this.cargarProductos();
-//             await this.cargarOpcionesProductoForm(); // <-  Para actualizar los selects!
-//             await appService.refreshCache(); // <- ¡Importante!
-//         }
-//         else{ // Si resultado es null
-//           throw new Error('Errores en Datos o Validacion.');
-//         }
-//
-//     } catch (error) {
-//         console.error("Error :", error);
-//         alert("Revise consola");  // Mejor feedback
-//     }
-// }
   async guardarProducto(e) {
     e.preventDefault();
     const productoId = this.productoIdInput.value;
@@ -1296,45 +958,6 @@ class AdminController {
   //-------------------------
   //Ventas (Historial)
   //-------------------------
-  // async cargarVentas() {
-  //   try {
-  //     const ventas = await this.facturaService.obtenerFacturas(); //  await (indexedDB)
-  //     this.tablaVentas.innerHTML = ''; // limpiar antes
-  //
-  //     if (!Array.isArray(ventas)) {  // <--- AÑADE ESTA COMPROBACIÓN
-  //       console.error("Error: ventas no es un array.");
-  //       return; // Salir si no es un array
-  //     }
-  //
-  //     for (const venta of ventas) {      //  venta singular!!       NO "ventas", sino "venta"
-  //       // Obtener ,  nombre de Cliente
-  //       //const clienteNombre = await this.facturaService.obtenerNombreCliente(venta.cliente); //
-  //       const cliente = await this.clienteService.obtenerClientePorId(venta.cliente);
-  //       const clienteNombre = cliente ? cliente.nombre : 'Cliente Desconocido'; // Si no existe, pone
-  //       // Convertir a un  formato
-  //       const fecha = new Date(venta.fecha).toLocaleDateString();  //Formato legible
-  //       // Crea elemento HTML <tr> fila!
-  //       const tr = document.createElement('tr');     // Row
-  //
-  //       // Añadir a esta fila, columnas!
-  //       tr.innerHTML = `
-  //                  <td>${venta.id}</td>
-  //                <td>${fecha}</td>
-  //                   <td>${clienteNombre}</td>
-  //                <td>$${venta.total.toFixed(2)}</td>
-  //                 <td class="action-buttons">
-  //                    <button class="action-button edit-button view-venta" data-id="${venta.id}">Ver Detalle</button>
-  //                </td>
-  //           `;  // Texto!, datos, botones
-  //       this.tablaVentas.appendChild(tr); // Añadir al tbody
-  //
-  //     } //cierra loop "for"
-  //     this.setupVentasListeners(); //METODO, Inicializa o Refresca Listeners
-  //   } catch (error) {  // Error!
-  //     console.error("Hubo Error obtener ventas, o no existen:", error);
-  //     alert("Revise si existem Facturas.");//Mensaje
-  //   }
-  // }
   async cargarVentas() {
     try {
       const ventas = await this.facturaService.obtenerFacturas(); //  await (indexedDB)
@@ -1376,27 +999,7 @@ class AdminController {
   }
 
   // Metodo Setup para eventos dentro de la Tabla, para: Boton!
-  // setupVentasListeners()
-  // setupVentasListeners() {
-  //   // Dentro de este <tbody>:  usar querySelectorAll Para *todos* botones
-  //   this.tablaVentas.querySelectorAll('.view-venta').forEach(button => { // querySelectorAll(... foreach ...
-  //     button.addEventListener('click', async (e) => { //   Listener al click, en: ( e )
-  //
-  //       const ventaId = parseInt(e.target.dataset.id);          // sacar id
-  //       const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
-  //
-  //       // invocar , Vista detallada, la funcion:
-  //       await CheckoutController.mostrarFactura(venta);
-  //       document.getElementById('tienda').classList.add('hidden')
-  //       document.getElementById('admin').classList.add('hidden'); //  panel de ADMIN oculto:
-  //       //Ocultar ventana actual!
-  //       document.getElementById('invoiceSection').classList.remove('hidden'); // Muestra vista
-  //
-  //     }); // Listener, cada boton:
-  //   });  // foreach loop
-  //
-  // }  //Metodo.
-  async mostrarFactura(factura) { //METODO, para mostrar el detalle de la factura
+  static async mostrarFactura(factura) { //METODO, para mostrar el detalle de la factura
     if (!factura) return;
 
     const fecha = new Date(factura.fecha).toLocaleDateString();
@@ -1409,9 +1012,9 @@ class AdminController {
       const producto = await this.productoService.obtenerProductoPorId(detalle.productoId)
 
       detallesHTML += `
-                <tr>
+                <tr style="text-align: center">
                   <td>${producto.nombre}</td>
-                <td>${detalle.cantidad}</td>
+                <td >${detalle.cantidad}</td>
                   <td>$${detalle.precio.toFixed(2)}</td>
                  <td>$${detalle.subtotal.toFixed(2)}</td>
               </tr>
@@ -1465,12 +1068,12 @@ class AdminController {
       button.addEventListener('click', async (e) => { //   Listener al click, en: ( e )
 
         const ventaId = parseInt(e.target.dataset.id);          // sacar id
+        // const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
         const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
-
         // invocar , Vista detallada, la funcion:
         if (venta) {
-          await this.mostrarFactura(venta);
-
+          // await this.mostrarFactura(venta);
+          await app.checkoutController.mostrarFactura(venta);
         }
 
         document.getElementById('tienda').classList.add('hidden')
