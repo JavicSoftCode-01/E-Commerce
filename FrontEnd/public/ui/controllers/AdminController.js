@@ -40,7 +40,7 @@ class AdminController {
     this.proveedorIdInput = document.getElementById('proveedorId');
     this.proveedorNombreInput = document.getElementById('proveedorNombre');
     this.proveedorTelefonoInput = document.getElementById('proveedorTelefono');
-    this.proveedorContactoInput = document.getElementById('proveedorContacto');
+    this.proveedorDireccionInput = document.getElementById('proveedorDireccion');
     this.tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
@@ -461,7 +461,7 @@ class AdminController {
           // Cargar  form
           this.proveedorIdInput.value = proveedor.id;   // carga de datos
           this.proveedorNombreInput.value = proveedor.nombre;//
-          this.proveedorContactoInput.value = proveedor.direccion;
+          this.proveedorDireccionInput.value = proveedor.direccion;
           this.proveedorTelefonoInput.value = proveedor.telefono;
         }
       });
@@ -496,7 +496,7 @@ class AdminController {
     e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
     const proveedorId = this.proveedorIdInput.value;       //Desde elemento del DOM! -> HTML
     const nombre = this.proveedorNombreInput.value;       // Valor en la caja texto
-    const direccion = this.proveedorContactoInput.value;
+    const direccion = this.proveedorDireccionInput.value;
     const telefono = this.proveedorTelefonoInput.value;
     if (!nombre || !direccion) {
       alert("Campos obligatorios");
@@ -551,7 +551,7 @@ class AdminController {
   resetFormProveedor() {
     this.proveedorIdInput.value = '';
     this.proveedorNombreInput.value = '';
-    this.proveedorContactoInput.value = '';
+    this.proveedorDireccionInput.value = '';
     this.proveedorTelefonoInput.value = '';
   }
 
@@ -705,6 +705,7 @@ class AdminController {
         const tr = document.createElement('tr');
         tr.innerHTML = `
                        <td>${producto.id}</td>
+                       <td style="width: 50px; height: 50px; border-radius: 50%"><img src="${producto.imagen}" alt="${producto.nombre}"></td>
                        <td>${producto.nombre}</td>
                      <td>${producto.categoriaNombre}</td>
                        <td>${producto.marcaNombre}</td>
@@ -949,7 +950,7 @@ class AdminController {
 
 
     } catch (error) {     // Errores
-      //Feedback, si falla.
+                          //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }

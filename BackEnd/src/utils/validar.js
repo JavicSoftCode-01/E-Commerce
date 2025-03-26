@@ -14,9 +14,71 @@ export class Validar {
    * @param {number} [id=null] -  ID para excluir en la validación de duplicados (para actualizaciones).
    * @returns {Promise<string|null>} El nombre validado si es válido, o null si no lo es.
    */
+  // static async nombreBM(nombre, service, id = null) {
+  //   // Validación inicial
+  //   if (!nombre || nombre.trim() === '') {
+  //     console.error('El nombre no puede estar vacío.');
+  //     return null;
+  //   }
+  //
+  //   // Eliminar espacios al inicio y al final
+  //   const nombreFormateado = nombre.trim();
+  //
+  //   // Validación de longitud
+  //   if (nombreFormateado.length < 3 || nombreFormateado.length > 50) {
+  //     console.error('El nombre debe tener entre 3 y 50 caracteres.');
+  //     return null;
+  //   }
+  //
+  //   // Expresion regular mejorada: Solo letras, números, espacios.  Comienza/termina con letra/número.
+  //   const regex = /^[a-zA-Z0-9][a-zA-Z0-9\s]*[a-zA-Z0-9]$/; //Ahora permite numeros y letras
+  //   if (!regex.test(nombreFormateado)) {
+  //     console.error('El nombre no es válido.  Solo letras, números, y espacios. No espacios al inicio/final.');
+  //     return null;
+  //   }
+  //
+  //
+  //   try {
+  //     // Determinar qué método getAll usar según el tipo de servicio
+  //     let items = [];
+  //     if (service instanceof service.constructor) {
+  //
+  //       if (service.storeName === 'categorias') {
+  //         items = await service.obtenerTodasLasCategorias();
+  //       } else if (service.storeName === 'marcas') {
+  //         items = await service.obtenerTodasLasMarcas();
+  //
+  //       } else if (service.storeName === 'productos') { //  <--- Aquí se valida los productos
+  //         items = await service.obtenerProductos()
+  //
+  //       } else {
+  //         console.error('Servicio no reconocido en validación de nombre.');
+  //         return null; //  importante en caso de un service no esperado.
+  //       }
+  //     }
+  //
+  //
+  //     // Adaptación para manejar la verificación para edición o creación
+  //     const existe = items.some(item => {
+  //
+  //       // Si estamos actualizando (id !== null), excluimos el item actual
+  //       // Si estamos creando un nuevo item (id === null), se verifican todos.
+  //       return item.nombre.toLowerCase() === nombreFormateado.toLowerCase() && item.id !== id;
+  //     });
+  //     if (existe) {
+  //       console.error(`Ya existe un registro con el nombre: ${nombreFormateado}.`);
+  //       return null;
+  //     }
+  //     console.info(`Nombre ${nombreFormateado} validado`);
+  //     return nombreFormateado;
+  //   } catch (error) {
+  //     console.error("Error al validar el nombre:", error);
+  //     return null; //  retorna null
+  //   }
+  // }
   static async nombreBM(nombre, service, id = null) {
-    // Validación inicial
-    if (!nombre || nombre.trim() === '') {
+    // Validación básica: Verificar que nombre es una cadena no vacía
+    if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
       console.error('El nombre no puede estar vacío.');
       return null;
     }
@@ -30,50 +92,47 @@ export class Validar {
       return null;
     }
 
-    // Expresion regular mejorada: Solo letras, números, espacios.  Comienza/termina con letra/número.
-    const regex = /^[a-zA-Z0-9][a-zA-Z0-9\s]*[a-zA-Z0-9]$/; //Ahora permite numeros y letras
+    // Expresión regular:
+    // - Permite letras mayúsculas y minúsculas, incluidas acentuadas y la Ñ/ñ
+    // - Permite números y espacios intermedios (sin permitir espacios al inicio ni final)
+    const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9](?:[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9])?$/;
     if (!regex.test(nombreFormateado)) {
-      console.error('El nombre no es válido.  Solo letras, números, y espacios. No espacios al inicio/final.');
+      console.error('El nombre no es válido. Solo se permiten letras (incluyendo acentos y la Ñ), números y espacios, sin espacios al inicio ni final.');
       return null;
     }
 
-
     try {
-      // Determinar qué método getAll usar según el tipo de servicio
+      // Obtener los ítems según el tipo de servicio, utilizando un switch para mayor claridad
       let items = [];
-      if (service instanceof service.constructor) {
-
-        if (service.storeName === 'categorias') {
+      switch (service.storeName) {
+        case 'categorias':
           items = await service.obtenerTodasLasCategorias();
-        } else if (service.storeName === 'marcas') {
+          break;
+        case 'marcas':
           items = await service.obtenerTodasLasMarcas();
-
-        } else if (service.storeName === 'productos') { //  <--- Aquí se valida los productos
-          items = await service.obtenerProductos()
-
-        } else {
+          break;
+        case 'productos':
+          items = await service.obtenerProductos();
+          break;
+        default:
           console.error('Servicio no reconocido en validación de nombre.');
-          return null; //  importante en caso de un service no esperado.
-        }
+          return null;
       }
 
-
-      // Adaptación para manejar la verificación para edición o creación
-      const existe = items.some(item => {
-
-        // Si estamos actualizando (id !== null), excluimos el item actual
-        // Si estamos creando un nuevo item (id === null), se verifican todos.
-        return item.nombre.toLowerCase() === nombreFormateado.toLowerCase() && item.id !== id;
-      });
+      // Verificar si ya existe un registro con el mismo nombre (ignorando mayúsculas/minúsculas)
+      const existe = items.some(item =>
+        item.nombre.toLowerCase() === nombreFormateado.toLowerCase() && item.id !== id
+      );
       if (existe) {
         console.error(`Ya existe un registro con el nombre: ${nombreFormateado}.`);
         return null;
       }
-      console.info(`Nombre ${nombreFormateado} validado`);
+
+      console.info(`Nombre "${nombreFormateado}" validado correctamente.`);
       return nombreFormateado;
     } catch (error) {
       console.error("Error al validar el nombre:", error);
-      return null; //  retorna null
+      return null;
     }
   }
 

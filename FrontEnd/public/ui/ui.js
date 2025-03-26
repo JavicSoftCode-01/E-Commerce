@@ -17,7 +17,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       adminController.mostrarPanelAdmin();
     });
 
+    // document.getElementById('btnCarrito').addEventListener('click', () => {
+    //   app.carritoController.mostrarCarrito();
+    // });
     document.getElementById('btnCarrito').addEventListener('click', () => {
+      console.log('Cart button clicked'); // Add logging
       app.carritoController.mostrarCarrito();
     });
 

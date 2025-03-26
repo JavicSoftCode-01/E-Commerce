@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,6 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link rel="stylesheet" href="./../css/styles.css">
 </head>
-
 <body>
 
 <!-- Navegación -->
@@ -28,20 +26,22 @@
   </div>
 </header>
 
+<!-- Hero Section Foto principal -->
 <section class="hero">
-  <img src="../assets/img/Lunaire.jpg" alt="Lunaire luxury cosmetics and accessories" class="hero-image">
+  <img src="../assets/img/Lunairesinmodelo.jpg" alt="Lunaire luxury cosmetics and accessories" class="hero-image">
 </section>
-
 
 <!-- Sección Tienda -->
 <div id="tienda" class="container">
   <h2>Catálogo de Productos</h2>
 
+  <!-- Barra de Búsqueda -->
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="Buscar en Lunaire...">
     <button id="searchButton"><i class="fas fa-search"></i> Buscar</button>
   </div>
 
+  <!-- Filtros y Ordenamiento -->
   <div class="filters">
     <select id="filterCategoria">
       <option value="">Todas las categorías</option>
@@ -58,99 +58,69 @@
     </select>
   </div>
 
+  <!-- Productos -->
   <div class="products" id="productList">
     <!-- Productos se cargarán aquí vía JS -->
-    <div class="product">
-      <img src="placeholder.jpg" alt="Product Name" class="product-image">
-      <div class="product-info">
-        <h3 class="product-title">Nombre del Producto</h3>
-        <p class="product-category">Categoría</p>
-        <p class="product-brand">Marca</p>
-        <p class="product-price">$99.99</p>
-        <p class="product-description">Breve descripción del producto.</p>
-        <button class="btn btn-primary add-to-cart-btn" data-product-id="1">Agregar al Carrito</button>
-      </div>
-    </div>
-    */}
+    <!--    <div class="product">-->
+    <!--      <img src="placeholder.jpg" alt="Product Name" class="product-image">-->
+    <!--      <div class="product-info">-->
+    <!--        <h3 class="product-title">Nombre del Producto</h3>-->
+    <!--        <p class="product-category">Categoría</p>-->
+    <!--        <p class="product-brand">Marca</p>-->
+    <!--        <p class="product-price">$99.99</p>-->
+    <!--        <p class="product-description">Breve descripción del producto.</p>-->
+    <!--        <button class="btn btn-primary add-to-cart-btn" data-product-id="1">Agregar al Carrito</button>-->
+    <!--      </div>-->
+    <!--    </div>-->
   </div>
 </div>
 
-<!-- Sección Carrito -->
-<!-- =============== MODAL DEL CARRITO =============== -->
-<div id="cartModal" class="modal hidden">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 class="modal-title">Carrito de Compra</h3>
-      <button class="modal-close" id="closeCartModal" aria-label="Cerrar">×</button>
-    </div>
-    <div class="modal-body">
-      <div id="emptyCart" class="cart-empty">
-        <i class="fas fa-shopping-bag fa-3x" style="color: #ccc; margin-bottom: 15px;"></i><br>
-        Tu carrito está vacío
+<!-- Cart Section -->
+<section id="cartSection" class="hidden">
+  <div id="cartModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Carrito de Compra</h3>
+        <button class="modal-close" id="closeCartModal" aria-label="Cerrar">×</button>
       </div>
-
-      <div id="cartContentModal" class="hidden">
-        <div class="table-responsive-container">
-          <table id="cartTable">
-            <thead>
-            <tr>
-              <th>Producto</th>
-              <th class="text-center">Cantidad</th>
-              <th class="text-right">Precio Unit.</th>
-              <th class="text-right">Subtotal</th>
-              <th class="text-center">Acción</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
+      <div class="modal-body">
+        <div id="emptyCart" class="cart-empty">
+          <i class="fas fa-shopping-bag fa-3x" style="color: #ccc; margin-bottom: 15px;"></i><br>
+          Tu carrito está vacío
         </div>
-        <p class="cart-total" id="cartTotal">Total: $0.00</p>
+
+        <div id="cartContentModal" class="hidden">
+          <div class="table-responsive-container">
+            <table id="cartTable">
+              <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-right">Precio Unit.</th>
+                <th class="text-right">Subtotal</th>
+                <th class="text-center">Acción</th>
+              </tr>
+              </thead>
+              <tbody>
+              <!-- Productos se insertarán dinámicamente aquí -->
+              </tbody>
+            </table>
+          </div>
+          <p class="cart-total" id="cartTotal">Total: $0.00</p>
+        </div>
+      </div>
+      <div class="modal-footer" id="cartActions">
+        <button id="btnEmptyCart" class="btn btn-outline-danger btn-icon">
+          <i class="fas fa-trash-alt"></i> Vaciar Carrito
+        </button>
+        <button id="btnCheckout" class="btn btn-success btn-icon">
+          <i class="fas fa-credit-card"></i> Proceder al Pago
+        </button>
       </div>
     </div>
-    <div class="modal-footer" id="cartActions">
-      <button id="btnEmptyCart" class="btn btn-outline-danger btn-icon">
-        <i class="fas fa-trash-alt"></i> Vaciar Carrito
-      </button>
-      <button id="btnCheckout" class="btn btn-success btn-icon">
-        <i class="fas fa-credit-card"></i> Proceder al Pago
-      </button>
-    </div>
   </div>
-</div>
-<!-- =============== FIN MODAL DEL CARRITO =============== -->
-
-<div id="cartSection" class="cart-container container hidden">
-  <h2>Carrito de Compra</h2>
-  <div id="emptyCart" class="cart-empty">
-    <i class="fas fa-shopping-cart fa-3x" style="color: #ccc; margin-bottom: 15px;"></i><br>
-    Tu carrito está vacío
-  </div>
-  <div class="cart-content hidden">
-    <div class="table-responsive-container">
-      <table id="cartTable">
-        <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio Unitario</th>
-          <th>Subtotal</th>
-          <th>Acción</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Items del carrito via JS -->
-        </tbody>
-      </table>
-    </div>
-    <p class="cart-total" id="cartTotal">Total: $0.00</p>
-    <div class="cart-actions" id="cartActions">
-      <button id="btnEmptyCart" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Vaciar Carrito</button>
-      <button id="btnCheckout" class="btn btn-success"><i class="fas fa-credit-card"></i> Proceder al Pago</button>
-    </div>
-  </div>
-</div>
+</section>
 
 <!-- Sección Checkout Mejorada (Integrated from your styles) -->
 <div id="checkoutSection" class="checkout-container hidden">
@@ -319,10 +289,7 @@
             <label for="proveedorTelefono">Teléfono</label>
             <input type="tel" id="proveedorTelefono" placeholder="Teléfono de contacto">
           </div>
-          <div class="form-group">
-            <label for="proveedorContacto">Contacto/Email</label>
-            <input type="text" id="proveedorContacto" placeholder="Nombre de contacto o Email">
-          </div>
+
         </div>
         <div class="form-group">
           <label for="proveedorDireccion">Dirección</label>
@@ -341,7 +308,6 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Teléfono</th>
-            <th>Contacto</th>
             <th>Dirección</th>
             <th>Acciones</th>
           </tr>
@@ -502,9 +468,10 @@
   </div>
 </div>
 
+<!-- Footer -->
 <footer>
   <div class="container">
-    <p>© 2024 JavicSoftCode E-Commerce. Lunaire.</p>
+    <strong><p>© 2024 JavicSoftCode</strong> E-Commerce. Lunaire.</p>
   </div>
 </footer>
 

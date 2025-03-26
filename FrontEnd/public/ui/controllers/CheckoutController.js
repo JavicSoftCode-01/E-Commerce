@@ -19,8 +19,7 @@ class CheckoutController {
         this.setupEventListeners();
     }
 
-    // ... (setupEventListeners, cancelarCheckout, limpiarFormularioCliente - sin cambios)
-
+    // carrito
     async mostrarSeccionCheckout() {
         document.getElementById('cartSection').classList.add('hidden');
         this.checkoutSection.classList.remove('hidden');
@@ -49,6 +48,7 @@ class CheckoutController {
 
         this.limpiarFormularioCliente();
     }
+
     setupEventListeners() {
         this.btnCancelCheckout.addEventListener('click', () => this.cancelarCheckout());
         this.btnConfirmCheckout.addEventListener('click', () => this.confirmarCompra());
