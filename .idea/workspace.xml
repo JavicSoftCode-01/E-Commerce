@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/AppFactory.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/AppFactory.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/TiendaController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/TiendaController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

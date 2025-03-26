@@ -1,90 +1,145 @@
-/* (Los estilos CSS que proporcionaste, sin cambios) */
+/* --- Base Variables (Lunaire Palette) --- */
 :root {
-    --primary: #4361ee;
-    --secondary: #3f37c9;
-    --success: #28a745;
-    --danger: #dc3545;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --text: #333;
-    --border: #dee2e6;
+    /* Reds from the image */
+    --primary: #A51A25; /* Rich Red Background */
+    --secondary: #800000; /* Darker Red/Maroon for hover/accents */
+    --accent: #C4A484; /* Gold/Bronze from product caps */
+
+    /* Neutrals */
+    --light: #FFF8F0; /* Warm Off-White/Cream (like tablecloth) */
+    --dark: #333; /* Dark grey for primary text */
+    --medium-gray: #6c757d; /* For less important text */
+    --border: #E0D8D0; /* Subtle border, related to light */
+    --white: #ffffff;
+
+    /* Standard Status Colors */
+    --success: #198754; /* Green */
+    --danger: #dc3545; /* Red */
+    --warning: #ffc107; /* Yellow */
+    --info: #0dcaf0; /* Cyan */
+
+    /* Typography */
+    --font-sans-serif: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-serif: 'Playfair Display', Georgia, 'Times New Roman', Times, serif; /* Optional elegant serif */
+
+    /* Spacing */
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
 }
 
+/* --- Global Styles --- */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+html {
+    font-size: 16px; /* Base font size */
+}
+
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    color: var(--text);
-    background-color: #f9f9f9;
+    font-family: var(--font-sans-serif);
+    color: var(--dark);
+    background-color: var(--white); /* Cleaner white background */
     line-height: 1.6;
+    display: flex; /* Flex layout for footer */
+    flex-direction: column; /* Stack body content */
+    min-height: 100vh; /* Ensure footer sticks to bottom */
 }
 
 .container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 var(--spacing-md); /* Horizontal padding only */
 }
 
-/* Header y navegación */
+main {
+    flex-grow: 1; /* Allows main content to fill space */
+    padding-top: var(--spacing-lg);
+    padding-bottom: var(--spacing-xl);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* --- Header & Navigation --- */
 header {
     background: linear-gradient(to right, var(--primary), var(--secondary));
-    color: white;
-    padding: 15px 0;
+    color: var(--white);
+    padding: var(--spacing-sm) 0; /* Reduced padding */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000; /* Ensure it's above other content */
 }
 
 .nav-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    flex-wrap: wrap; /* Allow wrapping on very small screens */
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.8rem; /* Slightly larger */
     font-weight: bold;
+    font-family: var(--font-serif); /* Use elegant font */
+    letter-spacing: 1px;
 }
 
 .nav-buttons {
     display: flex;
-    gap: 15px;
+    gap: var(--spacing-md);
+    align-items: center;
 }
 
 header button {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
+    background: transparent; /* Cleaner look */
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Subtle border */
     border-radius: 4px;
-    padding: 10px 20px;
+    padding: var(--spacing-sm) var(--spacing-md);
     cursor: pointer;
-    transition: background 0.3s;
-    font-weight: 600;
+    transition: background 0.3s, border-color 0.3s;
+    font-weight: 500; /* Slightly lighter weight */
+    font-size: 0.9rem;
+    display: inline-flex; /* For icon alignment */
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 header button:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--white);
 }
 
 .cart-icon {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
 }
 
 .cart-count {
     position: absolute;
     top: -8px;
-    right: -8px;
+    right: -10px;
     background: var(--danger);
     color: white;
     border-radius: 50%;
@@ -94,143 +149,270 @@ header button:hover {
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
+    font-weight: bold;
+    border: 1px solid var(--white); /* Contrast border */
 }
 
-/* Títulos de sección */
+/* --- Hero Section (Optional) --- */
+.hero {
+    width: 100%;
+    max-height: 430px; /* Limit height */
+    overflow: hidden;
+    margin-bottom: var(--spacing-lg);
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Crop nicely */
+    object-position: center center;
+    display: block;
+}
+
+/* --- Section Titles --- */
 h2 {
-    margin: 25px 0 15px;
+    margin: var(--spacing-lg) 0 var(--spacing-md);
     color: var(--primary);
+    font-family: var(--font-serif); /* Elegant font */
+    font-size: 2rem;
+    font-weight: 600;
     border-bottom: 2px solid var(--border);
-    padding-bottom: 10px;
+    padding-bottom: var(--spacing-sm);
 }
 
 h3 {
-    margin: 20px 0 15px;
+    margin: var(--spacing-md) 0;
     color: var(--secondary);
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 500;
 }
 
-/* Catálogo de productos */
+/* --- Store: Search & Filters --- */
 .search-bar {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-lg);
+    max-width: 500px; /* Limit width */
 }
 
 .search-bar input {
     flex: 1;
-    padding: 10px;
+    padding: 10px 15px;
     border: 1px solid var(--border);
+    border-right: none; /* Remove right border */
     border-radius: 4px 0 0 4px;
+    font-size: 1rem;
 }
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(165, 26, 37, 0.2);
+}
+
 
 .search-bar button {
     padding: 10px 15px;
     background: var(--primary);
     color: white;
-    border: none;
+    border: 1px solid var(--primary);
     border-radius: 0 4px 4px 0;
     cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s;
+}
+
+.search-bar button:hover {
+    background: var(--secondary);
+    border-color: var(--secondary);
 }
 
 .filters {
     display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
     flex-wrap: wrap;
 }
 
 .filters select {
-    padding: 8px;
+    padding: 8px 12px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background-color: white;
+    font-size: 0.95rem;
 }
 
+/* --- Store: Product List --- */
 .products {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Min size 240px */
+    gap: var(--spacing-lg);
 }
 
 .product {
     border-radius: 8px;
     overflow: hidden;
     background: white;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex; /* Flex column layout */
+    flex-direction: column;
 }
 
 .product:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.product-image-container { /* Optional container for consistent aspect ratio */
+    height: 280px; /* Fixed height */
+    background-color: #f8f8f8; /* Placeholder color */
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .product-image {
-    height: 300px;
-    width: 100%;
-   /* object-fit: cover; */
-    border-bottom: 1px solid var(--border);
+    max-height: 100%;
+    max-width: 100%;
+    width: auto; /* Let height control */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Show whole image, may leave space */
 }
 
 .product-info {
-    padding: 15px;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Takes remaining space */
 }
 
 .product-title {
-    font-weight: bold;
-    margin-bottom: 8px;
+    font-weight: 600; /* Bolder title */
+    margin-bottom: 5px;
     font-size: 1.1rem;
+    color: var(--dark);
 }
 
 .product-category,
 .product-brand {
-    color: #666;
+    color: var(--medium-gray);
     font-size: 0.85rem;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
-.product-price {
-    font-weight: bold;
-    color: var(--primary);
-    margin: 10px 0;
-    font-size: 1.2rem;
+.product-brand {
+    font-style: italic;
 }
 
 .product-description {
     font-size: 0.9rem;
-    margin-bottom: 15px;
-    color: #555;
+    margin-bottom: var(--spacing-md);
+    color: var(--medium-gray);
+    flex-grow: 1; /* Pushes price/button down */
 }
 
+
+.product-price {
+    font-weight: bold;
+    color: var(--accent); /* Use accent color for price */
+    margin: var(--spacing-sm) 0 var(--spacing-md) 0;
+    font-size: 1.3rem;
+    text-align: right; /* Align price right */
+}
+
+/* --- Buttons --- */
 .btn {
     display: inline-block;
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--white);
     text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem; /* Standard padding */
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    text-decoration: none; /* Remove underline */
 }
 
 .btn:hover {
-    background: var(--secondary);
+    text-decoration: none;
+}
+
+.btn:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(165, 26, 37, 0.25); /* Primary color focus ring */
+}
+
+
+/* Button Colors */
+.btn-primary {
+    color: var(--white);
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-secondary {
+    color: var(--white);
+    background-color: var(--medium-gray);
+    border-color: var(--medium-gray);
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
 }
 
 .btn-success {
-    background: var(--success);
+    color: var(--white);
+    background-color: var(--success);
+    border-color: var(--success);
 }
 
 .btn-success:hover {
-    background: #218838;
+    background-color: #157347;
+    border-color: #146c43;
 }
 
 .btn-danger {
-    background: var(--danger);
+    color: var(--white);
+    background-color: var(--danger);
+    border-color: var(--danger);
 }
 
 .btn-danger:hover {
-    background: #c82333;
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Outline Buttons */
+.btn-outline-danger {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-outline-danger:hover {
+    color: var(--white);
+    background-color: var(--danger);
+    border-color: var(--danger);
+}
+
+/* Button with Icon */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm); /* Space between icon and text */
 }
 
 .btn-block {
@@ -238,115 +420,262 @@ h3 {
     width: 100%;
 }
 
-/* Carrito */
-.cart {
+/* --- Cart --- */
+.cart-container {
     background: white;
     border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
 }
 
 .cart-empty {
     text-align: center;
-    padding: 20px;
-    color: #666;
+    padding: var(--spacing-xl) var(--spacing-md);
+    color: var(--medium-gray);
 }
 
-.cart table {
+.table-responsive-container {
+    overflow-x: auto; /* Enable horizontal scroll on small screens */
+    margin-bottom: var(--spacing-md);
+}
+
+#cartTable {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.95rem;
 }
 
-.cart th {
+#cartTable th {
     background-color: var(--light);
     font-weight: 600;
     text-align: left;
     padding: 12px;
     border-bottom: 2px solid var(--border);
+    color: var(--secondary); /* Use secondary color */
 }
 
-.cart td {
+#cartTable td {
     padding: 12px;
     border-bottom: 1px solid var(--border);
+    vertical-align: middle;
 }
 
-.cart tr:last-child td {
+#cartTable tr:last-child td {
     border-bottom: none;
 }
 
 .cart-total {
     text-align: right;
     font-weight: bold;
-    font-size: 1.1rem;
-    margin: 15px 0;
+    font-size: 1.2rem;
+    margin: var(--spacing-md) 0;
+    color: var(--primary);
 }
 
 .cart-actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    align-items: center; /* Align buttons vertically */
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
 }
 
-/* Factura */
+/* --- Checkout Section Styles (Integrated & Adapted) --- */
+.checkout-container {
+    /* No container-specific styles needed if using .container class */
+    margin-bottom: var(--spacing-lg);
+}
+
+.checkout-main-title {
+    text-align: center;
+    color: var(--primary); /* Use primary */
+    margin-bottom: var(--spacing-lg);
+    font-size: 2rem; /* Match h2 */
+    font-family: var(--font-serif);
+    border-bottom: none;
+}
+
+.checkout-card {
+    background: white;
+    border-radius: 8px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    margin-bottom: var(--spacing-lg);
+}
+
+.checkout-subtitle {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    color: var(--secondary); /* Use secondary */
+    font-size: 1.4rem; /* Match h3 size slightly reduced */
+    font-family: var(--font-serif);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--spacing-sm);
+}
+
+/* Form Styles within Checkout */
+#checkoutClientForm .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+#checkoutClientForm label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--dark);
+}
+
+#checkoutClientForm input[type="text"],
+#checkoutClientForm input[type="tel"] { /* Included tel type */
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#checkoutClientForm input[type="text"]:focus,
+#checkoutClientForm input[type="tel"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(165, 26, 37, 0.2); /* Adjusted primary focus */
+}
+
+#checkoutClientForm .form-row { /* Same grid as admin */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+
+/* Checkout Order Summary Table */
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.95rem;
+}
+
+.checkout-table th {
+    background-color: var(--light);
+    padding: 12px 15px;
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    text-align: left;
+    color: var(--secondary); /* Use secondary */
+}
+
+.checkout-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--dark);
+}
+
+.checkout-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.checkout-table .text-center {
+    text-align: center;
+}
+
+.checkout-table .text-right {
+    text-align: right;
+}
+
+/* Checkout Totals Summary */
+.checkout-summary {
+    max-width: 400px;
+    margin-left: auto; /* Align right */
+    margin-top: var(--spacing-md);
+    font-size: 1.05rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    color: var(--dark);
+}
+
+.summary-item span:first-child {
+    color: var(--medium-gray);
+    font-weight: 500;
+}
+
+.summary-item span:last-child {
+    font-weight: 600;
+}
+
+.summary-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: var(--spacing-sm) 0;
+}
+
+.summary-item.total-item span {
+    font-weight: bold;
+    font-size: 1.3em; /* Larger total */
+    color: var(--primary); /* Primary color for final total */
+}
+
+/* Checkout Actions */
+.checkout-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: var(--spacing-md);
+}
+
+/* --- Invoice --- */
 .invoice {
     background: white;
     border-radius: 8px;
-    padding: 30px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    padding: var(--spacing-xl);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-top: var(--spacing-lg);
     position: relative;
+    border: 1px solid var(--border);
 }
 
-.invoice-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--border);
-}
-
-.invoice-id {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary);
-}
-
-.invoice-date {
-    color: #666;
-}
-
-.invoice-client {
-    margin-bottom: 25px;
-}
-
-.invoice-total {
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-align: right;
-    margin-top: 20px;
-    color: var(--primary);
-}
+/* Styles for actual invoice content generated by JS would go here */
+/* E.g., .invoice-header, .invoice-client-details, .invoice-table etc. */
 
 .invoice-close {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
     cursor: pointer;
-    font-size: 1.5rem;
-    color: #999;
+    font-size: 1.8rem;
+    color: var(--medium-gray);
+    line-height: 1;
+    padding: 0 5px;
 }
 
-.hidden {
-    display: none;
+.invoice-close:hover {
+    color: var(--dark);
 }
 
-/* Panel Administrador */
+/* --- Admin Panel --- */
 .admin-tabs {
     display: flex;
     border-bottom: 2px solid var(--border);
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap; /* Allow tabs to wrap */
+    gap: var(--spacing-sm); /* Gap between tabs */
 }
 
 .admin-tab {
@@ -355,6 +684,15 @@ h3 {
     border-bottom: 3px solid transparent;
     margin-right: 10px;
     font-weight: 600;
+    color: var(--medium-gray);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-tab:hover {
+    color: var(--dark);
 }
 
 .admin-tab.active {
@@ -363,39 +701,70 @@ h3 {
 }
 
 .admin-panel {
-    background: white;
+    background: var(--light); /* Light background for panel */
     border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    padding: var(--spacing-lg);
+    /* box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); */
+    border: 1px solid var(--border);
 }
 
 .admin-section {
-    margin-bottom: 30px;
+    margin-bottom: var(--spacing-xl);
 }
 
-form {
-    display: grid;
-    gap: 15px;
-    max-width: 600px;
-    margin-bottom: 25px;
+.admin-section h3 {
+    display: inline-flex; /* Align icon and text */
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 1.4rem; /* Slightly smaller than checkout */
+    margin-bottom: var(--spacing-lg);
 }
+
+/* Admin Forms */
+form {
+    /* display: grid; -- Using form-groups instead */
+    gap: var(--spacing-md);
+    max-width: 800px; /* Wider forms in admin */
+    margin-bottom: var(--spacing-lg);
+    background: var(--white); /* White background for forms */
+    padding: var(--spacing-lg);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md); /* Spacing below each group */
+}
+
 
 form label {
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     display: block;
+    font-size: 0.9rem;
 }
 
 form input,
 form select,
 form textarea {
     width: 100%;
-    padding: 10px;
+    padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 4px;
     font-family: inherit;
     font-size: 1rem;
+    background-color: var(--white);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(165, 26, 37, 0.2);
+}
+
 
 form textarea {
     resize: vertical;
@@ -405,92 +774,365 @@ form textarea {
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    gap: var(--spacing-lg); /* Consistent gap */
 }
 
 .form-actions {
     display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
+    justify-content: flex-end; /* Align buttons right */
+    gap: var(--spacing-md); /* Gap between buttons */
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
 }
 
-.admin-section table {
+/* Basic Form Validation Feedback Styles */
+.needs-validation .invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: .875em;
+    color: var(--danger);
+}
+
+.was-validated :invalid ~ .invalid-feedback,
+.was-validated :invalid ~ .valid-feedback {
+    display: block;
+}
+
+.was-validated input:invalid, .was-validated select:invalid, .was-validated textarea:invalid {
+    border-color: var(--danger);
+}
+
+.was-validated input:invalid:focus, .was-validated select:invalid:focus, .was-validated textarea:invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+
+/* Admin Tables */
+.table-admin { /* Specific class */
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
+    margin-top: var(--spacing-md);
     background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+    font-size: 0.9rem; /* Slightly smaller font */
 }
 
-.admin-section th {
+.table-admin th {
     background-color: var(--light);
     font-weight: 600;
     text-align: left;
-    padding: 12px;
+    padding: 10px 12px;
     border-bottom: 2px solid var(--border);
+    color: var(--secondary);
 }
 
-.admin-section td {
-    padding: 12px;
+.table-admin td {
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border);
+    vertical-align: middle; /* Align content vertically */
 }
 
+.table-admin tbody tr:hover {
+    background-color: #f8f9fa; /* Subtle hover */
+}
+
+.table-admin td:last-child {
+    white-space: nowrap;
+}
+
+/* Prevent action buttons from wrapping */
+
+/* Admin Action Buttons */
 .action-buttons {
     display: flex;
     gap: 5px;
 }
 
 .action-button {
-    padding: 5px 10px;
+    padding: 5px 8px;
     border-radius: 4px;
     cursor: pointer;
     border: none;
     font-size: 0.85rem;
     color: white;
+    line-height: 1; /* Prevent weird heights */
+    transition: opacity 0.2s;
+}
+
+.action-button:hover {
+    opacity: 0.85;
 }
 
 .edit-button {
-    background-color: #4dabf7;
+    background-color: #0d6efd;
 }
 
+/* Standard Blue */
 .delete-button {
-    background-color: #fa5252;
+    background-color: var(--danger);
 }
 
-/* Cliente selector en checkout */
-.client-selector {
-    padding: 20px;
-    background-color: var(--light);
-    border-radius: 8px;
-    margin-bottom: 20px;
+/* Use Danger */
+.view-button {
+    background-color: var(--info);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* View Button Style */
+
+/* Table Product Image */
+.table-product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background-color: #f8f8f8;
+}
+
+
+/* --- Footer --- */
+footer {
+    background: var(--dark); /* Dark footer */
+    color: var(--light);
+    padding: var(--spacing-lg) 0;
+    margin-top: auto; /* Pushes footer down */
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+footer p {
+    margin: 0;
+    color: rgba(255, 248, 240, 0.8); /* Slightly transparent light color */
+}
+
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* --- Print Styles --- */
+@media print {
+    body {
+        background-color: white;
+        color: black;
+    }
+
+    header, footer, .admin-tabs, .form-actions button:not(.btn-success), .cart-actions button:not(.btn-success), .search-bar, .filters, .hero, .no-print {
+        display: none !important;
+    }
+
+    .container, .checkout-container, .admin-panel, .cart-container {
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .table-responsive-container {
+        overflow: visible;
+    }
+
+    table, .table-admin, #cartTable, .checkout-table {
+        font-size: 10pt;
+        width: 100%;
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 4px;
+    }
+
+    .invoice {
+        box-shadow: none;
+        border: none;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+
+/* --- Responsive Adjustments --- */
+
+/* Tablets and larger */
+@media (min-width: 768px) {
+    /* Example: Could add styles for larger layouts here if needed */
+}
+
+/* Tablets (portrait) and large phones */
+@media (max-width: 991.98px) {
+    .products {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Slightly smaller min */
+    }
+
+    form {
+        max-width: 100%;
+    }
+
+    /* Allow form full width */
+}
+
+
+/* Small devices (landscape phones, etc.) */
+@media (max-width: 767.98px) {
+    h2, .checkout-main-title {
+        font-size: 1.8rem;
+    }
+
+    h3, .checkout-subtitle {
+        font-size: 1.4rem;
+    }
+
+    .nav-container {
+        justify-content: center;
+    }
+
+    /* Center nav items */
+    .logo {
+        flex-basis: 100%;
+        text-align: center;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Logo full width */
     .products {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
 
-    .form-row {
+    /* Stack form rows */
+    .form-row, #checkoutClientForm .form-row {
         grid-template-columns: 1fr;
+        gap: var(--spacing-md); /* Reduce gap when stacked */
     }
 
-    .cart th:nth-child(4),
-    .cart td:nth-child(4) {
-        display: none;
+    .form-actions, .cart-actions, .checkout-actions {
+        justify-content: center; /* Center actions */
+        flex-direction: column-reverse; /* Stack buttons vertically */
+        align-items: stretch; /* Full width buttons */
+    }
+
+    .form-actions .btn, .cart-actions .btn, .checkout-actions .btn {
+        width: 100%;
+    }
+
+
+    /* Simplify tables - Consider hiding less important columns or using data-labels */
+    /* Example: Hiding columns in Cart - adjust as needed */
+    #cartTable th:nth-child(4), /* Subtotal */
+    #cartTable td:nth-child(4) {
+        /* display: none; */ /* Uncomment if you want to hide */
+    }
+
+    /* Admin tables */
+    .table-admin th:nth-child(n+5):not(:last-child), /* Hide cols 5+ except last */
+    .table-admin td:nth-child(n+5):not(:last-child) {
+        /* display: none; */
     }
 
     .admin-tabs {
-        flex-wrap: wrap;
+        /* Tabs might scroll horizontally if too many */
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: var(--spacing-md);
     }
+
+    .admin-tab {
+        white-space: nowrap;
+    }
+
+    /* Prevent tab text wrap */
+    .checkout-summary {
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    /* Full width summary */
+
 }
 
-@media (max-width: 576px) {
-    .products {
-        grid-template-columns: 1fr;
+/* Extra small devices (portrait phones) */
+@media (max-width: 575.98px) {
+    html {
+        font-size: 15px;
     }
 
-    .cart th:nth-child(3),
-    .cart td:nth-child(3) {
-        display: none;
+    /* Slightly smaller base font */
+    h2, .checkout-main-title {
+        font-size: 1.6rem;
     }
+
+    h3, .checkout-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .products {
+        grid-template-columns: 1fr; /* Single column product list */
+    }
+
+    .product-image-container {
+        height: 300px;
+    }
+
+    /* Allow more height in single column */
+    .search-bar {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    /* Stack search */
+    .search-bar input {
+        border-radius: 4px 4px 0 0;
+        border-right: 1px solid var(--border);
+    }
+
+    .search-bar button {
+        border-radius: 0 0 4px 4px;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .filters select {
+        width: 100%;
+    }
+
+    /* Further table simplifications if needed */
+    #cartTable th:nth-child(3), /* Unit Price */
+    #cartTable td:nth-child(3) {
+        /* display: none; */
+    }
+
+    .table-admin, #cartTable, .checkout-table {
+        font-size: 0.85rem;
+    }
+
+    .table-admin th, .table-admin td,
+    #cartTable th, #cartTable td,
+    .checkout-table th, .checkout-table td {
+        padding: 8px;
+    }
+
+    /* Smaller padding */
+
+
 }

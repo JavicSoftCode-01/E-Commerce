@@ -1,3 +1,4 @@
+//FrontEnd/public/ui/ui.js
 import {app} from './AppFactory.js';
 import {appService} from './services/UшымтаService.js';
 import {adminController} from './controllers/AdminController.js';
