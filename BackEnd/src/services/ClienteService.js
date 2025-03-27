@@ -9,34 +9,49 @@ class ClienteService extends IndexedDB {
     this.idGeneratorService = idGeneratorService; //  Guarda la referencia
   }
 
-  async agregarCliente(cliente) {
+  async agregarCliente(clienteData) {
     try {
-      const nombreValidado = await Validar.nombreBP(cliente.nombre);
-      const direccionValidada = Validar.direccionBP(cliente.direccion);
-      const telefonoValidado = await Validar.telefonoBP(cliente.telefono, this);
+        // Validate data
+        const nombre = await Validar.nombreBP(clienteData.nombre);
+        const telefono = await Validar.telefonoBP(clienteData.telefono, this);
+        const direccion = Validar.direccionBP(clienteData.direccion);
 
-      if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-        return null;
-      }
+        if (!nombre || !telefono || !direccion) {
+            console.error('Validation failed for cliente data');
+            return null;
+        }
 
-      const nuevoCliente = new Cliente(nombreValidado, telefonoValidado, direccionValidada);
+        // Create a Cliente instance first
+        const nuevoCliente = new Cliente(nombre, telefono, direccion);
+        
+        // Get the next ID
+        const nextId = await this.idGeneratorService.getNextId('clientes');
+        nuevoCliente.id = nextId;
 
-      //  Usa IdGenerator correctamente:
-      nuevoCliente.id = await this.idGeneratorService.getLastId('Cliente');
-      nuevoCliente.id++;
-      await this.idGeneratorService.setLastId('Cliente', nuevoCliente.id);
+        // Convert to a plain object for storage
+        const clienteToStore = {
+            id: nuevoCliente.id,
+            nombre: nuevoCliente.nombre,
+            telefono: nuevoCliente.telefono,
+            direccion: nuevoCliente.direccion
+        };
 
-      const clienteId = await super.add(nuevoCliente);  //  Guarda usando el ID generado.
-      console.info(`Cliente agregado con ID: ${clienteId}`);
-      return clienteId; //  Retorna el ID, no el objeto.
+        // Add to database using parent class method
+        const clienteId = await super.add(clienteToStore);
+        
+        if (!clienteId) {
+            console.error('Failed to add cliente to database');
+            return null;
+        }
+
+        console.log('Cliente agregado exitosamente:', nuevoCliente);
+        return nuevoCliente;
 
     } catch (error) {
-      console.error('Error al agregar cliente:', error);
-      return null;
+        console.error('Error al agregar cliente:', error);
+        return null;
     }
-  }
-
-    // ... (resto de ClienteService,  asegúrate de que actualizarCliente también use idGeneratorService si es necesario) ...
+}
     async actualizarCliente(id, clienteActualizado) {
         try {
             const nombreValidado = await Validar.nombreBP(clienteActualizado.nombre);

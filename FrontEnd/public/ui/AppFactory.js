@@ -17,7 +17,7 @@ class AppFactory {
     this.idGeneratorService = new IdGenerator();
 
     //  Asegura que los registros existan (de forma asíncrona)
-    this.ensureIdRecordsExist();
+    //this.ensureIdRecordsExist();
 
 
     this.categoriaService = new CategoriaService();
@@ -45,20 +45,24 @@ class AppFactory {
     );
     this.tiendaController = new TiendaController(this.productoService);
     // Instancia AdminController (si lo estás usando)
+
+         // Initialize immediately
+         this.init();
   }
   // Método para asegurar la existencia de registros de ID (fuera del constructor)
-  async ensureIdRecordsExist() {
+  async init() {
     try {
-      await this.idGeneratorService.ensureIdExists('Categoria');
-      await this.idGeneratorService.ensureIdExists('Marca');
-      await this.idGeneratorService.ensureIdExists('Proveedor');
-      await this.idGeneratorService.ensureIdExists('Cliente');
-      await this.idGeneratorService.ensureIdExists('Producto');
-      await this.idGeneratorService.ensureIdExists('Factura');
+        // Ensure ID records exist for all entities
+        await this.idGeneratorService.ensureIdExists('clientes');
+        await this.idGeneratorService.ensureIdExists('productos');
+        await this.idGeneratorService.ensureIdExists('facturas');
+        await this.idGeneratorService.ensureIdExists('categorias');
+        await this.idGeneratorService.ensureIdExists('marcas');
+        await this.idGeneratorService.ensureIdExists('proveedores');
     } catch (error) {
-      console.error("Error al asegurar la existencia de registros de ID:", error);
+        console.error('Error initializing app:', error);
     }
-  }
+}
 }
 
 const app = new AppFactory();  // Exporta instancia de AppFactory

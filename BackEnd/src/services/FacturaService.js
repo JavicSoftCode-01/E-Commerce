@@ -10,57 +10,68 @@ class FacturaService extends IndexedDB {
         this.idGeneratorService = idGeneratorService;
     }
 
-    async generarFactura(clienteId, carrito) {
-        try {
-            const cliente = await this.clienteService.obtenerClientePorId(clienteId);
-            if (!cliente) {
-                console.warn(`No se encontró un cliente con ID ${clienteId}.`);
-                return null;
-            }
+async generarFactura(cliente, carrito) {
+    try {
+        console.log('Cliente recibido en generarFactura:', cliente); // Debug
 
-            // 1. Verificar el stock *antes* de hacer cualquier otra cosa.
-            for (const item of carrito.items) {
-                const producto = await this.productoService.obtenerProductoPorId(item.productoId);
-                if (!producto || producto.stock < item.cantidad) {
-                    console.error(`No hay suficiente stock para ${producto ? producto.nombre : 'un producto'}. Stock actual: ${producto ? producto.stock : 'N/A'}, Cantidad requerida: ${item.cantidad}`);
-                    return null; //  ¡Importante! Salir si no hay stock.
-                }
-            }
-
-
-            const detallesFactura = [];
-            for (const item of carrito.items) {
-                //  2.  *Ahora* reducir el stock, DESPUÉS de la verificación.
-                const resultadoActualizacion = await this.productoService.actualizarStock(item.productoId, -item.cantidad);
-                if (!resultadoActualizacion) {
-                    console.error('Error al actualizar el stock.');
-                    return null;
-                }
-
-                //  3.  Crear DetalleFactura con la información *copiada* del carrito.
-
-                detallesFactura.push(new DetalleFactura(item.productoId, item.nombre, item.precio, item.cantidad));
-            }
-
-            const factura = new Factura(clienteId, detallesFactura);
-            factura.id = await this.idGeneratorService.getLastId('Factura');
-            factura.id++;
-            await this.idGeneratorService.setLastId('Factura', factura.id);
-
-            const idFactura = await this.add(factura);
-            if (!idFactura) {
-                console.error('Error al agregar la factura.');
-                return null;
-            }
-            console.info(`Factura generada con ID: ${idFactura}:`, factura);
-            return factura;
-
-        } catch (error) {
-            console.error("Error al generar la factura:", error);
-            return null;
+        // Validar cliente
+        if (!cliente || !cliente.id) {
+            console.error('Cliente inválido:', cliente);
+            throw new Error('Cliente no válido');
         }
-    }
 
+        // Validar carrito
+        if (!carrito || !carrito.items || carrito.items.length === 0) {
+            throw new Error('Carrito vacío');
+        }
+
+        // Verificar stock antes de procesar
+        for (const item of carrito.items) {
+            const producto = await this.productoService.obtenerProductoPorId(item.productoId);
+            if (!producto) {
+                throw new Error(`Producto ${item.productoId} no encontrado`);
+            }
+            if (producto.stock < item.cantidad) {
+                throw new Error(`Stock insuficiente para ${producto.nombre}`);
+            }
+        }
+
+        // Crear detalles y actualizar stock
+        const detalles = [];
+        for (const item of carrito.items) {
+            const stockActualizado = await this.productoService.actualizarStock(
+                item.productoId,
+                -item.cantidad
+            );
+
+            if (!stockActualizado) {
+                throw new Error(`Error al actualizar stock del producto ${item.productoId}`);
+            }
+
+            detalles.push(new DetalleFactura(
+                item.productoId,
+                item.nombre,
+                item.precio,
+                item.cantidad
+            ));
+        }
+
+        // Crear y guardar la factura
+        const factura = new Factura(cliente.id, detalles);
+        const idFactura = await this.add(factura);
+
+        if (!idFactura) {
+            throw new Error('Error al guardar la factura');
+        }
+
+        console.log('Factura generada exitosamente:', factura); // Debug
+        return factura;
+
+    } catch (error) {
+        console.error('Error en generarFactura:', error);
+        throw error;
+    }
+}
     async obtenerFacturas() {
         try {
             const facturas = await super.getAll();

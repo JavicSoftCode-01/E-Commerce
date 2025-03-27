@@ -331,35 +331,41 @@ class ProductoService extends IndexedDB {
    * @param {number} cantidad - Cantidad a sumar o restar del stock (puede ser negativo para una venta).
    * @returns {Promise<boolean>} -  True si fue exitoso o null si ocurrio un error.
    */
-  async actualizarStock(productoId, cantidad) {
+async actualizarStock(productoId, cantidad) {
     try {
-      const producto = await this.obtenerProductoPorId(productoId); //Obtener el producto
-      if (!producto) {
-        return null // Ya se registró un mensaje de advertencia.
-      }
-      const cantidadValidada = Validar.cantidadStock(cantidad); // Validar
-      if (cantidadValidada === null) return null // Si hay error
-      // Verifica que el stock no se vuelva negativo
-      if (producto.stock + cantidadValidada < 0) { // Verifica si la operacion resulta en un stock negativo
-        console.error("Error: No se puede reducir el stock por debajo de cero.");
-        return null;
-      }
-      // Actualiza
-      producto.stock += cantidadValidada; // Incrementa/Reduce el stock con la validación
-      const updatedId = await super.update(productoId, producto);
-      if (updatedId !== undefined) { // Comprobar si se actualizó
-        console.info(`Stock del producto con ID ${productoId} actualizado. Nuevo stock: ${producto.stock}`);
-        return true; // Éxito
-      } else {
-        console.error(`Error al actualizar el stock del producto con ID ${productoId}.`);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error al actualizar el stock:", error);
-      return null;
-    }
-  }
+        const producto = await this.obtenerProductoPorId(productoId);
+        if (!producto) {
+            console.error(`No se encontró el producto con ID ${productoId}`);
+            return null;
+        }
 
+        // Si es una venta (cantidad negativa), validar que haya suficiente stock
+        if (cantidad < 0 && Math.abs(cantidad) > producto.stock) {
+            console.error(`Stock insuficiente. Stock actual: ${producto.stock}, Cantidad solicitada: ${Math.abs(cantidad)}`);
+            return null;
+        }
+
+        // Actualizar el stock
+        producto.stock += cantidad; // Si cantidad es negativa, restará del stock
+
+        // Validar que el stock no sea negativo después de la operación
+        if (producto.stock < 0) {
+            console.error("El stock no puede ser negativo");
+            return null;
+        }
+
+        const actualizado = await super.update(productoId, producto);
+        if (actualizado) {
+            console.info(`Stock actualizado para producto ${productoId}. Nuevo stock: ${producto.stock}`);
+            return true;
+        }
+        return null;
+
+    } catch (error) {
+        console.error("Error al actualizar el stock:", error);
+        return null;
+    }
+}
   /**
    * Elimina un producto por su ID.
    * @param {number} id - ID del producto a eliminar.

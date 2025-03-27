@@ -36,6 +36,12 @@
     padding: 0;
 }
 
+
+/* Oculta la barra de desplazamiento en navegadores WebKit */
+html::-webkit-scrollbar {
+    width: 0;
+}
+
 html {
     font-size: 16px; /* Base font size */
 }

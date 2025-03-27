@@ -128,46 +128,66 @@ async mostrarFactura(factura) {
   }
 
 async confirmarCompra() {
-  const nombre = document.getElementById('checkoutNombre').value;
-  const telefono = document.getElementById('checkoutTelefono').value;
-  const direccion = document.getElementById('checkoutDireccion').value;
+    try {
+        const nombre = document.getElementById('checkoutNombre').value;
+        const telefono = document.getElementById('checkoutTelefono').value;
+        const direccion = document.getElementById('checkoutDireccion').value;
 
-  if (!nombre || !telefono || !direccion) {
-    alert('Por favor, complete todos los campos del cliente.');
-    return;
-  }
+        if (!nombre || !telefono || !direccion) {
+            alert('Por favor, complete todos los campos del cliente.');
+            return;
+        }
 
-  try {
-    const cliente = new Cliente(nombre, telefono, direccion);
-    const nuevoCliente = await this.clienteService.agregarCliente(cliente);
+        // Deshabilitar el botón mientras se procesa
+        this.btnConfirmCheckout.disabled = true;
+        this.btnConfirmCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
 
-    if (!nuevoCliente) {
-      throw new Error('El cliente no pudo ser registrado.');
+        // 1. Crear y guardar el cliente
+        const clienteData = {
+            nombre: nombre,
+            telefono: telefono,
+            direccion: direccion
+        };
+        
+        const nuevoCliente = await this.clienteService.agregarCliente(clienteData);
+        
+        if (!nuevoCliente) {
+            throw new Error('El cliente no pudo ser registrado.');
+        }
+
+        console.log('Cliente creado:', nuevoCliente); // Debug
+
+        // 2. Generar la factura con el cliente y el carrito
+        const carrito = app.carritoController.carrito;
+        const factura = await this.facturaService.generarFactura(nuevoCliente, carrito);
+
+        if (!factura) {
+            throw new Error('La factura no pudo ser generada. Verifique el stock disponible.');
+        }
+
+        // 3. Mostrar mensaje de éxito
+        const modal = this.checkoutSection;
+        modal.classList.add('fade-out');
+        
+        // Esperar la animación
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // 4. Ocultar checkout y mostrar factura
+        this.ocultarCheckoutModal();
+        await this.mostrarFactura(factura);
+
+        // 5. Limpiar carrito y actualizar UI
+        carrito.vaciarCarrito();
+        app.tiendaController.actualizarContadorCarrito();
+        this.limpiarFormularioCliente();
+
+    } catch (error) {
+        console.error('Error durante el checkout:', error);
+        alert(`Error al confirmar la compra: ${error.message}`);
+    } finally {
+        this.btnConfirmCheckout.disabled = false;
+        this.btnConfirmCheckout.innerHTML = 'Confirmar Compra <i class="fas fa-check-circle fa-lg"></i>';
     }
-
-    const carrito = app.carritoController.carrito;
-    // Create invoice with cart items
-    const factura = await this.facturaService.generarFactura(nuevoCliente, carrito);
-
-    if (!factura) {
-      throw new Error('La factura no pudo ser generada.');
-    }
-
-    // Hide checkout modal
-    this.ocultarCheckoutModal();
-    
-    // Show invoice
-    await this.mostrarFactura(factura);
-    
-    // Clear cart and update UI
-    carrito.vaciarCarrito();
-    app.tiendaController.actualizarContadorCarrito();
-    this.limpiarFormularioCliente();
-
-  } catch (error) {
-    console.error('Error durante el checkout:', error);
-    alert(`Error al confirmar la compra: ${error.message}`);
-  }
 }
 
   async cerrarFactura() {

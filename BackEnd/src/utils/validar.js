@@ -544,37 +544,63 @@ export class Validar {
    * @param {string|number} valor - La cantidad/stock como string o número.
    * @returns {number|false} Cantidad validada como entero o false si no es válida.
    */
-  static cantidadStock(valor) {
-    let valorNumerico;
-    if (typeof valor === 'string') {
-      valorNumerico = valor.trim();//Eliminar Espacios
-      if (/[^0-9]/.test(valorNumerico)) { //Si contiene valor no numerico
-        console.error("Error: La cantidad/stock debe ser un número entero.");
-        return false;
+  //static cantidadStock(valor) {
+  //  let valorNumerico;
+  //  if (typeof valor === 'string') {
+  //    valorNumerico = valor.trim();//Eliminar Espacios
+  //    if (/[^0-9]/.test(valorNumerico)) { //Si contiene valor no numerico
+  //      console.error("Error: La cantidad/stock debe ser un número entero.");
+  //      return false;
+  //    }
+  //    valorNumerico = Number(valorNumerico);
+  //    //Verificar si es entero
+  //    if (!Number.isInteger(valorNumerico)) {
+  //      console.error("Error, Formato invalido, debe ser un entero");
+  //      return false
+  //    }
+  //  } else if (typeof valor === 'number') {
+  //    valorNumerico = valor;
+  //    if (!Number.isInteger(valorNumerico)) {
+  //      console.error("Error, Debe ser entero, no se admite decimales");
+  //      return false;
+  //    }
+  //  } else {
+  //    console.error("Error: La cantidad/stock debe ser un número o una cadena.");
+  //    return false;
+  //  }
+  //  //Verifica si es negativo
+  //  if (valorNumerico < 0) {
+  //    console.error("Error: La cantidad/stock no puede ser negativo.");
+  //    return false;
+  //  }
+  //  console.info(`Cantidad/stock validado: ${valorNumerico}`);
+  //  return valorNumerico;
+  //}
+    static cantidadStock(valor) {
+      let valorNumerico;
+      
+      // Si es una cadena, convertir a número
+      if (typeof valor === 'string') {
+          valorNumerico = parseInt(valor.trim(), 10);
+          if (isNaN(valorNumerico)) {
+              console.error("Error: La cantidad debe ser un número válido");
+              return null;
+          }
+      } else if (typeof valor === 'number') {
+          valorNumerico = valor;
+      } else {
+          console.error("Error: Tipo de dato inválido para cantidad");
+          return null;
       }
-      valorNumerico = Number(valorNumerico);
-      //Verificar si es entero
+  
+      // Para actualizaciones de stock por venta, permitimos números negativos
+      // pero para cantidad inicial o reposición, debe ser positivo
       if (!Number.isInteger(valorNumerico)) {
-        console.error("Error, Formato invalido, debe ser un entero");
-        return false
+          console.error("Error: La cantidad debe ser un número entero");
+          return null;
       }
-    } else if (typeof valor === 'number') {
-      valorNumerico = valor;
-      if (!Number.isInteger(valorNumerico)) {
-        console.error("Error, Debe ser entero, no se admite decimales");
-        return false;
-      }
-    } else {
-      console.error("Error: La cantidad/stock debe ser un número o una cadena.");
-      return false;
-    }
-    //Verifica si es negativo
-    if (valorNumerico < 0) {
-      console.error("Error: La cantidad/stock no puede ser negativo.");
-      return false;
-    }
-    console.info(`Cantidad/stock validado: ${valorNumerico}`);
-    return valorNumerico;
+  
+      return valorNumerico;
   }
 
   /**
