@@ -1013,6 +1013,7 @@ footer p {
 
     .form-actions .btn, .cart-actions .btn, .checkout-actions .btn {
         width: 100%;
+        text-align: center;
     }
 
 
@@ -1117,8 +1118,13 @@ footer p {
     }
 }
 
+/* --- Modal Styles Mejorados --- */
+/* Evitar scroll en el body cuando el modal está abierto */
+body.modal-open {
+    overflow: hidden;
+}
 
-/* Modal Styles */
+/* Contenedor del modal */
 .modal {
     position: fixed;
     top: 0;
@@ -1129,23 +1135,36 @@ footer p {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    /* Opcional: prevenir scroll accidental en el contenedor */
+    overflow: hidden;
 }
 
+/* Ocultar modal por defecto */
 .modal.hidden {
-    display: none;
+    display: none !important;
 }
 
+/* Overlay con transición de opacidad */
 .modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6); /* Dark reddish overlay */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
 }
 
+/* Cuando el modal está visible, se activa la opacidad del overlay */
+.modal.show .modal-overlay {
+    opacity: 1;
+}
+
+/* Contenido del modal con animación sutil */
 .modal-content {
-    background: white;
+    background: var(--white);
     width: 90%;
     max-width: 600px;
     max-height: 80%;
@@ -1154,8 +1173,18 @@ footer p {
     position: relative;
     z-index: 1001;
     padding: 20px;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* Estado activo: contenido visible y en tamaño normal */
+.modal.show .modal-content {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Cabecera del modal */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -1164,6 +1193,7 @@ footer p {
     padding-bottom: 10px;
 }
 
+/* Botón de cerrar */
 .modal-close {
     background: none;
     border: none;
@@ -1171,45 +1201,12 @@ footer p {
     cursor: pointer;
 }
 
+/* Cuerpo del modal */
 .modal-body {
     padding: 20px 0;
 }
 
-.cart-empty {
-    text-align: center;
-    color: #888;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* Table Styles */
-#cartTable {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#cartTable th, #cartTable td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.cart-total {
-    text-align: right;
-    font-weight: bold;
-    margin-top: 15px;
-}
-
+/* Pie del modal */
 .modal-footer {
     display: flex;
     justify-content: space-between;
@@ -1217,6 +1214,7 @@ footer p {
     border-top: 1px solid #eee;
 }
 
+/* Botones (se mantienen igual, se puede ajustar si se desea) */
 .btn {
     padding: 10px 15px;
     border: none;
@@ -1240,7 +1238,6 @@ footer p {
     align-items: center;
     gap: 10px;
 }
-
 
 .cart-count {
     position: absolute;

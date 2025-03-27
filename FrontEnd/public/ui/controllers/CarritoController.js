@@ -118,7 +118,8 @@ class CarritoController {
       return;
     }
 // Ocultar el carrito y mostrar la sección de checkout
-    this.ocultarCarrito(); // Oculta antes de mostrar el checkout.
+//     this.ocultarCarrito(); // Oculta antes de mostrar el checkout.
+    this.ocultarModalCarrito()
     await app.checkoutController.mostrarSeccionCheckout(); // instancia correcta.
   }
 
@@ -135,22 +136,40 @@ class CarritoController {
       console.error('cartModal element is null');
       return;
     }
+    //
+    // // Remove 'hidden' class from both cart section and cart modal
+    // this.cartSection.classList.remove('hidden');
+    // this.cartModal.classList.remove('hidden');
 
-    // Remove 'hidden' class from both cart section and cart modal
-    this.cartSection.classList.remove('hidden');
+    // Quitar la clase "hidden" para que el modal sea visible
     this.cartModal.classList.remove('hidden');
+    // Utilizar un pequeño delay para iniciar la transición
+    setTimeout(() => {
+      this.cartModal.classList.add('show');
+      // Bloquea el scroll del body
+      document.body.classList.add('modal-open');
+    }, 10);
 
     this.actualizarCarrito();
-
-    // Scroll to the top of the cart section if possible
-    if (this.cartSection) {
-      window.scrollTo(0, this.cartSection.offsetTop - 20);
-    }
   }
 
-  ocultarCarrito() {
-    this.cartSection.classList.add('hidden'); // Metodo Ocultar
+  // ocultarCarrito() {
+  //   this.cartSection.classList.add('hidden'); // Metodo Ocultar
+  // }
+   ocultarModalCarrito() {
+    // Inicia la animación de salida quitando la clase "show"
+    this.cartModal.classList.remove('show');
+    // Reactiva el scroll del body
+    document.body.classList.remove('modal-open');
+    // Espera a que la animación termine para ocultar el modal completamente
+    setTimeout(() => {
+      this.cartModal.classList.add('hidden');
+    }, 300); // Debe coincidir con la duración de la transición en el CSS (0.3s)
   }
+
+  // ocultarModalCarrito() {
+  //   this.cartModal.classList.add('hidden'); // Metodo Ocultar
+  // }
 }
 
 export {CarritoController};

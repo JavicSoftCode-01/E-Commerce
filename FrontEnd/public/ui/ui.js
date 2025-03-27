@@ -17,12 +17,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       adminController.mostrarPanelAdmin();
     });
 
-    // document.getElementById('btnCarrito').addEventListener('click', () => {
-    //   app.carritoController.mostrarCarrito();
-    // });
     document.getElementById('btnCarrito').addEventListener('click', () => {
-      console.log('Cart button clicked'); // Add logging
+      console.log('Cart button clicked');
       app.carritoController.mostrarCarrito();
+    });
+
+    document.getElementById('closeCartModal').addEventListener('click', () => {
+      console.log('Cart button cerrar modal');
+      app.carritoController.ocultarModalCarrito();
     });
 
     document.getElementById('btnCheckout').addEventListener('click', () => {
