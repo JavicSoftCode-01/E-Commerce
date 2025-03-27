@@ -139,7 +139,7 @@ header button:hover {
 /* --- Hero Section (Optional) --- */
 .hero {
     width: 100%;
-    max-height: 400px; /* Limit height */
+    max-height: 30rem; /* Limit height */
     overflow: hidden;
     margin-bottom: var(--spacing-lg);
 }
@@ -1343,3 +1343,116 @@ body.modal-open {
     opacity: 0;
     transition: opacity 0.7s ease-out;
 }
+
+.checkout-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1100;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.checkout-container.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Opcional: un overlay para el checkout */
+.checkout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1090;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.checkout-overlay.show {
+    opacity: 1;
+}
+
+/* Checkout Modal Estilizado */
+#checkoutOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1090;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#checkoutOverlay.show {
+  opacity: 1;
+}
+
+#checkoutSection {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 1100;
+  padding: var(--spacing-lg);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#checkoutSection.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.checkout-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Responsividad: en pantallas grandes, mostrar en columnas */
+@media (min-width: 768px) {
+  .checkout-content {
+    flex-direction: row;
+  }
+  .client-data-section,
+  .order-summary-section {
+    flex: 1;
+  }
+}
+
+/* Ajusta la tabla para mayor legibilidad */
+.checkout-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.checkout-table th,
+.checkout-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.checkout-summary {
+  margin-top: var(--spacing-md);
+}
+

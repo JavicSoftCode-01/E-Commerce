@@ -324,10 +324,12 @@ class CarritoController {
       alert('El carrito está vacío');
       return;
     }
-// Ocultar el carrito y mostrar la sección de checkout
-//     this.ocultarCarrito(); // Oculta antes de mostrar el checkout.
-    this.ocultarModalCarrito()
-    await app.checkoutController.mostrarSeccionCheckout(); // instancia correcta.
+  
+    // Hide cart modal with animation
+    this.ocultarModalCarrito();
+    
+    // Show checkout modal and load cart items
+    app.checkoutController.mostrarCheckoutModal();
   }
 
   mostrarCarrito() {

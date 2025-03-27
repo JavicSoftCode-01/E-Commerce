@@ -19,40 +19,100 @@ class CheckoutController {
     this.setupEventListeners();
   }
 
-  // carrito
-  async mostrarSeccionCheckout() {
-    document.getElementById('cartSection').classList.add('hidden');
-    this.checkoutSection.classList.remove('hidden');
-
-    const tbody = this.checkoutCartTable.querySelector('tbody');
-    tbody.innerHTML = '';
-    const carrito = app.carritoController.carrito;
-
-    if (carrito && carrito.items) {
-      //  CORRECCIÓN:  Acceder a las propiedades directamente desde item.
-      carrito.items.forEach(item => {
+    // Add this new method to load cart items into checkout
+    cargarResumenPedido() {
+      const tbody = this.checkoutCartTable.querySelector('tbody');
+      tbody.innerHTML = '';
+      
+      const cartItems = app.carritoController.carrito.items;
+      let subtotal = 0;
+  
+      cartItems.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${item.nombre}</td> 
-          <td>${item.cantidad}</td>
-          <td>$${item.precio.toFixed(2)}</td>
-          <td>$${item.subtotal.toFixed(2)}</td>
+          <td>
+            <img src="${item.imagen}" alt="${item.nombre}" style="width:50px; height:50px; object-fit:cover; border-radius:50%">
+            ${item.nombre}
+          </td>
+          <td class="text-center">${item.cantidad}</td>
+          <td class="text-right">$${item.precio.toFixed(2)}</td>
+          <td class="text-right">$${(item.precio * item.cantidad).toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
+        subtotal += item.precio * item.cantidad;
       });
-      this.checkoutTotal.textContent = `Total: $${carrito.calcularTotalCarrito().toFixed(2)}`;
-    } else {
-      console.error('Carrito no está definido o no tiene items');
-      this.checkoutTotal.textContent = 'Total: $0.00';
+  
+      // Update summary values
+      document.getElementById('checkoutSubtotalValue').textContent = `$${subtotal.toFixed(2)}`;
+      const shipping = 0; // Or calculate shipping cost
+      document.getElementById('checkoutShippingValue').textContent = `$${shipping.toFixed(2)}`;
+      document.getElementById('checkoutTotal').textContent = `$${(subtotal + shipping).toFixed(2)}`;
     }
 
-    this.limpiarFormularioCliente();
+
+async mostrarFactura(factura) {
+  if (!factura) return;
+
+  const fecha = new Date(factura.fecha).toLocaleDateString();
+
+  let detallesHTML = '';
+  for (const detalle of factura.detalles) {
+    detallesHTML += `
+      <tr>
+        <td style="width: 50px; height: 50px; border-radius: 50%;">
+          <img src="${detalle.imagen || 'default.png'}" alt="${detalle.nombre}" 
+               style="width:50px; height:50px; object-fit:cover;">
+        </td>
+        <td>${detalle.nombre}</td>
+        <td class="text-center">${detalle.cantidad}</td>
+        <td class="text-right">$${detalle.precio.toFixed(2)}</td>
+        <td class="text-right">$${(detalle.precio * detalle.cantidad).toFixed(2)}</td>
+      </tr>
+    `;
   }
+}
 
   setupEventListeners() {
-    this.btnCancelCheckout.addEventListener('click', () => this.cancelarCheckout());
+    this.btnCancelCheckout.addEventListener('click', () => {
+      this.ocultarCheckoutModal();
+      // Mostramos nuevamente el modal del carrito
+      app.carritoController.mostrarCarrito();
+    });
     this.btnConfirmCheckout.addEventListener('click', () => this.confirmarCompra());
     this.btnCloseInvoice.addEventListener('click', () => this.cerrarFactura());
+  }
+
+  mostrarCheckoutModal() {
+    const modal = this.checkoutSection;
+    const overlay = document.getElementById('checkoutOverlay');
+    
+    // Remove hidden class
+    modal.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    
+    // Load cart items into checkout summary
+    this.cargarResumenPedido();
+    
+    // Animate modal
+    requestAnimationFrame(() => {
+      modal.classList.add('show');
+      overlay.classList.add('show');
+    });
+  }
+ 
+
+  ocultarCheckoutModal() {
+    const modal = this.checkoutSection;
+    const overlay = document.getElementById('checkoutOverlay');
+  
+    modal.classList.remove('show');
+    overlay.classList.remove('show');
+  
+    // Espera a que termine la transición para volver a ocultar
+    modal.addEventListener('transitionend', () => {
+      modal.classList.add('hidden');
+      overlay.classList.add('hidden');
+    }, { once: true });
   }
 
   cancelarCheckout() {
@@ -67,102 +127,48 @@ class CheckoutController {
     document.getElementById('checkoutDireccion').value = '';
   }
 
-  async confirmarCompra() {
-    const nombre = document.getElementById('checkoutNombre').value;
-    const telefono = document.getElementById('checkoutTelefono').value;
-    const direccion = document.getElementById('checkoutDireccion').value;
+async confirmarCompra() {
+  const nombre = document.getElementById('checkoutNombre').value;
+  const telefono = document.getElementById('checkoutTelefono').value;
+  const direccion = document.getElementById('checkoutDireccion').value;
 
-    if (!nombre || !telefono || !direccion) {
-      alert('Por favor, complete todos los campos del cliente.');
-      return;
-    }
-
-    try {
-      const cliente = new Cliente(nombre, telefono, direccion);
-      const nuevoCliente = await this.clienteService.agregarCliente(cliente);
-
-      if (!nuevoCliente) {
-        throw new Error('El cliente no pudo ser registrado.');
-      }
-
-      const carrito = app.carritoController.carrito;
-      const factura = await this.facturaService.generarFactura(nuevoCliente, carrito);
-
-      if (!factura) {
-        throw new Error('La factura no pudo ser generada.');
-      }
-
-      await this.mostrarFactura(factura);
-      carrito.vaciarCarrito();
-      app.tiendaController.actualizarContadorCarrito();
-      this.checkoutSection.classList.add('hidden');
-      this.limpiarFormularioCliente();
-
-    } catch (error) {
-      console.error('Error durante el checkout:', error);
-      alert(`Error al confirmar la compra: ${error.message}`);
-    }
+  if (!nombre || !telefono || !direccion) {
+    alert('Por favor, complete todos los campos del cliente.');
+    return;
   }
 
-  async mostrarFactura(factura) {
-    if (!factura) return;
+  try {
+    const cliente = new Cliente(nombre, telefono, direccion);
+    const nuevoCliente = await this.clienteService.agregarCliente(cliente);
 
-    const fecha = new Date(factura.fecha).toLocaleDateString();
-
-    let detallesHTML = '';
-    for (const detalle of factura.detalles) {
-      detallesHTML += `
-                <tr>
-                 <td style="width: 50px; height: 50px; border-radius: 50%"><img src="${item.imagen}" alt="${item.nombre}"></td>
-                
-                  <td>${detalle.nombre}</td>
-                <td>${detalle.cantidad}</td>
-                  <td>$${detalle.precio.toFixed(2)}</td>
-                 <td>$${detalle.subtotal.toFixed(2)}</td>
-              </tr>
-            `;
+    if (!nuevoCliente) {
+      throw new Error('El cliente no pudo ser registrado.');
     }
 
-    const cliente = await this.clienteService.obtenerClientePorId(factura.cliente);
-    if (!cliente) {
-      console.error("No se pudo encontrar el cliente para la factura ID:", factura.cliente);
-      this.invoiceDetails.innerHTML = "<p>Cliente no encontrado.</p>"; // Mejor mensaje.
-      this.invoiceSection.classList.remove('hidden');
-      return;
+    const carrito = app.carritoController.carrito;
+    // Create invoice with cart items
+    const factura = await this.facturaService.generarFactura(nuevoCliente, carrito);
+
+    if (!factura) {
+      throw new Error('La factura no pudo ser generada.');
     }
 
-    this.invoiceDetails.innerHTML = `
-        <div class="invoice-header">
-               <div>
-                 <div class="invoice-id">Factura #${factura.id}</div>
-               <div class="invoice-date">Fecha: ${fecha}</div>
-              </div>
-          </div>
-            <div class="invoice-client">
-                <h3>Cliente</h3>
-               <p><strong>Nombre:</strong> ${cliente.nombre}</p>
-              <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
-               <p><strong>Dirección:</strong> ${cliente.direccion}</p>
-            </div>
-         <h3>Detalle de Compra</h3>
-            <table>
-            <thead>
-                 <tr>
-                  <th>Producto</th>
-                    <th>Cantidad</th>
-                   <th>Precio Unitario</th>
-                    <th>Subtotal</th>
-                </tr>
-             </thead>
-             <tbody>
-                 ${detallesHTML}  <!-- Aquí se insertan las filas -->
-             </tbody>
-         </table>
-         <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
-      `;
+    // Hide checkout modal
+    this.ocultarCheckoutModal();
+    
+    // Show invoice
+    await this.mostrarFactura(factura);
+    
+    // Clear cart and update UI
+    carrito.vaciarCarrito();
+    app.tiendaController.actualizarContadorCarrito();
+    this.limpiarFormularioCliente();
 
-    this.invoiceSection.classList.remove('hidden');
+  } catch (error) {
+    console.error('Error durante el checkout:', error);
+    alert(`Error al confirmar la compra: ${error.message}`);
   }
+}
 
   async cerrarFactura() {
     this.invoiceSection.classList.add('hidden');

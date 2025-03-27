@@ -92,72 +92,74 @@
   </div>
 </div>
 
+
 <!-- Sección Checkout Mejorada (Integrated from your styles) -->
+<div id="checkoutOverlay" class="checkout-overlay hidden"></div>
 <div id="checkoutSection" class="checkout-container hidden">
   <h2 class="checkout-main-title">Completar Compra</h2>
-
-  <div class="checkout-card client-data-section">
-    <h3 class="checkout-subtitle">Datos del Cliente</h3>
-    <form id="checkoutClientForm">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="checkoutNombre">Nombre Completo *</label>
-          <input type="text" id="checkoutNombre" placeholder="Ingrese su nombre completo" required>
+  <div class="checkout-content">
+    <!-- Datos del Cliente -->
+    <div class="checkout-card client-data-section">
+      <h3 class="checkout-subtitle">Datos del Cliente</h3>
+      <form id="checkoutClientForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="checkoutNombre">Nombre Completo *</label>
+            <input type="text" id="checkoutNombre" placeholder="Ingrese su nombre completo" required>
+          </div>
+          <div class="form-group">
+            <label for="checkoutTelefono">Teléfono *</label>
+            <input type="tel" id="checkoutTelefono" placeholder="Ingrese su número de teléfono" maxlength="10" required>
+          </div>
         </div>
         <div class="form-group">
-          <label for="checkoutTelefono">Teléfono *</label>
-          <input type="tel" id="checkoutTelefono" placeholder="Ingrese su número de teléfono" maxlength="10" required>
+          <label for="checkoutDireccion">Dirección de Entrega *</label>
+          <input type="text" id="checkoutDireccion" placeholder="Ingrese su dirección completa" required>
+        </div>
+      </form>
+    </div>
+    <!-- Resumen del Pedido / Factura -->
+    <div class="checkout-card order-summary-section" id="checkoutCartSection">
+      <h3 class="checkout-subtitle">Resumen del Pedido</h3>
+      <div class="table-responsive-container">
+        <table id="checkoutCartTable" class="checkout-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-right">Precio Unit.</th>
+              <th class="text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Los ítems se generarán dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+      <div class="checkout-summary" id="checkoutSummary">
+        <div class="summary-item">
+          <span>Subtotal:</span>
+          <span id="checkoutSubtotalValue">$0.00</span>
+        </div>
+        <div class="summary-item">
+          <span>Envío:</span>
+          <span id="checkoutShippingValue">$0.00</span>
+        </div>
+        <hr class="summary-divider">
+        <div class="summary-item total-item">
+          <span>Total General:</span>
+          <span id="checkoutTotal">$0.00</span>
         </div>
       </div>
-      <div class="form-group">
-        <label for="checkoutDireccion">Dirección de Entrega *</label>
-        <input type="text" id="checkoutDireccion" placeholder="Ingrese su dirección completa" required>
-      </div>
-    </form>
+    </div>
   </div>
-
-  <div class="checkout-card order-summary-section" id="checkoutCartSection">
-    <h3 class="checkout-subtitle">Resumen del Pedido</h3>
-    <div class="table-responsive-container">
-      <table id="checkoutCartTable" class="checkout-table">
-        <thead>
-        <tr>
-          <th>Producto</th>
-          <th class="text-center">Cantidad</th>
-          <th class="text-right">Precio Unit.</th>
-          <th class="text-right">Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="checkout-summary">
-      <div class="summary-item">
-        <span>Subtotal:</span>
-        <span id="checkoutSubtotalValue">$0.00</span>
-      </div>
-      <div class="summary-item">
-        <span>Envío:</span>
-        <span id="checkoutShippingValue">$0.00</span>
-      </div>
-      <hr class="summary-divider">
-      <div class="summary-item total-item">
-        <span>Total General:</span>
-        <span id="checkoutTotal">$0.00</span>
-      </div>
-    </div>
-
-    <div class="cart-actions checkout-actions">
-      <button id="btnCancelCheckout" class="btn btn-outline-danger btn-icon ">
-        <i class="fas fa-times-circle"></i> Cancelar
-      </button>
-      <button id="btnConfirmCheckout" class="btn btn-success btn-icon ">
-        <!--        <i class="fab fa-whatsapp"></i> Enviar Pedido por WhatsApp-->
-        Confirmar Compra <i class="fas fa-check-circle fa-lg"></i>
-      </button>
-    </div>
+  <div class="cart-actions checkout-actions">
+    <button id="btnCancelCheckout" class="btn btn-outline-danger btn-icon">
+      <i class="fas fa-times-circle"></i> Cancelar
+    </button>
+    <button id="btnConfirmCheckout" class="btn btn-success btn-icon">
+      Confirmar Compra <i class="fas fa-check-circle fa-lg"></i>
+    </button>
   </div>
 </div>
 
