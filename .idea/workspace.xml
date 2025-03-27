@@ -6,12 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Carrito.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Carrito.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prueva.html" beforeDir="false" afterPath="$PROJECT_DIR$/prueva.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +84,7 @@
       <workItem from="1742700674648" duration="26430000" />
       <workItem from="1742793724666" duration="6966000" />
       <workItem from="1742825808520" duration="28510000" />
-      <workItem from="1743052057223" duration="4333000" />
+      <workItem from="1743052057223" duration="7220000" />
     </task>
     <servers />
   </component>

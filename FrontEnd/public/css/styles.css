@@ -419,15 +419,21 @@ h3 {
     color: var(--medium-gray);
 }
 
+/*.table-responsive-container {*/
+/*    overflow-x: auto; !* Enable horizontal scroll on small screens *!*/
+/*    margin-bottom: var(--spacing-md);*/
+/*}*/
 .table-responsive-container {
-    overflow-x: auto; /* Enable horizontal scroll on small screens */
-    margin-bottom: var(--spacing-md);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #cartTable {
+    margin: auto;
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: var(--spacing-lg);
+    /*margin-bottom: var(--spacing-lg);*/
     font-size: 0.95rem;
 }
 
@@ -437,13 +443,17 @@ h3 {
     text-align: left;
     padding: 12px;
     border-bottom: 2px solid var(--border);
+    /*text-align: center;*/
+    vertical-align: middle;
     color: var(--secondary); /* Use secondary color */
 }
 
 #cartTable td {
+    text-align: center;
+    vertical-align: middle;
     padding: 12px;
     border-bottom: 1px solid var(--border);
-    vertical-align: middle;
+    /*vertical-align: middle;*/
 }
 
 #cartTable tr:last-child td {
@@ -453,9 +463,9 @@ h3 {
 .cart-total {
     text-align: right;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     margin: var(--spacing-md) 0;
-    color: var(--primary);
+    color: limegreen;
 }
 
 .cart-actions {
@@ -1065,7 +1075,7 @@ footer p {
     }
 
     h3, .checkout-subtitle {
-        font-size: 1.3rem;
+        font-size: 2rem;
     }
 
     .products {
@@ -1250,4 +1260,76 @@ body.modal-open {
     font-size: 0.7em;
     font-weight: bold;
     border: 1px solid white;
+}
+
+/* ...existing code... */
+
+/* Agrega estas nuevas reglas al final para que la cabecera y el pie del modal se mantengan fijos */
+#cartTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#cartTable thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#cartTable tbody {
+    display: block;
+    max-height: 300px; /* Ajusta el alto máximo según la altura aproximada de 6 filas */
+    overflow-y: auto;
+    width: 100%;
+}
+
+#cartTable tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+
+.cart-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    background-color: var(--light);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cart-card-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-right: var(--spacing-md);
+}
+
+.cart-card-details {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.cart-card-product {
+    font-weight: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+.cart-card-info {
+    margin-bottom: 4px;
+}
+
+/* Contenedor con scroll para items del carrito (visible 3 tarjetas aprox.) */
+.cart-items-wrapper {
+    max-height: 475px; /* Ajusta este valor según la altura aproximada de 3 tarjetas */
+    overflow-y: auto;
+    padding-right: 10px; /* Para evitar que la barra de scroll encime el contenido */
 }

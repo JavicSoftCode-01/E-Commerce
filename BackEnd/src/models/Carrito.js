@@ -18,6 +18,7 @@ class Carrito {
             //  CREAR UNA COPIA de los datos relevantes del producto:
             const newItem = {
                 productoId: producto.id,
+                imagen: producto.imagen,
                 nombre: producto.nombre,
                 precio: producto.pvp, //  Usar el precio de venta (pvp)
                 cantidad: cantidad,
