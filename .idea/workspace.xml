@@ -7,9 +7,10 @@
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Carrito.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Carrito.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/TiendaController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/TiendaController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +50,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -85,6 +86,7 @@
       <workItem from="1742793724666" duration="6966000" />
       <workItem from="1742825808520" duration="28510000" />
       <workItem from="1743052057223" duration="7220000" />
+      <workItem from="1743089413186" duration="965000" />
     </task>
     <servers />
   </component>

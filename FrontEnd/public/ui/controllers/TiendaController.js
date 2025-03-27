@@ -17,30 +17,29 @@ class TiendaController {
   async handleAddToCartClick(event) {
     const addToCartButton = event.target.closest('.add-to-cart');
     if (!addToCartButton) return;
-
+  
     const productoId = parseInt(addToCartButton.dataset.id);
-
-    //  AÑADIR ESTAS COMPROBACIONES:
+  
     if (isNaN(productoId)) {
       console.error("handleAddToCartClick: productoId es NaN!", event.target);
-      alert("Error: ID de producto inválido."); // Mostrar al usuario
-      return; //  ¡Importante! Salir si el ID no es válido.
+      alert("Error: ID de producto inválido.");
+      return;
     }
-
+  
     if (!this.productoService) {
       console.error("handleAddToCartClick: this.productoService es undefined!");
-      alert("Error: Servicio de productos no disponible."); // Mostrar al usuario
-      return;  // ¡Importante! Salir si productoService no está definido.
+      alert("Error: Servicio de productos no disponible.");
+      return;
     }
-
-
+  
     try {
       const producto = await this.productoService.obtenerProductoPorId(productoId);
-
+  
       if (producto && producto.stock > 0) {
-        app.carritoController.carrito.agregarItemAlCarrito(producto);
+        // Se cambia la llamada de agregarItemAlCarrito a agregarItem
+        app.carritoController.carrito.agregarItem(producto);
         this.actualizarContadorCarrito();
-
+  
         addToCartButton.textContent = "✓ Agregado";
         setTimeout(() => {
           addToCartButton.textContent = "Agregar al Carrito";
@@ -175,8 +174,10 @@ class TiendaController {
   }
 
   actualizarContadorCarrito() {
-    this.cartCount.textContent = app.carritoController.carrito.obtenerCantidadTotalItems();
-  }
+    const cartCountEl = document.getElementById('cartCount');
+    // Cambiar obtenerCantidadItems() por obtenerCantidadTotalItems()
+    cartCountEl.textContent = app.carritoController.carrito.obtenerCantidadTotalItems();
+}
 
   async mostrarTienda() {
     document.getElementById('admin').classList.add('hidden');

@@ -94,10 +94,12 @@ export class Validar {
 
     // Expresión regular:
     // - Permite letras mayúsculas y minúsculas, incluidas acentuadas y la Ñ/ñ
-    // - Permite números y espacios intermedios (sin permitir espacios al inicio ni final)
-    const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9](?:[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9])?$/;
+    // - Permite números, espacios, comas (,) y puntos (.)
+    // - El primer carácter debe ser letra o número.
+    // - El último carácter puede ser letra, número o punto.
+    const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9](?:[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s,\.]*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\.])?$/;
     if (!regex.test(nombreFormateado)) {
-      console.error('El nombre no es válido. Solo se permiten letras (incluyendo acentos y la Ñ), números y espacios, sin espacios al inicio ni final.');
+      console.error('El nombre no es válido. Solo se permiten letras (incluyendo acentos y la Ñ), números, espacios, comas y puntos, sin espacios, comas o puntos al inicio.');
       return null;
     }
 
@@ -480,20 +482,21 @@ export class Validar {
    */
   static direccionBP(direccion) {
     if (!direccion || direccion.trim() === '') {
-      console.error('La direccion no puede ser vacia.')
-      return null
+      console.error('La dirección no puede estar vacía.');
+      return null;
     }
-    const direccionFormateada = direccion.trim()
+    const direccionFormateada = direccion.trim();
 
     if (direccionFormateada.length < 5 || direccionFormateada.length > 100) {
-      console.error('La direccion debe tener entre 5 y 100 caracteres.');
-      return null
+      console.error('La dirección debe tener entre 5 y 100 caracteres.');
+      return null;
     }
-    //Permite letras, números, espacios, #, -, y coma. Empieza/termina con letra/número.
-    const regex = /^[a-zA-Z0-9][a-zA-Z0-9\s#,-]*[a-zA-Z0-9]$/;
+    // Permite letras (incluyendo acentuadas y Ñ/ñ), números, espacios, #, - y ,.
+    // Debe iniciar y terminar con letra o número.
+    const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9][A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s#,-]*[A-Za-zÁÉÍÓÚáéíóúÑñ0-9]$/;
 
     if (!regex.test(direccionFormateada)) {
-      console.error('Dirección no válida. Solo letras, números, espacios, #, -, y comas. Debe empezar/terminar con letra/número.');
+      console.error('Dirección no válida. Solo se permiten letras (incluyendo acentos y Ñ), números, espacios, #, - y comas. Debe iniciar y terminar con letra o número.');
       return null;
     }
 

@@ -19,7 +19,7 @@ class CarritoController {
 
     this.logMissingElements();
 
-    this.carrito = new Carrito();
+   // this.carrito = new Carrito();
 
     this.setupEventListeners();
   }
@@ -235,37 +235,45 @@ class CarritoController {
     this.carrito.items.forEach(item => {
       const card = document.createElement('div');
       card.classList.add('cart-card');
-
+    
       // Imagen del producto.
       const img = document.createElement('img');
       img.src = item.imagen;
       img.alt = item.nombre;
       img.classList.add('cart-card-image');
       card.appendChild(img);
-
+    
       // Contenedor de detalles.
       const details = document.createElement('div');
       details.classList.add('cart-card-details');
       details.innerHTML = `
-      <div class="cart-card-product">${item.nombre}</div>
-      <div class="cart-card-info">Cantidad: ${item.cantidad}</div>
-      <div class="cart-card-info">Precio Unitario: $${item.precio.toFixed(2)}</div>
-      <div class="cart-card-info">Subtotal: $${item.subtotal.toFixed(2)}</div>
-    `;
+        <div class="cart-card-product">${item.nombre}</div>
+        <div class="cart-card-info">Cantidad: ${item.cantidad}</div>
+        <div class="cart-card-info">Precio Unitario: $${item.precio.toFixed(2)}</div>
+        <div class="cart-card-info">Subtotal: $${item.subtotal.toFixed(2)}</div>
+      `;
       card.appendChild(details);
-
-      // Botón para eliminar el producto.
+    
+      // Botón para eliminar el producto con animación.
       const removeBtn = document.createElement('button');
       removeBtn.classList.add('action-button', 'delete-button', 'remove-item');
       removeBtn.textContent = 'X';
       removeBtn.setAttribute('data-id', item.productoId);
       removeBtn.addEventListener('click', () => {
-        this.carrito.eliminarItemDelCarrito(item.productoId);
-        this.actualizarCarrito();
-        app.tiendaController.actualizarContadorCarrito();
+        // Aplica la animación agregando la clase 'fade-out'
+        const cardElement = removeBtn.closest('.cart-card');
+        if (cardElement) {
+          cardElement.classList.add('fade-out');
+          // Una vez terminada la transición, elimina el ítem y actualiza la IU
+          cardElement.addEventListener('transitionend', () => {
+            this.carrito.eliminarItemDelCarrito(item.productoId);
+            this.actualizarCarrito();
+            app.tiendaController.actualizarContadorCarrito();
+          }, { once: true });
+        }
       });
       card.appendChild(removeBtn);
-
+    
       itemsWrapper.appendChild(card);
     });
 
@@ -286,10 +294,28 @@ class CarritoController {
 
   vaciarCarrito() {
     if (confirm("¿Estás seguro de vaciar el carrito?")) {
-      this.carrito.vaciarCarrito(); //  método en *esta* instancia.
-      this.actualizarCarrito();    // Actualiza *esta* vista.
-      // Actualizar *también* el contador en la tienda:
-      app.tiendaController.actualizarContadorCarrito(); // Llama al método *correcto*.
+      // Obtén todos los elementos de tarjeta
+      const cards = this.cartSection.querySelectorAll('.cart-card');
+      let transitionCount = cards.length;
+      if(transitionCount === 0) {
+        // Si no hay tarjetas, simplemente vacía
+        this.carrito.vaciarCarrito();
+        this.actualizarCarrito();
+        app.tiendaController.actualizarContadorCarrito();
+        return;
+      }
+      cards.forEach(card => {
+        card.classList.add('fade-out');
+        card.addEventListener('transitionend', () => {
+          transitionCount--;
+          if (transitionCount === 0) {
+            // Una vez terminada la animación de todas las tarjetas
+            this.carrito.vaciarCarrito();
+            this.actualizarCarrito();
+            app.tiendaController.actualizarContadorCarrito();
+          }
+        }, { once: true });
+      });
     }
   }
 
@@ -305,34 +331,20 @@ class CarritoController {
   }
 
   mostrarCarrito() {
-    // Add comprehensive error checking
-    console.log('Intentando mostrar carrito');
-
-    if (!this.cartSection) {
-      console.error('cartSection element is null');
-      return;
+    // Remover la clase "hidden" del contenedor de items del carrito
+    const cartSection = document.getElementById('cartSection');
+    if (cartSection) {
+        cartSection.classList.remove('hidden');
     }
-
-    if (!this.cartModal) {
-      console.error('cartModal element is null');
-      return;
-    }
-    //
-    // // Remove 'hidden' class from both cart section and cart modal
-    // this.cartSection.classList.remove('hidden');
-    // this.cartModal.classList.remove('hidden');
-
-    // Quitar la clase "hidden" para que el modal sea visible
+    
+    // Mostrar el modal del carrito
     this.cartModal.classList.remove('hidden');
-    // Utilizar un pequeño delay para iniciar la transición
     setTimeout(() => {
       this.cartModal.classList.add('show');
-      // Bloquea el scroll del body
       document.body.classList.add('modal-open');
     }, 10);
-
     this.actualizarCarrito();
-  }
+}
 
   // ocultarCarrito() {
   //   this.cartSection.classList.add('hidden'); // Metodo Ocultar

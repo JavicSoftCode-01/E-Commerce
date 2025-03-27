@@ -1205,10 +1205,15 @@ body.modal-open {
 
 /* Botón de cerrar */
 .modal-close {
-    background: none;
+    background: red;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    color: white;
     border: none;
-    font-size: 24px;
+    font-size: 30px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 /* Cuerpo del modal */
@@ -1329,7 +1334,12 @@ body.modal-open {
 
 /* Contenedor con scroll para items del carrito (visible 3 tarjetas aprox.) */
 .cart-items-wrapper {
-    max-height: 475px; /* Ajusta este valor según la altura aproximada de 3 tarjetas */
+    max-height: 465px; /* Ajusta este valor según la altura aproximada de 3 tarjetas */
     overflow-y: auto;
     padding-right: 10px; /* Para evitar que la barra de scroll encime el contenido */
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.7s ease-out;
 }
