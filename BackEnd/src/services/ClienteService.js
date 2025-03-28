@@ -9,6 +9,7 @@ class ClienteService extends IndexedDB {
     this.idGeneratorService = idGeneratorService; //  Guarda la referencia
   }
 
+
   async agregarCliente(clienteData) {
     try {
         // Validate data
@@ -24,24 +25,22 @@ class ClienteService extends IndexedDB {
         // Create a Cliente instance first
         const nuevoCliente = new Cliente(nombre, telefono, direccion);
         
-        // Get the next ID
-        const nextId = await this.idGeneratorService.getNextId('clientes');
-        nuevoCliente.id = nextId;
-
-        // Convert to a plain object for storage
-        const clienteToStore = {
-            id: nuevoCliente.id,
-            nombre: nuevoCliente.nombre,
-            telefono: nuevoCliente.telefono,
-            direccion: nuevoCliente.direccion
-        };
-
-        // Add to database using parent class method
-        const clienteId = await super.add(clienteToStore);
+        // Obtener todos los clientes existentes para encontrar el ID más alto
+        const clientes = await this.obtenerTodosLosClientes();
+        const lastId = clientes.length > 0 
+            ? Math.max(...clientes.map(c => c.id))
+            : 0;
+        const nextId = lastId + 1;
         
-        if (!clienteId) {
-            console.error('Failed to add cliente to database');
-            return null;
+        // Asignar el nuevo ID
+        nuevoCliente.id = nextId;
+        
+        // Guardar el cliente
+        await super.add(nuevoCliente);
+        
+        // Actualizar el último ID usado
+        if (this.idGeneratorService) {
+            await this.idGeneratorService.setLastId('clientes', nextId);
         }
 
         console.log('Cliente agregado exitosamente:', nuevoCliente);
@@ -52,6 +51,8 @@ class ClienteService extends IndexedDB {
         return null;
     }
 }
+
+
     async actualizarCliente(id, clienteActualizado) {
         try {
             const nombreValidado = await Validar.nombreBP(clienteActualizado.nombre);

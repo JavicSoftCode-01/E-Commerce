@@ -12,27 +12,36 @@ class CategoriaService extends IndexedDB {
         super('mydb', 'categorias');
     }
 
-    async agregarCategoria(categoria) {
-        try {
-            // 1. Validación
-            const nombreValidado = await Validar.nombreBM(categoria.nombre, this);
-            if (!nombreValidado) {
-                return null; // La validación falló.
-            }
-
-            // 2. Creación del objeto
-            const nuevaCategoria = new Categoria(nombreValidado);
-
-            // 3. Agregar a IndexedDB (sin asignar ID manualmente)
-            const newId = await super.add(nuevaCategoria); // IndexedDB asigna el ID.
-            console.info(`Categoría agregada con ID: ${newId}`);  // Usar el ID de IndexedDB
-            return newId; // Retornar el ID generado por IndexedDB
-
-        } catch (error) {
-            console.error('Error al agregar categoría:', error);
-            return null; // Manejo de errores
+ async agregarCategoria(categoria) {
+    try {
+        // 1. Validación
+        const nombreValidado = await Validar.nombreBM(categoria.nombre, this);
+        if (!nombreValidado) {
+            return null; // La validación falló.
         }
+
+        // 2. Obtener el último ID y generar el siguiente
+        const lastId = await this.getAll()
+            .then(categorias => {
+                if (categorias.length === 0) return 0;
+                return Math.max(...categorias.map(c => c.id));
+            });
+        const nextId = lastId + 1;
+
+        // 3. Creación del objeto con ID
+        const nuevaCategoria = new Categoria(nombreValidado);
+        nuevaCategoria.id = nextId; // Asignar el ID antes de guardar
+
+        // 4. Agregar a IndexedDB
+        await super.add(nuevaCategoria);
+        console.info(`Categoría agregada con ID: ${nextId}`);
+        return nextId;
+
+    } catch (error) {
+        console.error('Error al agregar categoría:', error);
+        return null;
     }
+}
 
     async actualizarCategoria(id, categoriaActualizada) {
       try {

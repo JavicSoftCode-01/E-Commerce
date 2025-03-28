@@ -18,22 +18,36 @@ class ProveedorService extends IndexedDB {
    * @returns {Promise<number|null>} - El ID del proveedor agregado o null si falla.
    */
   async agregarProveedor(proveedor) {
-    try {
-      const nombreValidado = await Validar.nombreBP(proveedor.nombre);
-      const direccionValidada = Validar.direccionBP(proveedor.direccion);
-      const telefonoValidado = await Validar.telefonoBP(proveedor.telefono, this);
-      if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-        return null; // Los errores de validación se manejan en los métodos de Validar.
+      try {
+          // 1. Validación
+          const nombreValidado = await Validar.nombreBP(proveedor.nombre);
+          const direccionValidada = Validar.direccionBP(proveedor.direccion);
+          const telefonoValidado = await Validar.telefonoBP(proveedor.telefono, this);
+          if (!nombreValidado || !direccionValidada || !telefonoValidado) {
+              return null; // Los errores de validación se manejan en los métodos de Validar.
+          }
+  
+          // 2. Obtener el último ID y generar el siguiente
+          const lastId = await this.getAll()
+              .then(proveedores => {
+                  if (proveedores.length === 0) return 0;
+                  return Math.max(...proveedores.map(p => p.id));
+              });
+          const nextId = lastId + 1;
+  
+          // 3. Crear instancia de Proveedor con ID
+          const nuevoProveedor = new Proveedor(nombreValidado, telefonoValidado, direccionValidada);
+          nuevoProveedor.id = nextId; // Asignar el ID antes de guardar
+  
+          // 4. Agregar a IndexedDB
+          await super.add(nuevoProveedor);
+          console.info(`Proveedor agregado con ID: ${nextId}`);
+          return nextId;
+  
+      } catch (error) {
+          console.error('Error al agregar proveedor:', error);
+          return null;
       }
-      // Crear instancia de Proveedor.
-      const nuevoProveedor = new Proveedor(nombreValidado, telefonoValidado, direccionValidada);
-      nuevoProveedor.id = await super.add(nuevoProveedor);  // Guarda instancia.
-      console.info(`Proveedor agregado con ID: ${nuevoProveedor.id}`);
-      return nuevoProveedor.id;
-    } catch (error) {
-      console.error('Error al agregar proveedor:', error);
-      return null;
-    }
   }
 
   /**

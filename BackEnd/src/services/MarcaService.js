@@ -18,19 +18,34 @@ class MarcaService extends IndexedDB {
    * @returns {Promise<number|null>} - El ID de la marca agregada o null si falla.
    */
   async agregarMarca(marca) {
-    try {
-      const nombreValidado = await Validar.nombreBM(marca.nombre, this);
-      if (!nombreValidado) {
-        return null; // Ya se registró el error en Validar.nombreBM
+      try {
+          // 1. Validación del nombre
+          const nombreValidado = await Validar.nombreBM(marca.nombre, this);
+          if (!nombreValidado) {
+              return null; // Ya se registró el error en Validar.nombreBM
+          }
+  
+          // 2. Obtener el último ID y generar el siguiente
+          const lastId = await this.getAll()
+              .then(marcas => {
+                  if (marcas.length === 0) return 0;
+                  return Math.max(...marcas.map(m => m.id));
+              });
+          const nextId = lastId + 1;
+  
+          // 3. Crear instancia con ID
+          const nuevaMarca = new Marca(nombreValidado);
+          nuevaMarca.id = nextId; // Asignar el ID antes de guardar
+  
+          // 4. Agregar a IndexedDB
+          await super.add(nuevaMarca);
+          console.info(`Marca agregada con ID: ${nextId}`);
+          return nextId;
+  
+      } catch (error) {
+          console.error('Error al agregar marca:', error);
+          return null;
       }
-      const nuevaMarca = new Marca(nombreValidado); // Crea una instancia de la clase Marca.
-      nuevaMarca.id = await super.add(nuevaMarca);
-      console.info(`Marca agregada con ID: ${nuevaMarca.id}`);
-      return nuevaMarca.id;
-    } catch (error) {
-      console.error('Error al agregar marca:', error);
-      return null;
-    }
   }
 
   /**

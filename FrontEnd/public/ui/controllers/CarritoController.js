@@ -12,7 +12,7 @@ class CarritoController {
     this.cartModal = document.getElementById('cartModal');
     this.cartTable = document.getElementById('cartTable');
     this.cartTotal = document.getElementById('cartTotal');
-    this.emptyCart = document.getElementById('emptyCart');
+  //  this.emptyCart = document.getElementById('emptyCart');
     this.cartActions = document.getElementById('cartActions');
     this.btnCheckout = document.getElementById('btnCheckout');
     this.btnEmptyCart = document.getElementById('btnEmptyCart');
@@ -30,7 +30,7 @@ class CarritoController {
       {name: 'cartModal', element: this.cartModal},
       {name: 'cartTable', element: this.cartTable},
       {name: 'cartTotal', element: this.cartTotal},
-      {name: 'emptyCart', element: this.emptyCart},
+     // {name: 'emptyCart', element: this.emptyCart},
       {name: 'cartActions', element: this.cartActions},
       {name: 'btnCheckout', element: this.btnCheckout},
       {name: 'btnEmptyCart', element: this.btnEmptyCart}
