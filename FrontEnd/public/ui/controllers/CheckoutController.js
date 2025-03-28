@@ -53,102 +53,6 @@ class CheckoutController {
   }
 
 
-  async mostrarFactura(factura) {
-    try {
-      if (!factura) {
-        console.error('No se recibió factura para mostrar');
-        return;
-      }
-
-      console.log('Mostrando factura:', factura); // Debug
-
-      // Formatear la fecha
-      const fecha = new Date(factura.fecha).toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-
-      // Generar el HTML de los detalles de productos
-      const detallesHTML = factura.detalles.map(detalle => `
-            <tr>
-                <td class="producto-info">
-                    ${detalle.imagen ? `<img src="${detalle.imagen}" alt="${detalle.nombre}" class="producto-mini-img">` : ''}
-                    <span>${detalle.nombre}</span>
-                </td>
-                <td class="text-center">${detalle.cantidad}</td>
-                <td class="text-right">$${detalle.precio.toFixed(2)}</td>
-                <td class="text-right">$${(detalle.cantidad * detalle.precio).toFixed(2)}</td>
-            </tr>
-        `).join('');
-
-      // Construir el HTML completo de la factura
-      const facturaHTML = `
-            <div class="invoice-header">
-                <div class="company-info">
-                    <h2>LUNAIRE</h2>
-                    <p>Factura de Venta</p>
-                </div>
-                <div class="invoice-info">
-                    <p><strong>Factura N°:</strong> ${factura.id}</p>
-                    <p><strong>Fecha:</strong> ${fecha}</p>
-                </div>
-            </div>
-
-            <div class="customer-info">
-                <h3>Cliente</h3>
-                <p><strong>Nombre:</strong> ${factura.clienteNombre}</p>
-            </div>
-
-            <div class="invoice-details">
-                <table class="invoice-table">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th class="text-center">Cantidad</th>
-                            <th class="text-right">Precio Unit.</th>
-                            <th class="text-right">Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${detallesHTML}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                            <td class="text-right"><strong>$${factura.total.toFixed(2)}</strong></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div class="invoice-footer">
-                <p>¡Gracias por su compra!</p>
-            </div>
-        `;
-
-      // Actualizar el contenido del modal
-      const invoiceDetails = document.getElementById('invoiceDetails');
-      if (!invoiceDetails) {
-        throw new Error('No se encontró el elemento invoiceDetails');
-      }
-      invoiceDetails.innerHTML = facturaHTML;
-
-      // Mostrar el modal
-      const invoiceSection = document.getElementById('invoiceSection');
-      if (!invoiceSection) {
-        throw new Error('No se encontró el elemento invoiceSection');
-      }
-      invoiceSection.classList.remove('hidden');
-
-    } catch (error) {
-      console.error('Error al mostrar la factura:', error);
-      alert('Error al mostrar la factura: ' + error.message);
-    }
-  }
-
   setupEventListeners() {
     this.btnCancelCheckout.addEventListener('click', () => {
       this.ocultarCheckoutModal();
@@ -161,9 +65,15 @@ class CheckoutController {
       app.carritoController.mostrarCarrito();
     });
   
+    this.btnCloseInvoice.addEventListener('click', () => {
+      this.cerrarFactura();
+      if (document.getElementById('admin').classList.contains('show')) {
+        document.getElementById('admin').classList.remove('hidden');
+      }
+    });
  
     this.btnConfirmCheckout.addEventListener('click', () => this.confirmarCompra());
-    this.btnCloseInvoice.addEventListener('click', () => this.cerrarFactura());
+    
   }
 
   mostrarCheckoutModal() {
@@ -272,10 +182,86 @@ class CheckoutController {
     }
   }
 
-  async cerrarFactura() {
-    this.invoiceSection.classList.add('hidden');
-    await app.tiendaController.cargarProductos();
+async mostrarFactura(factura) {
+  try {
+    const invoiceModal = document.getElementById('invoiceModal');
+    const invoiceDetails = document.getElementById('invoiceDetails');
+
+    // Generate invoice HTML
+    const detallesHTML = factura.items.map(item => `
+      <tr>
+        <td>${item.nombre}</td>
+        <td class="text-center">${item.cantidad}</td>
+        <td class="text-right">$${item.precio.toFixed(2)}</td>
+        <td class="text-right">$${item.subtotal.toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    const facturaHTML = `
+      <div class="invoice-content">
+        <div class="invoice-header">
+          <h2>Factura #${factura.id}</h2>
+          <p>Fecha: ${new Date(factura.fecha).toLocaleDateString()}</p>
+        </div>
+        
+        <div class="invoice-client">
+          <h3>Cliente</h3>
+          <p>Nombre: ${factura.cliente.nombre}</p>
+          <p>Teléfono: ${factura.cliente.telefono}</p>
+          <p>Dirección: ${factura.cliente.direccion}</p>
+        </div>
+        
+        <div class="invoice-details">
+          <table class="invoice-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-right">Precio Unit.</th>
+                <th class="text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${detallesHTML}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                <td class="text-right"><strong>$${factura.total.toFixed(2)}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    `;
+
+    invoiceDetails.innerHTML = facturaHTML;
+
+    // Show modal with animation
+    invoiceModal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      invoiceModal.classList.add('show');
+      document.body.classList.add('modal-open');
+    });
+
+  } catch (error) {
+    console.error('Error al mostrar la factura:', error);
+    alert('Error al mostrar la factura: ' + error.message);
   }
+}
+
+cerrarFactura() {
+  const invoiceModal = document.getElementById('invoiceModal');
+  
+  // Start closing animation
+  invoiceModal.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  
+  // Wait for animation to finish before hiding
+  setTimeout(() => {
+    invoiceModal.classList.add('hidden');
+  }, 300); // Match CSS transition duration
+}
 }
 
 export {CheckoutController};

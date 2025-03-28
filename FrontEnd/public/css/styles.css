@@ -1538,3 +1538,71 @@ body.modal-open {
 
 
 
+
+
+
+
+
+
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .invoice-table th,
+  .invoice-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .invoice-table th {
+    background-color: #f5f5f5;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  .invoice-content {
+    padding: 20px;
+  }
+  
+  .invoice-header {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .invoice-client {
+    margin-bottom: 30px;
+  }
+  
+  .invoice-details {
+    margin-bottom: 30px;
+  }
+  
+  /* Estilos para impresión */
+  @media print {
+    .modal-header,
+    .modal-footer,
+    .no-print {
+      display: none !important;
+    }
+  
+    .modal {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  
+    .modal-content {
+      box-shadow: none !important;
+    }
+  }

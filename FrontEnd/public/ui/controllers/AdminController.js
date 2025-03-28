@@ -1079,28 +1079,97 @@ async mostrarFactura(factura) {
 }
 
   setupVentasListeners() {
-    // Dentro de este <tbody>:  usar querySelectorAll Para *todos* botones
-    this.tablaVentas.querySelectorAll('.view-venta').forEach(button => { // querySelectorAll(... foreach ...
-      button.addEventListener('click', async (e) => { //   Listener al click, en: ( e )
-
-        const ventaId = parseInt(e.target.dataset.id);          // sacar id
-        // const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
-        const venta = await this.facturaService.obtenerFacturaPorId(ventaId);  // Metodo! de Service de facturacion, obtiene: venta por id
-        // invocar , Vista detallada, la funcion:
-        if (venta) {
-          // await this.mostrarFactura(venta);
-          await app.checkoutController.mostrarFactura(venta);
+    this.tablaVentas.querySelectorAll('.view-venta').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        try {
+          const ventaId = parseInt(e.target.dataset.id);
+          const venta = await this.facturaService.obtenerFacturaPorId(ventaId);
+          
+          if (!venta) {
+            throw new Error('No se encontró la factura');
+          }
+  
+          // Mostrar el modal de factura
+          const invoiceModal = document.getElementById('invoiceModal');
+          if (!invoiceModal) {
+            throw new Error('El modal de factura no existe en el DOM');
+          }
+  
+          // Obtener los datos del cliente
+          const cliente = await this.clienteService.obtenerClientePorId(venta.cliente);
+          if (!cliente) {
+            throw new Error('Cliente no encontrado');
+          }
+  
+          // Construir el detalle de los productos
+          const detallesHTML = venta.detalles.map(detalle => `
+            <tr>
+              <td>${detalle.nombre}</td>
+              <td class="text-center">${detalle.cantidad}</td>
+              <td class="text-right">$${detalle.precio.toFixed(2)}</td>
+              <td class="text-right">$${(detalle.precio * detalle.cantidad).toFixed(2)}</td>
+            </tr>
+          `).join('');
+  
+          // Formatear la fecha
+          const fecha = new Date(venta.fecha).toLocaleDateString();
+  
+          // Construir el HTML completo de la factura
+          const invoiceDetails = document.getElementById('invoiceDetails');
+          invoiceDetails.innerHTML = `
+            <div class="invoice-content">
+              <div class="invoice-header">
+                <h2>FACTURA</h2>
+                <div class="invoice-id">N° ${venta.id}</div>
+                <div class="invoice-date">Fecha: ${fecha}</div>
+              </div>
+              
+              <div class="invoice-client">
+                <h3>Datos del Cliente</h3>
+                <p><strong>Nombre:</strong> ${cliente.nombre}</p>
+                <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
+                <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+              </div>
+  
+              <div class="invoice-details">
+                <h3>Detalle de Productos</h3>
+                <table class="invoice-table">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th class="text-center">Cantidad</th>
+                      <th class="text-right">Precio Unit.</th>
+                      <th class="text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${detallesHTML}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                      <td class="text-right"><strong>$${venta.total.toFixed(2)}</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          `;
+  
+          // Mostrar el modal
+          invoiceModal.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            invoiceModal.classList.add('show');
+            document.body.classList.add('modal-open');
+          });
+  
+        } catch (error) {
+          console.error('Error al mostrar la factura:', error);
+          alert('Error al mostrar la factura: ' + error.message);
         }
-
-        document.getElementById('tienda').classList.add('hidden')
-        document.getElementById('admin').classList.add('hidden'); //  panel de ADMIN oculto:
-        //Ocultar ventana actual!
-        document.getElementById('invoiceSection').classList.remove('hidden'); // Muestra vista
-
-      }); // Listener, cada boton:
-    });  // foreach loop
-
-  }  //Metodo.
+      });
+    });
+  }
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.
