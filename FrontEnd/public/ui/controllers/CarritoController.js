@@ -7,7 +7,7 @@ class CarritoController {
   constructor() {
 
     this.carrito = new Carrito(); // Ahora, el carrito es parte de CarritoController, es independiente
-
+    this.sincronizarCarrito();
     this.cartSection = document.getElementById('cartSection');
     this.cartModal = document.getElementById('cartModal');
     this.cartTable = document.getElementById('cartTable');
@@ -18,11 +18,23 @@ class CarritoController {
     this.btnEmptyCart = document.getElementById('btnEmptyCart');
 
     this.logMissingElements();
+    
 
    // this.carrito = new Carrito();
 
     this.setupEventListeners();
   }
+  async sincronizarCarrito() {
+    try {
+        const actualizado = await this.carrito.sincronizarCarritoConProductos(app.productoService);
+        if (actualizado) {
+            console.log('Carrito sincronizado con datos actualizados');
+            this.actualizarCarrito();
+        }
+    } catch (error) {
+        console.error('Error al sincronizar carrito:', error);
+    }
+}
 
   logMissingElements() {
     const elements = [
@@ -245,13 +257,13 @@ class CarritoController {
     
       // Contenedor de detalles.
       const details = document.createElement('div');
-      details.classList.add('cart-card-details');
-      details.innerHTML = `
-        <div class="cart-card-product">${item.nombre}</div>
-        <div class="cart-card-info">Cantidad: ${item.cantidad}</div>
-        <div class="cart-card-info">Precio Unitario: $${item.precio.toFixed(2)}</div>
-        <div class="cart-card-info">Subtotal: $${item.subtotal.toFixed(2)}</div>
-      `;
+        details.classList.add('cart-card-details');
+        details.innerHTML = `
+            <div class="cart-card-product">${item.nombre}</div>
+            <div class="cart-card-info">Cantidad: ${item.cantidad}</div>
+            <div class="cart-card-info">Precio: $${item.precio.toFixed(2)}</div>
+            <div class="cart-card-info">Subtotal: $${item.subtotal.toFixed(2)}</div>
+        `;
       card.appendChild(details);
     
       // Botón para eliminar el producto con animación.
@@ -333,6 +345,19 @@ class CarritoController {
   }
 
   mostrarCarrito() {
+    this.sincronizarCarrito().then(() => {
+      const cartSection = document.getElementById('cartSection');
+      if (cartSection) {
+          cartSection.classList.remove('hidden');
+      }
+      
+      this.cartModal.classList.remove('hidden');
+      setTimeout(() => {
+          this.cartModal.classList.add('show');
+          document.body.classList.add('modal-open');
+      }, 10);
+  });
+
     // Remover la clase "hidden" del contenedor de items del carrito
     const cartSection = document.getElementById('cartSection');
     if (cartSection) {
