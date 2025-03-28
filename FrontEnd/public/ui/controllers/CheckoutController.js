@@ -1,5 +1,6 @@
 // FrontEnd/ui/controllers/CheckoutController.js
 import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
+import { CarritoController } from './CarritoController.js';
 import {app} from '../AppFactory.js';
 
 class CheckoutController {
@@ -16,6 +17,8 @@ class CheckoutController {
     this.invoiceSection = document.getElementById('invoiceSection');
     this.invoiceDetails = document.getElementById('invoiceDetails');
     this.btnCloseInvoice = document.getElementById('btnCloseInvoice');
+
+    this.btnCloseCheckoutModal = document.getElementById('closeCheckoutModal');
     this.setupEventListeners();
   }
 
@@ -31,12 +34,12 @@ class CheckoutController {
       const tr = document.createElement('tr');
       tr.innerHTML = `
           <td>
-            <img src="${item.imagen}" alt="${item.nombre}" style="width:50px; height:50px; object-fit:cover; border-radius:50%">
-            ${item.nombre}
+            <img src="${item.imagen}" alt="${item.nombre}" style="width:60px; height:70px; object-fit:cover; border-radius:50%">
           </td>
-          <td class="text-center">${item.cantidad}</td>
-          <td class="text-right">$${item.precio.toFixed(2)}</td>
-          <td class="text-right">$${(item.precio * item.cantidad).toFixed(2)}</td>
+          <td >${item.nombre}</td>
+          <td >${item.cantidad}</td>
+          <td >$${item.precio.toFixed(2)}</td>
+          <td >$${(item.precio * item.cantidad).toFixed(2)}</td>
         `;
       tbody.appendChild(tr);
       subtotal += item.precio * item.cantidad;
@@ -152,41 +155,46 @@ class CheckoutController {
       // Mostramos nuevamente el modal del carrito
       app.carritoController.mostrarCarrito();
     });
+
+    document.getElementById('closeCheckoutModal').addEventListener('click', () => {
+      this.ocultarCheckoutModal();
+      app.carritoController.mostrarCarrito();
+    });
+  
+ 
     this.btnConfirmCheckout.addEventListener('click', () => this.confirmarCompra());
     this.btnCloseInvoice.addEventListener('click', () => this.cerrarFactura());
   }
 
   mostrarCheckoutModal() {
-    const modal = this.checkoutSection;
-    const overlay = document.getElementById('checkoutOverlay');
+    const modal = document.getElementById('checkoutOverlay');
 
-    // Remove hidden class
+  
+    // Remove hidden class and add show class
     modal.classList.remove('hidden');
-    overlay.classList.remove('hidden');
-
+    document.body.classList.add('modal-open');
+    
     // Load cart items into checkout summary
     this.cargarResumenPedido();
-
-    // Animate modal
+    
+    // Trigger animation
     requestAnimationFrame(() => {
       modal.classList.add('show');
-      overlay.classList.add('show');
     });
+
   }
-
-
+  
   ocultarCheckoutModal() {
-    const modal = this.checkoutSection;
-    const overlay = document.getElementById('checkoutOverlay');
-
+    const modal = document.getElementById('checkoutOverlay');
+    
+    // Start hide animation
     modal.classList.remove('show');
-    overlay.classList.remove('show');
-
-    // Espera a que termine la transición para volver a ocultar
-    modal.addEventListener('transitionend', () => {
+    document.body.classList.remove('modal-open');
+    
+    // Wait for animation to finish before hiding
+    setTimeout(() => {
       modal.classList.add('hidden');
-      overlay.classList.add('hidden');
-    }, {once: true});
+    }, 300);
   }
 
   cancelarCheckout() {

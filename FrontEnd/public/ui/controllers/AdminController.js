@@ -112,7 +112,7 @@ class AdminController {
     //Ocultar otros
     document.getElementById('tienda').classList.add('hidden');
     document.getElementById('cartSection').classList.add('hidden');
-    document.getElementById('checkoutSection').classList.add('hidden');
+   // document.getElementById('checkoutSection').classList.add('hidden');
     this.adminSection.classList.remove('hidden');
     this.cargarSeccionAdmin('categorias');  // Por defecto
   }

@@ -332,6 +332,7 @@ class CarritoController {
   }
 
   async procederAlPago() {
+
     if (this.carrito.items.length === 0) {
       alert('El carrito está vacío');
       return;

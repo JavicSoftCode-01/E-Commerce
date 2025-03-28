@@ -20,6 +20,7 @@ class AppFactory {
     //this.ensureIdRecordsExist();
 
 
+
     this.categoriaService = new CategoriaService();
     this.marcaService = new MarcaService();
     this.proveedorService = new ProveedorService();

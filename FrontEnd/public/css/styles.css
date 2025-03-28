@@ -500,23 +500,15 @@ h3 {
     border-bottom: none;
 }
 
-.checkout-card {
-    background: white;
-    border-radius: 8px;
-    padding: var(--spacing-lg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
-    margin-bottom: var(--spacing-lg);
-}
+
 
 .checkout-subtitle {
-    margin-top: 0;
-    margin-bottom: var(--spacing-md);
     color: var(--secondary); /* Use secondary */
     font-size: 1.4rem; /* Match h3 size slightly reduced */
     font-family: var(--font-serif);
     border-bottom: 1px solid var(--border);
-    padding-bottom: var(--spacing-sm);
-}
+    }
+
 
 /* Form Styles within Checkout */
 #checkoutClientForm .form-group {
@@ -999,6 +991,10 @@ footer p {
         font-size: 1.4rem;
     }
 
+    .detalle{
+        margin-top: -2.5rem;
+    }
+
     .nav-container {
         justify-content: center;
     }
@@ -1231,17 +1227,21 @@ body.modal-open {
 .modal-footer {
     display: flex;
     justify-content: space-between;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-}
+    align-items: center;
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  
+  .btn {
+    min-width: 150px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+
 
 /* Botones (se mantienen igual, se puede ajustar si se desea) */
-.btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
+
 
 .btn-outline-danger {
     background: none;
@@ -1433,6 +1433,8 @@ body.modal-open {
   gap: var(--spacing-lg);
 }
 
+
+
 /* Responsividad: en pantallas grandes, mostrar en columnas */
 @media (min-width: 768px) {
   .checkout-content {
@@ -1533,3 +1535,6 @@ body.modal-open {
         padding: 0;
     }
 }
+
+
+
