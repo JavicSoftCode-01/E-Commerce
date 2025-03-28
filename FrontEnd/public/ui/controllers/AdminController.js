@@ -1000,68 +1000,83 @@ class AdminController {
   }
 
   // Metodo Setup para eventos dentro de la Tabla, para: Boton!
-  static async mostrarFactura(factura) { //METODO, para mostrar el detalle de la factura
-    if (!factura) return;
+async mostrarFactura(factura) {
+  if (!factura) return;
 
-    const fecha = new Date(factura.fecha).toLocaleDateString();
+  const fecha = new Date(factura.fecha).toLocaleDateString();
+  
+  // Construir el detalle de los productos
+  let detallesHTML = '';
+  for (const detalle of factura.detalles) {
+    detallesHTML += `
+      <tr>
+        <td style="text-align: left">
+          ${detalle.nombre}
+        </td>
+        <td style="text-align: center">${detalle.cantidad}</td>
+        <td style="text-align: right">$${detalle.precio.toFixed(2)}</td>
+        <td style="text-align: right">$${(detalle.precio * detalle.cantidad).toFixed(2)}</td>
+      </tr>
+    `;
+  }
 
-    let detallesHTML = '';
-
-    //Aqui busca mediante el id, el producto
-    for (const detalle of factura.detalles) {
-
-      const producto = await this.productoService.obtenerProductoPorId(detalle.productoId)
-
-      detallesHTML += `
-                <tr style="text-align: center">
-                  <td>${producto.nombre}</td>
-                <td >${detalle.cantidad}</td>
-                  <td>$${detalle.precio.toFixed(2)}</td>
-                 <td>$${detalle.subtotal.toFixed(2)}</td>
-              </tr>
-            `;
-    }
-
+  // Obtener los datos del cliente
+  try {
     const cliente = await this.clienteService.obtenerClientePorId(factura.cliente);
     if (!cliente) {
-      console.error("No se pudo encontrar el cliente para la factura ID:", factura.cliente);
-      this.invoiceDetails.innerHTML = "<p>Cliente no encontrado.</p>"; // Mejor mensaje.
-      document.getElementById('invoiceSection').classList.remove('hidden');
-      return;
+      console.error('Cliente no encontrado:', factura.cliente);
+      throw new Error('Cliente no encontrado');
     }
 
+    // Construir el HTML de la factura
     this.invoiceDetails.innerHTML = `
-        <div class="invoice-header">
-               <div>
-                 <div class="invoice-id">Factura #${factura.id}</div>
-               <div class="invoice-date">Fecha: ${fecha}</div>
-              </div>
-          </div>
-            <div class="invoice-client">
-                <h3>Cliente</h3>
-               <p><strong>Nombre:</strong> ${cliente.nombre}</p>
-              <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
-               <p><strong>Dirección:</strong> ${cliente.direccion}</p>
-            </div>
-         <h3>Detalle de Compra</h3>
-            <table>
-            <thead>
-                 <tr>
-                  <th>Producto</th>
-                    <th>Cantidad</th>
-                   <th>Precio Unitario</th>
-                    <th>Subtotal</th>
-                </tr>
-             </thead>
-             <tbody>
-                 ${detallesHTML}  <!-- Aquí se insertan las filas -->
-             </tbody>
-         </table>
-         <div class="invoice-total">Total: $${factura.total.toFixed(2)}</div>
-      `;
+      <div class="invoice-header">
+        <div class="invoice-title">
+          <h2>FACTURA</h2>
+          <div class="invoice-id">N° ${factura.id}</div>
+          <div class="invoice-date">Fecha: ${fecha}</div>
+        </div>
+      </div>
+      
+      <div class="invoice-client">
+        <h3>Datos del Cliente</h3>
+        <p><strong>Nombre:</strong> ${cliente.nombre}</p>
+        <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
+        <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+      </div>
 
+      <div class="invoice-details">
+        <h3>Detalle de Productos</h3>
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th style="text-align: left">Producto</th>
+              <th style="text-align: center">Cantidad</th>
+              <th style="text-align: right">Precio Unit.</th>
+              <th style="text-align: right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${detallesHTML}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="text-align: right"><strong>Total:</strong></td>
+              <td style="text-align: right"><strong>$${factura.total.toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    `;
+
+    // Mostrar la sección de factura
     this.invoiceSection.classList.remove('hidden');
+
+  } catch (error) {
+    console.error('Error al mostrar la factura:', error);
+    alert('Error al mostrar la factura. Por favor, inténtelo de nuevo.');
   }
+}
 
   setupVentasListeners() {
     // Dentro de este <tbody>:  usar querySelectorAll Para *todos* botones
