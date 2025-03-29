@@ -96,13 +96,12 @@ class IndexedDB {
    * @param {any} item - El objeto a agregar.
    * @returns {Promise<any>} Promesa que resuelve a la clave del nuevo registro.
    */
-  async add(item) {
+async add(item) {
     try {
         const db = await this.dbPromise;
         
-        // Convert the item to a plain object regardless of its type
-        const plainItem = {};
-        Object.assign(plainItem, item);
+        // Asegurarse de que el item sea un objeto plano
+        const plainItem = JSON.parse(JSON.stringify(item));
 
         return new Promise((resolve, reject) => {
             const transaction = db.transaction([this.storeName], 'readwrite');
@@ -112,7 +111,7 @@ class IndexedDB {
             
             request.onsuccess = () => {
                 console.info(`Registro agregado en ${this.storeName}:`, plainItem);
-                resolve(request.result);
+                resolve(plainItem);
             };
             
             request.onerror = (event) => {

@@ -6,6 +6,8 @@ import {Proveedor} from '../../../../BackEnd/src/models/Proveedor.js';
 import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
 import {Producto} from '../../../../BackEnd/src/models/Producto.js';
 import {appService} from '../services/UшымтаService.js';
+import { InvoiceTemplate } from './InvoicePlantilla.js';
+
 
 class AdminController {
   constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService) {
@@ -693,38 +695,57 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Productos
   //---------------------------------------------------
-  async cargarProductos() {
+async cargarProductos() {
     try {
-      const productos = await this.productoService.obtenerProductos();
-      this.tablaProductos.innerHTML = '';
-      if (!Array.isArray(productos)) {
-        console.error('Error: El resultado de obtenerProductos no es un array.');
-        return;
-      }
-      productos.forEach(producto => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-                       <td>${producto.id}</td>
-                       <td style="width: 50px; height: 50px; border-radius: 50%"><img src="${producto.imagen}" alt="${producto.nombre}"></td>
-                       <td>${producto.nombre}</td>
-                     <td>${producto.categoriaNombre}</td>
-                       <td>${producto.marcaNombre}</td>
-                         <td>$${producto.pvp.toFixed(2)}</td>
-                         <td>${producto.proveedorNombre}</td>
-                     <td>${producto.stock}</td>
-                       <td class="action-buttons">
-                          <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
-                          <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
-                        </td>
-                       `;
-        this.tablaProductos.appendChild(tr); // Añade a tbody
-      });
-      this.setupProductoListeners();
+        const productos = await this.productoService.obtenerProductos();
+        
+        // Asegurarse de que tablaProductos existe
+        if (!this.tablaProductos) {
+            console.error('Error: tablaProductos no encontrada');
+            return;
+        }
+        
+        this.tablaProductos.innerHTML = '';
+        
+        if (!Array.isArray(productos)) {
+            console.error('Error: El resultado de obtenerProductos no es un array.');
+            return;
+        }
+
+        productos.forEach(producto => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${producto.id}</td>
+                <td style="width: 50px; height: 50px; border-radius: 50%">
+                    <img src="${producto.imagen}" alt="${producto.nombre}">
+                </td>
+                <td>${producto.nombre}</td>
+                <td>${producto.categoriaNombre}</td>
+                <td>${producto.marcaNombre}</td>
+                <td>$${producto.pvp.toFixed(2)}</td>
+                <td>${producto.proveedorNombre}</td>
+                <td>${producto.stock}</td>
+                <td class="action-buttons">
+                    <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
+                    <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
+                </td>
+            `;
+            this.tablaProductos.appendChild(tr);
+        });
+
+        // Configurar los listeners después de cargar los productos
+        this.setupProductoListeners();
+        
+        // Actualizar la vista de la tienda si está visible
+        if (!document.getElementById('tienda').classList.contains('hidden')) {
+            await app.tiendaController.cargarProductos();
+        }
+
     } catch (error) {
-      console.error("Hubo un error obteniendo los productos:", error);
-      alert("Error al cargar los productos");
+        console.error("Hubo un error obteniendo los productos:", error);
+        alert("Error al cargar los productos");
     }
-  }
+}
 
   setupProductoListeners() {
     // Editar
@@ -959,218 +980,124 @@ class AdminController {
   //-------------------------
   //Ventas (Historial)
   //-------------------------
-  async cargarVentas() {
+ async cargarVentas() {
     try {
-      const ventas = await this.facturaService.obtenerFacturas(); //  await (indexedDB)
-      this.tablaVentas.innerHTML = ''; // limpiar antes
+        const tablaVentas = document.querySelector('#tablaVentas tbody');
+        const facturas = await this.facturaService.obtenerFacturas();
+        
+        if (!tablaVentas) {
+            console.error('Tabla de ventas no encontrada');
+            return;
+        }
 
-      if (!Array.isArray(ventas)) {  // <--- AÑADE ESTA COMPROBACIÓN
-        console.error("Error: ventas no es un array.");
-        return; // Salir si no es un array
-      }
+        tablaVentas.innerHTML = '';
 
-      for (const venta of ventas) {      //  venta singular!!       NO "ventas", sino "venta"
-        // Obtener ,  nombre de Cliente
-        //const clienteNombre = await this.facturaService.obtenerNombreCliente(venta.cliente); //
-        const cliente = await this.clienteService.obtenerClientePorId(venta.cliente);
+        for (const factura of facturas) {
+            // Verificar que factura y clienteId existan
+            if (!factura || !factura.clienteId) {
+                console.warn('Factura inválida o sin clienteId:', factura);
+                continue;
+            }
 
-        const clienteNombre = cliente ? cliente.nombre : 'Cliente Desconocido'; 
-        // Convertir a un  formato
-        const fecha = new Date(venta.fecha).toLocaleDateString();  //Formato legible
-        // Crea elemento HTML <tr> fila!
-        const tr = document.createElement('tr');     // Row
+            // Obtener cliente
+            const cliente = await this.clienteService.obtenerClientePorId(factura.clienteId);
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${factura.numeroFactura || 'N/A'}</td>
+                <td>${new Date(factura.fecha).toLocaleDateString()}</td>
+                <td>${factura.clienteNombre || 'Cliente desconocido'}</td>
+                <td>$${factura.total?.toFixed(2) || '0.00'}</td>
+                <td class="action-buttons">
+                    <button class="action-button view-button ver-factura" 
+                            data-factura-id="${factura.id}" 
+                            data-cliente-id="${factura.clienteId}">
+                        Ver Factura
+                    </button>
+                </td>
+            `;
+            tablaVentas.appendChild(tr);
+        }
 
-        // Añadir a esta fila, columnas!
-        tr.innerHTML = `
-                   <td>${venta.id}</td>
-                 <td>${fecha}</td>
-                    <td>${clienteNombre}</td>
-                 <td>$${venta.total.toFixed(2)}</td>
-                  <td class="action-buttons">
-                     <button class="action-button edit-button view-venta" data-id="${venta.id}">Ver Detalle</button>
-                 </td>
-            `;  // Texto!, datos, botones
-        this.tablaVentas.appendChild(tr); // Añadir al tbody
-
-      } //cierra loop "for"
-      this.setupVentasListeners(); //METODO, Inicializa o Refresca Listeners
-    } catch (error) {  // Error!
-      console.error("Hubo Error obtener ventas, o no existen:", error);
-      alert("Revise si existem Facturas.");//Mensaje
+        this.setupVentasListeners();
+    } catch (error) {
+        console.error('Error al cargar ventas:', error);
     }
-  }
+}
 
   // Metodo Setup para eventos dentro de la Tabla, para: Boton!
+// En AdminController.js
+
+// En CheckoutController.js
 async mostrarFactura(factura) {
-  if (!factura) return;
-
-  const fecha = new Date(factura.fecha).toLocaleDateString();
-  
-  // Construir el detalle de los productos
-  let detallesHTML = '';
-  for (const detalle of factura.detalles) {
-    detallesHTML += `
-      <tr>
-        <td style="text-align: left">
-          ${detalle.nombre}
-        </td>
-        <td style="text-align: center">${detalle.cantidad}</td>
-        <td style="text-align: right">$${detalle.precio.toFixed(2)}</td>
-        <td style="text-align: right">$${(detalle.precio * detalle.cantidad).toFixed(2)}</td>
-      </tr>
-    `;
-  }
-
-  // Obtener los datos del cliente
   try {
-    const cliente = await this.clienteService.obtenerClientePorId(factura.cliente);
-    if (!cliente) {
-      console.error('Cliente no encontrado:', factura.cliente);
-      throw new Error('Cliente no encontrado');
-    }
+      if (!factura) {
+          throw new Error('Datos de factura no válidos');
+      }
 
-    // Construir el HTML de la factura
-    this.invoiceDetails.innerHTML = `
-      <div class="invoice-header">
-        <div class="invoice-title">
-          <h2>FACTURA</h2>
-          <div class="invoice-id">N° ${factura.id}</div>
-          <div class="invoice-date">Fecha: ${fecha}</div>
-        </div>
-      </div>
+      const invoiceModal = document.getElementById('invoiceModal');
+      const invoiceDetails = document.getElementById('invoiceDetails');
       
-      <div class="invoice-client">
-        <h3>Datos del Cliente</h3>
-        <p><strong>Nombre:</strong> ${cliente.nombre}</p>
-        <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
-        <p><strong>Dirección:</strong> ${cliente.direccion}</p>
-      </div>
+      if (!invoiceModal || !invoiceDetails) {
+          throw new Error('Elementos del modal no encontrados');
+      }
 
-      <div class="invoice-details">
-        <h3>Detalle de Productos</h3>
-        <table class="invoice-table">
-          <thead>
-            <tr>
-              <th style="text-align: left">Producto</th>
-              <th style="text-align: center">Cantidad</th>
-              <th style="text-align: right">Precio Unit.</th>
-              <th style="text-align: right">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${detallesHTML}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" style="text-align: right"><strong>Total:</strong></td>
-              <td style="text-align: right"><strong>$${factura.total.toFixed(2)}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    `;
+      // Usar la plantilla de factura con esPreview = false para mostrar datos existentes
+      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false);
 
-    // Mostrar la sección de factura
-    this.invoiceSection.classList.remove('hidden');
+      // Mostrar el modal
+      invoiceModal.classList.remove('hidden');
+      invoiceModal.classList.add('show');
+      document.body.classList.add('modal-open');
 
   } catch (error) {
-    console.error('Error al mostrar la factura:', error);
-    alert('Error al mostrar la factura. Por favor, inténtelo de nuevo.');
+      console.error('Error al mostrar factura:', error);
+      alert('Error al mostrar la factura: ' + error.message);
   }
 }
 
-  setupVentasListeners() {
-    this.tablaVentas.querySelectorAll('.view-venta').forEach(button => {
-      button.addEventListener('click', async (e) => {
+setupVentasListeners() {
+    const tabla = document.getElementById('tablaVentas');
+    if (!tabla) return;
+
+    tabla.addEventListener('click', async (e) => {
+        const button = e.target.closest('.ver-factura');
+        if (!button) return;
+
         try {
-          const ventaId = parseInt(e.target.dataset.id);
-          const venta = await this.facturaService.obtenerFacturaPorId(ventaId);
-          
-          if (!venta) {
-            throw new Error('No se encontró la factura');
-          }
-  
-          // Mostrar el modal de factura
-          const invoiceModal = document.getElementById('invoiceModal');
-          if (!invoiceModal) {
-            throw new Error('El modal de factura no existe en el DOM');
-          }
-  
-          // Obtener los datos del cliente
-          const cliente = await this.clienteService.obtenerClientePorId(venta.cliente);
-          if (!cliente) {
-            throw new Error('Cliente no encontrado');
-          }
-  
-          // Construir el detalle de los productos
-          const detallesHTML = venta.detalles.map(detalle => `
-            <tr>
-              <td>${detalle.nombre}</td>
-              <td class="text-center">${detalle.cantidad}</td>
-              <td class="text-right">$${detalle.precio.toFixed(2)}</td>
-              <td class="text-right">$${(detalle.precio * detalle.cantidad).toFixed(2)}</td>
-            </tr>
-          `).join('');
-  
-          // Formatear la fecha
-          const fecha = new Date(venta.fecha).toLocaleDateString();
-  
-          // Construir el HTML completo de la factura
-          const invoiceDetails = document.getElementById('invoiceDetails');
-          invoiceDetails.innerHTML = `
-            <div class="invoice-content">
-              <div class="invoice-header">
-                <h2>FACTURA</h2>
-                <div class="invoice-id">N° ${venta.id}</div>
-                <div class="invoice-date">Fecha: ${fecha}</div>
-              </div>
-              
-              <div class="invoice-client">
-                <h3>Datos del Cliente</h3>
-                <p><strong>Nombre:</strong> ${cliente.nombre}</p>
-                <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
-                <p><strong>Dirección:</strong> ${cliente.direccion}</p>
-              </div>
-  
-              <div class="invoice-details">
-                <h3>Detalle de Productos</h3>
-                <table class="invoice-table">
-                  <thead>
-                    <tr>
-                      <th>Producto</th>
-                      <th class="text-center">Cantidad</th>
-                      <th class="text-right">Precio Unit.</th>
-                      <th class="text-right">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${detallesHTML}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                      <td class="text-right"><strong>$${venta.total.toFixed(2)}</strong></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          `;
-  
-          // Mostrar el modal
-          invoiceModal.classList.remove('hidden');
-          requestAnimationFrame(() => {
-            invoiceModal.classList.add('show');
-            document.body.classList.add('modal-open');
-          });
-  
+            const facturaId = parseInt(button.dataset.facturaId);
+            const clienteId = parseInt(button.dataset.clienteId);
+
+            if (!facturaId || !clienteId) {
+                throw new Error('ID de factura o cliente inválido');
+            }
+
+            const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
+            if (!factura) {
+                throw new Error('Factura no encontrada');
+            }
+
+            const cliente = await this.clienteService.obtenerClientePorId(clienteId);
+            if (!cliente) {
+                throw new Error('Cliente no encontrado');
+            }
+
+            // Combinar datos de factura y cliente
+            const facturaCompleta = {
+                ...factura,
+                clienteNombre: cliente.nombre,
+                clienteTelefono: cliente.telefono,
+                clienteDireccion: cliente.direccion
+            };
+
+            await this.mostrarFactura(facturaCompleta);
+
         } catch (error) {
-          console.error('Error al mostrar la factura:', error);
-          alert('Error al mostrar la factura: ' + error.message);
+            console.error('Error al mostrar factura:', error);
+            alert('Error al cargar la factura: ' + error.message);
         }
-      });
     });
-  }
+}
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.

@@ -180,14 +180,21 @@ class TiendaController {
 }
 
   async mostrarTienda() {
-    document.getElementById('admin').classList.add('hidden');
-    document.getElementById('cartSection').classList.add('hidden');
-    document.getElementById('checkoutSection').classList.add('hidden');
-    this.tiendaSection.classList.remove('hidden');
-
-    await this.cargarProductos(); //  Cargar los productos (y, por tanto, mostrar los botones).
-
-    this.tiendaSection.scrollTo(0, 0);
+      const adminSection = document.getElementById('admin');
+      const cartSection = document.getElementById('cartSection');
+      const checkoutSection = document.getElementById('checkoutSection');
+      
+      if (adminSection) adminSection.classList.add('hidden');
+      if (cartSection) cartSection.classList.add('hidden');
+      if (checkoutSection) checkoutSection.classList.add('hidden');
+      
+      // Actualizar la referencia al tiendaSection
+      this.tiendaSection = document.getElementById('tienda');
+      if (this.tiendaSection) {
+          this.tiendaSection.classList.remove('hidden');
+          await this.cargarProductos();
+          this.tiendaSection.scrollTo(0, 0);
+      }
   }
 }
 

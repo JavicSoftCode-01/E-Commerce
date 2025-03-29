@@ -105,24 +105,25 @@ class ClienteService extends IndexedDB {
      * @param {number} id - ID del cliente a obtener.
      * @returns {Promise<Cliente|null>} - El cliente encontrado o null si no se encuentra.
      */
-    async obtenerClientePorId(id) {
-        try {
-            const cliente = await super.getById(id);
-            if (cliente) {
-                //Crear instancia de cliente
-                const nuevoCliente = new Cliente(cliente.nombre, cliente.telefono, cliente.direccion);
-                nuevoCliente.id = cliente.id
-                console.info(`Cliente con ID ${id} obtenido:`, nuevoCliente);
-                return nuevoCliente; // Retornar instancia.
-            } else {
-                console.warn(`No se encontró ningún cliente con ID ${id}.`);
-                return null;
-            }
-        } catch (error) {
-            console.error(`Error al obtener cliente con ID ${id}:`, error);
+async obtenerClientePorId(id) {
+    try {
+        if (!id) {
+            throw new Error('ID de cliente no proporcionado');
+        }
+        
+        const cliente = await super.getById(id);
+        if (!cliente) {
+            console.warn(`Cliente con ID ${id} no encontrado`);
             return null;
         }
+        
+        console.log(`Cliente encontrado:`, cliente);
+        return cliente;
+    } catch (error) {
+        console.error('Error al obtener cliente:', error);
+        return null;
     }
+}
 
     /**
    * Elimina un cliente por su ID.

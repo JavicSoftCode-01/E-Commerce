@@ -9,14 +9,19 @@ class DetalleFactura {
 }
 
 class Factura {
-    constructor(clienteId, detalles = [], fecha = new Date()) {
-        this.id = null; // Para IndexedDB
-        this.cliente = clienteId;
-        this.clienteNombre = ''; // Para mostrar en la factura
-        this.detalles = detalles;
-        this.fecha = fecha;
-        this.estado = 'pendiente'; // Control de estado de la factura
-        this.total = this.calcularTotalFactura();
+    constructor(clienteId, detalles) {
+        this.id = null; // Será asignado por FacturaService
+        this.clienteId = clienteId;
+        this.numeroFactura = null; // Será asignado usando InvoiceTemplate
+        this.fecha = new Date().toISOString();
+        this.detalles = detalles || [];
+        this.total = 0;
+        this.subtotal = 0;
+        this.envio = 0;
+        this.estado = 'pendiente';
+        this.clienteNombre = '';
+        this.clienteTelefono = '';
+        this.clienteDireccion = '';
     }
 
     calcularTotalFactura() {

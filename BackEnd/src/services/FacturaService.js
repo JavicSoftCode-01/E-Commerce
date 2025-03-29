@@ -1,5 +1,6 @@
 // BackEnd/src/services/FacturaService.js
 import { IndexedDB } from '../database/indexdDB.js';
+import { InvoiceTemplate } from '../../../FrontEnd/public/ui/controllers/InvoicePlantilla.js';
 import { Factura, DetalleFactura } from '../models/Factura.js'; //  ¡Importante!
 
 class FacturaService extends IndexedDB {
@@ -10,20 +11,20 @@ class FacturaService extends IndexedDB {
         this.idGeneratorService = idGeneratorService;
     }
 
-        async generarFactura(cliente, carrito) {
+    async generarFactura(cliente, carrito, facturaTemp) {
         try {
             console.log('Cliente recibido en generarFactura:', cliente);
-    
+
             // 1. Validaciones iniciales
             if (!cliente || !cliente.id) {
                 console.error('Cliente inválido:', cliente);
                 throw new Error('Cliente no válido');
             }
-    
+
             if (!carrito || !carrito.items || carrito.items.length === 0) {
                 throw new Error('Carrito vacío');
             }
-    
+
             // 2. Verificar stock antes de procesar
             for (const item of carrito.items) {
                 const producto = await this.productoService.obtenerProductoPorId(item.productoId);
@@ -34,58 +35,71 @@ class FacturaService extends IndexedDB {
                     throw new Error(`Stock insuficiente para ${producto.nombre}`);
                 }
             }
-    
+
             // 3. Generar ID para la nueva factura
+            // Generar ID para la nueva factura
             const facturas = await this.getAll();
-            const lastId = facturas.length > 0 
+            const lastId = facturas.length > 0
                 ? Math.max(...facturas.map(f => f.id))
                 : 0;
             const nextId = lastId + 1;
-    
-            // 4. Crear detalles y actualizar stock
+
+            // Crear detalles
             const detalles = [];
             for (const item of carrito.items) {
-                const stockActualizado = await this.productoService.actualizarStock(
-                    item.productoId,
-                    -item.cantidad
-                );
-    
-                if (!stockActualizado) {
-                    throw new Error(`Error al actualizar stock del producto ${item.productoId}`);
+                // Verificar stock
+                const producto = await this.productoService.obtenerProductoPorId(item.productoId);
+                if (!producto || producto.stock < item.cantidad) {
+                    throw new Error(`Stock insuficiente para ${producto?.nombre || item.productoId}`);
                 }
-    
-                const detalle = new DetalleFactura(
-                    item.productoId,
-                    item.nombre,
-                    item.precio,
-                    item.cantidad
-                );
-                
-                // Agregar imagen si existe
-                if (item.imagen) {
-                    detalle.imagen = item.imagen;
-                }
-    
+
+                // Actualizar stock
+                await this.productoService.actualizarStock(item.productoId, -item.cantidad);
+
+                // Crear detalle
+                const detalle = {
+                    productoId: item.productoId,
+                    nombre: item.nombre,
+                    precio: item.precio,
+                    cantidad: item.cantidad,
+                    imagen: item.imagen
+                };
                 detalles.push(detalle);
             }
+
+            // Generar número de factura
+            const numeroFactura = await InvoiceTemplate.generarNumeroFactura();
+
+            // Crear y configurar la factura
+            const factura = {
+                id: nextId,
+                numeroFactura: facturaTemp.numeroFactura,
+                fecha: facturaTemp.fecha.toISOString(),
+                hora: facturaTemp.hora,
+                clienteId: cliente.id,
+                clienteNombre: cliente.nombre,
+                clienteTelefono: cliente.telefono,
+                clienteDireccion: cliente.direccion,
+                detalles: detalles,
+                subtotal: carrito.calcularTotalCarrito(),
+                envio: 0,
+                total: carrito.calcularTotalCarrito(),
+                estado: 'completada'
+            };
     
-            // 5. Crear factura con todos los datos necesarios
-            const factura = new Factura(cliente.id, detalles);
-            factura.id = nextId;
-            factura.fecha = new Date().toISOString();
-            factura.total = carrito.calcularTotalCarrito();
-            factura.clienteNombre = cliente.nombre;
-            factura.estado = 'completada';
-    
-            // 6. Guardar la factura
             await super.add(factura);
-    
-            console.log('Factura generada exitosamente:', factura);
             return factura;
-    
+
         } catch (error) {
             console.error('Error en generarFactura:', error);
-            // Aquí podrías implementar un rollback del stock si algo falla
+            // Intentar revertir los cambios de stock en caso de error
+            try {
+                for (const item of carrito.items) {
+                    await this.productoService.actualizarStock(item.productoId, item.cantidad);
+                }
+            } catch (rollbackError) {
+                console.error('Error al revertir cambios de stock:', rollbackError);
+            }
             throw error;
         }
     }

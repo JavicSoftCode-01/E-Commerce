@@ -34,6 +34,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 
@@ -314,7 +315,7 @@ h3 {
 /* --- Buttons --- */
 .btn {
     display: inline-block;
-    font-weight: 500;
+    font-weight: bold;
     line-height: 1.5;
     color: var(--white);
     text-align: center;
@@ -324,7 +325,7 @@ h3 {
     background-color: transparent;
     border: 1px solid transparent;
     padding: 0.5rem 1rem; /* Standard padding */
-    font-size: 1rem;
+    font-size: 1.3rem;
     border-radius: 0.25rem;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     text-decoration: none; /* Remove underline */
@@ -423,6 +424,17 @@ h3 {
     text-align: center;
     padding: var(--spacing-xl) var(--spacing-md);
     color: var(--medium-gray);
+    font-size: 2rem;
+}
+
+.cartFont{font-size: 20px;
+font-weight: bold;
+color: #000000;
+}
+
+.cartFont .spanFont{
+    font-size: 18px;
+    color: #676666;
 }
 
 /*.table-responsive-container {*/
@@ -486,6 +498,14 @@ h3 {
 }
 
 /* --- Checkout Section Styles (Integrated & Adapted) --- */
+
+#checkoutTotal, #cartTotal{
+    color: #32CD32;
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-decoration: underline #32CD32 3px;
+}
+
 .checkout-container {
     /* No container-specific styles needed if using .container class */
     margin-bottom: var(--spacing-lg);
@@ -599,12 +619,12 @@ h3 {
 }
 
 .summary-item span:first-child {
-    color: var(--medium-gray);
-    font-weight: 500;
+    color: black;
+    font-weight: bold;
 }
 
 .summary-item span:last-child {
-    font-weight: 600;
+    font-weight: bold;
 }
 
 .summary-divider {
@@ -615,9 +635,11 @@ h3 {
 
 .summary-item.total-item span {
     font-weight: bold;
-    font-size: 1.3em; /* Larger total */
+    font-size: 2rem; /* Larger total */
     color: var(--primary); /* Primary color for final total */
 }
+
+
 
 /* Checkout Actions */
 .checkout-actions {
@@ -630,6 +652,7 @@ h3 {
     flex-wrap: wrap; /* Allow wrapping */
     gap: var(--spacing-md);
 }
+
 
 /* --- Invoice --- */
 .invoice {
@@ -710,6 +733,97 @@ h3 {
     font-size: 1.4rem; /* Slightly smaller than checkout */
     margin-bottom: var(--spacing-lg);
 }
+
+.invoice-header {
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.client-info .inputFac {
+    border: none;
+    border-bottom: 2px solid var(--border);
+    outline: none;
+    padding: 5px 0;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+.client-info .inputFac:focus {
+    border: none;
+    border-bottom: 2px solid var(--primary);
+    outline: none;
+}
+
+.invoice-header-content {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ccc;
+}
+
+.company-logo {
+  text-align: left;
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  color: var(--primary);
+  font-weight: bold;
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+}
+
+.logo-tagline {
+  font-size: 0.9rem;
+  color: var(--secondary);
+  font-style: italic;
+  margin: 5px 0 0;
+}
+
+.invoice-info {
+  text-align: right;
+}
+
+.invoice-info h2 {
+  color: var(--secondary);
+  font-size: 1.5rem;
+  margin: 0 0 10px;
+  border: none;
+}
+
+.invoice-details p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.client-info {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 15px;
+}
+
+.info-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-group label {
+  font-weight: bold;
+  min-width: 80px;
+}
+
+.info-group input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+
 
 /* Admin Forms */
 form {
@@ -1140,15 +1254,21 @@ body.modal-open {
 .modal {
     position: fixed;
     top: 0;
+    margin-top: -2.5rem;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 110%;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     /* Opcional: prevenir scroll accidental en el contenedor */
     overflow: hidden;
+}
+
+.modal-title{
+    font-weight: bold;
+    font-size: 35px;
 }
 
 /* Ocultar modal por defecto */
@@ -1232,12 +1352,6 @@ body.modal-open {
     border-top: 1px solid var(--border);
   }
   
-  .btn {
-    min-width: 150px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-  }
-  
 
 
 /* Botones (se mantienen igual, se puede ajustar si se desea) */
@@ -1317,11 +1431,21 @@ body.modal-open {
 }
 
 .cart-card-image {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 5px;
-    margin-right: var(--spacing-md);
+    width: 100px;
+    height: 105px;
+    border: 2px solid var(--secondary) ;
+    border-radius: 8px;
+    margin-right: 2rem;
+}
+
+.imgFactura{
+    text-align: center;
+    border: 2px solid var(--secondary) ;
+border-radius: 8px;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .cart-card-details {
@@ -1330,7 +1454,11 @@ body.modal-open {
 }
 
 .cart-card-product {
+    text-transform: uppercase; /* Convierte el texto a mayúsculas */
+    text-decoration: underline; /* Subraya el texto */
+    color: rgb(200, 50, 50); /* Un tono rojizo */
     font-weight: bold;
+    font-size: 1.5rem;
     margin-bottom: var(--spacing-sm);
 }
 
@@ -1340,7 +1468,7 @@ body.modal-open {
 
 /* Contenedor con scroll para items del carrito (visible 3 tarjetas aprox.) */
 .cart-items-wrapper {
-    max-height: 465px; /* Ajusta este valor según la altura aproximada de 3 tarjetas */
+    max-height: 500px; /* Ajusta este valor según la altura aproximada de 3 tarjetas */
     overflow-y: auto;
     padding-right: 10px; /* Para evitar que la barra de scroll encime el contenido */
 }
@@ -1475,13 +1603,7 @@ body.modal-open {
     position: relative;
 }
 
-.invoice-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 1rem;
-}
+
 
 .invoice-table {
     width: 100%;
@@ -1573,10 +1695,7 @@ body.modal-open {
     padding: 20px;
   }
   
-  .invoice-header {
-    margin-bottom: 30px;
-    text-align: center;
-  }
+
   
   .invoice-client {
     margin-bottom: 30px;
