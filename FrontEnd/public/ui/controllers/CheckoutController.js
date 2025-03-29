@@ -119,136 +119,147 @@ class CheckoutController {
     document.getElementById('checkoutDireccion').value = '';
   }
 
-  async confirmarCompra() {
+
+    async confirmarCompra() {
+      try {
+        const nombre = document.getElementById('checkoutNombre').value;
+        const telefono = document.getElementById('checkoutTelefono').value;
+        const direccion = document.getElementById('checkoutDireccion').value;
+  
+        if (!nombre || !telefono || !direccion) {
+          alert('Por favor, complete todos los campos del cliente.');
+          return;
+        }
+  
+        // Deshabilitar el botón mientras se procesa
+        this.btnConfirmCheckout.disabled = true;
+        this.btnConfirmCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+  
+        // 1. Crear y guardar el cliente
+        const clienteData = {
+          nombre: nombre,
+          telefono: telefono,
+          direccion: direccion
+        };
+  
+        const nuevoCliente = await this.clienteService.agregarCliente(clienteData);
+  
+        if (!nuevoCliente) {
+          throw new Error('El cliente no pudo ser registrado.');
+        }
+  
+        // 2. Generar la factura con el cliente y el carrito
+        const carrito = app.carritoController.carrito;
+        const factura = await this.facturaService.generarFactura(nuevoCliente, carrito);
+  
+        if (!factura) {
+          throw new Error('La factura no pudo ser generada. Verifique el stock disponible.');
+        }
+  
+        // Remove the animation code that was causing the error
+        // and directly proceed to show the invoice
+  
+        // Ocultar checkout y mostrar factura
+        this.ocultarCheckoutModal();
+        await this.mostrarFactura(factura);
+  
+        // Limpiar carrito y actualizar UI
+        carrito.vaciarCarrito();
+        app.tiendaController.actualizarContadorCarrito();
+        this.limpiarFormularioCliente();
+  
+      } catch (error) {
+        console.error('Error durante el checkout:', error);
+        alert(`Error al confirmar la compra: ${error.message}`);
+      } finally {
+        this.btnConfirmCheckout.disabled = false;
+        this.btnConfirmCheckout.innerHTML = 'Confirmar Compra <i class="fas fa-check-circle fa-lg"></i>';
+      }
+    }
+
+    async mostrarFactura(factura) {
     try {
-      const nombre = document.getElementById('checkoutNombre').value;
-      const telefono = document.getElementById('checkoutTelefono').value;
-      const direccion = document.getElementById('checkoutDireccion').value;
-
-      if (!nombre || !telefono || !direccion) {
-        alert('Por favor, complete todos los campos del cliente.');
-        return;
+      if (!factura || !factura.detalles || !Array.isArray(factura.detalles)) {
+        throw new Error('Datos de factura inválidos');
       }
-
-      // Deshabilitar el botón mientras se procesa
-      this.btnConfirmCheckout.disabled = true;
-      this.btnConfirmCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-
-      // 1. Crear y guardar el cliente
-      const clienteData = {
-        nombre: nombre,
-        telefono: telefono,
-        direccion: direccion
-      };
-
-      const nuevoCliente = await this.clienteService.agregarCliente(clienteData);
-
-      if (!nuevoCliente) {
-        throw new Error('El cliente no pudo ser registrado.');
+  
+      const invoiceModal = document.getElementById('invoiceModal');
+      const invoiceDetails = document.getElementById('invoiceDetails');
+  
+      if (!invoiceModal || !invoiceDetails) {
+        throw new Error('Elementos del modal de factura no encontrados');
       }
-
-      console.log('Cliente creado:', nuevoCliente); // Debug
-
-      // 2. Generar la factura con el cliente y el carrito
-      const carrito = app.carritoController.carrito;
-      const factura = await this.facturaService.generarFactura(nuevoCliente, carrito);
-
-      if (!factura) {
-        throw new Error('La factura no pudo ser generada. Verifique el stock disponible.');
-      }
-
-      // 3. Mostrar mensaje de éxito
-      const modal = this.checkoutSection;
-      modal.classList.add('fade-out');
-
-      // Esperar la animación
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // 4. Ocultar checkout y mostrar factura
-      this.ocultarCheckoutModal();
-      await this.mostrarFactura(factura);
-
-      // 5. Limpiar carrito y actualizar UI
-      carrito.vaciarCarrito();
-      app.tiendaController.actualizarContadorCarrito();
-      this.limpiarFormularioCliente();
-
+  
+      // Generate invoice HTML
+      const detallesHTML = factura.detalles.map(item => {
+        if (!item.nombre || !item.cantidad || !item.precio) {
+          console.warn('Item con datos incompletos:', item);
+          return '';
+        }
+        const subtotal = item.precio * item.cantidad;
+        return `
+          <tr>
+            <td>${item.nombre}</td>
+            <td class="text-center">${item.cantidad}</td>
+            <td class="text-right">$${item.precio.toFixed(2)}</td>
+            <td class="text-right">$${subtotal.toFixed(2)}</td>
+          </tr>
+        `;
+      }).filter(html => html !== '').join('');
+  
+      const facturaHTML = `
+        <div class="invoice-content">
+          <div class="invoice-header">
+            <h2>Factura #${factura.id || 'N/A'}</h2>
+            <p>Fecha: ${factura.fecha ? new Date(factura.fecha).toLocaleDateString() : new Date().toLocaleDateString()}</p>
+          </div>
+          
+          <div class="invoice-client">
+            <h3>Cliente</h3>
+            <p>Nombre: ${factura.clienteNombre || 'N/A'}</p>
+            <p>Teléfono: ${factura.clienteTelefono || 'N/A'}</p>
+            <p>Dirección: ${factura.clienteDireccion || 'N/A'}</p>
+          </div>
+          
+          <div class="invoice-details">
+            <table class="invoice-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-right">Precio Unit.</th>
+                  <th class="text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${detallesHTML}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                  <td class="text-right"><strong>$${(factura.total || 0).toFixed(2)}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      `;
+  
+      invoiceDetails.innerHTML = facturaHTML;
+  
+      // Show modal with animation
+      invoiceModal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        invoiceModal.classList.add('show');
+        document.body.classList.add('modal-open');
+      });
+  
     } catch (error) {
-      console.error('Error durante el checkout:', error);
-      alert(`Error al confirmar la compra: ${error.message}`);
-    } finally {
-      this.btnConfirmCheckout.disabled = false;
-      this.btnConfirmCheckout.innerHTML = 'Confirmar Compra <i class="fas fa-check-circle fa-lg"></i>';
+      console.error('Error al mostrar la factura:', error);
+      console.error('Datos de factura recibidos:', factura);
+      alert('Error al mostrar la factura: ' + error.message);
     }
   }
-
-async mostrarFactura(factura) {
-  try {
-    const invoiceModal = document.getElementById('invoiceModal');
-    const invoiceDetails = document.getElementById('invoiceDetails');
-
-    // Generate invoice HTML
-    const detallesHTML = factura.items.map(item => `
-      <tr>
-        <td>${item.nombre}</td>
-        <td class="text-center">${item.cantidad}</td>
-        <td class="text-right">$${item.precio.toFixed(2)}</td>
-        <td class="text-right">$${item.subtotal.toFixed(2)}</td>
-      </tr>
-    `).join('');
-
-    const facturaHTML = `
-      <div class="invoice-content">
-        <div class="invoice-header">
-          <h2>Factura #${factura.id}</h2>
-          <p>Fecha: ${new Date(factura.fecha).toLocaleDateString()}</p>
-        </div>
-        
-        <div class="invoice-client">
-          <h3>Cliente</h3>
-          <p>Nombre: ${factura.cliente.nombre}</p>
-          <p>Teléfono: ${factura.cliente.telefono}</p>
-          <p>Dirección: ${factura.cliente.direccion}</p>
-        </div>
-        
-        <div class="invoice-details">
-          <table class="invoice-table">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th class="text-center">Cantidad</th>
-                <th class="text-right">Precio Unit.</th>
-                <th class="text-right">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${detallesHTML}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                <td class="text-right"><strong>$${factura.total.toFixed(2)}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-    `;
-
-    invoiceDetails.innerHTML = facturaHTML;
-
-    // Show modal with animation
-    invoiceModal.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      invoiceModal.classList.add('show');
-      document.body.classList.add('modal-open');
-    });
-
-  } catch (error) {
-    console.error('Error al mostrar la factura:', error);
-    alert('Error al mostrar la factura: ' + error.message);
-  }
-}
 
 cerrarFactura() {
   const invoiceModal = document.getElementById('invoiceModal');

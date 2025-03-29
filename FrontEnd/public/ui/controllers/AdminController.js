@@ -973,7 +973,8 @@ class AdminController {
         // Obtener ,  nombre de Cliente
         //const clienteNombre = await this.facturaService.obtenerNombreCliente(venta.cliente); //
         const cliente = await this.clienteService.obtenerClientePorId(venta.cliente);
-        const clienteNombre = cliente ? cliente.nombre : 'Cliente Desconocido'; // Si no existe, pone
+
+        const clienteNombre = cliente ? cliente.nombre : 'Cliente Desconocido'; 
         // Convertir a un  formato
         const fecha = new Date(venta.fecha).toLocaleDateString();  //Formato legible
         // Crea elemento HTML <tr> fila!
