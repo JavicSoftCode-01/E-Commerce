@@ -1,11 +1,11 @@
 // FrontEnd/ui/controllers/AdminController.js
-import {app} from '../AppFactory.js';
-import {Categoria} from '../../../../BackEnd/src/models/Categoria.js';
-import {Marca} from '../../../../BackEnd/src/models/Marca.js';
-import {Proveedor} from '../../../../BackEnd/src/models/Proveedor.js';
-import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
-import {Producto} from '../../../../BackEnd/src/models/Producto.js';
-import {appService} from '../services/UшымтаService.js';
+import { app } from '../AppFactory.js';
+import { Categoria } from '../../../../BackEnd/src/models/Categoria.js';
+import { Marca } from '../../../../BackEnd/src/models/Marca.js';
+import { Proveedor } from '../../../../BackEnd/src/models/Proveedor.js';
+import { Cliente } from '../../../../BackEnd/src/models/Cliente.js';
+import { Producto } from '../../../../BackEnd/src/models/Producto.js';
+import { appService } from '../services/UшымтаService.js';
 import { InvoiceTemplate } from './InvoicePlantilla.js';
 
 
@@ -114,7 +114,7 @@ class AdminController {
     //Ocultar otros
     document.getElementById('tienda').classList.add('hidden');
     document.getElementById('cartSection').classList.add('hidden');
-   // document.getElementById('checkoutSection').classList.add('hidden');
+    // document.getElementById('checkoutSection').classList.add('hidden');
     this.adminSection.classList.remove('hidden');
     this.cargarSeccionAdmin('categorias');  // Por defecto
   }
@@ -164,11 +164,12 @@ class AdminController {
       categorias.forEach(categoria => {
         const tr = document.createElement('tr');   // row
         tr.innerHTML = `
-               <td>${categoria.id}</td>
-                <td>${categoria.nombre}</td>
-            <td class="action-buttons">
-                 <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">Editar</button>
-                 <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">Eliminar</button>
+                <td class="text-center">${categoria.nombre}</td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center">${categoria.iconTrueFalse()}</td>
+                <td class="action-buttons" style="height: 100px;">
+                 <button class="action-button edit-button edit-categoria" data-id="${categoria.id}"><i class="fa-solid fa-pencil fa-lg delete" data-id="${categoria.id}"></i></button>
+                 <button class="action-button delete-button delete-categoria" data-id="${categoria.id}"><i class="fa-solid fa-trash-can fa-lg edit" data-id="${categoria.id}"></i></button>
                 </td>
           `;
         this.tablaCategorias.appendChild(tr);  // Append, al tbody!
@@ -287,12 +288,13 @@ class AdminController {
       marcas.forEach(marca => {
         const tr = document.createElement('tr');   // row
         tr.innerHTML = `
-                     <td>${marca.id}</td>
-                   <td>${marca.nombre}</td>
-                     <td class="action-buttons">
-                        <button class="action-button edit-button edit-marca" data-id="${marca.id}">Editar</button>
-                         <button class="action-button delete-button delete-marca" data-id="${marca.id}">Eliminar</button>
-                     </td>
+                <td class="text-center">${marca.nombre}</td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center">${marca.iconTrueFalse()}</td>
+                <td class="action-buttons" style="height: 100px;">
+                 <button class="action-button edit-button edit-marca" data-id="${marca.id}"><i class="fa-solid fa-pencil fa-lg delete" data-id="${marca.id}"></i></button>
+                 <button class="action-button delete-button delete-marca" data-id="${marca.id}"><i class="fa-solid fa-trash-can fa-lg edit" data-id="${marca.id}"></i></button>
+                </td>
                `;
         this.tablaMarcas.appendChild(tr);  // Append, al tbody!
       });
@@ -427,14 +429,30 @@ class AdminController {
       proveedores.forEach(proveedor => {
         const tr = document.createElement('tr');   // row
         tr.innerHTML = `
-               <td>${proveedor.id}</td>
-                <td>${proveedor.nombre}</td>
-               <td>${proveedor.telefono}</td>
-               <td>${proveedor.direccion}</td>
-                <td class="action-buttons">
-                     <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}">Editar</button>
-                    <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}">Eliminar</button>
-               </td>
+               <td class="text-center">${proveedor.nombre}</td>
+
+              <td class="text-center">
+                <!-- Llamada telefónica -->
+                <a href="tel:${proveedor.telefono}" title="${proveedor.telefono}" style="font-size: 22px;">
+                  <i class="fa fa-phone fa-lg"></i>
+                </a>
+
+                &nbsp;&nbsp;&nbsp; 
+
+                <!-- WhatsApp -->
+                <a style="font-size: 25px;"          title="${proveedor.telefono}"
+                  href="whatsapp://send?phone=${proveedor.telefono}" 
+                  title="Chatear por WhatsApp">
+                  <i class="fa-brands fa-whatsapp fa-lg"></i>
+                </a>
+              </td>
+
+                <td class="text-center">${proveedor.direccion}</td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center">${proveedor.iconTrueFalse()}</td>
+                <td class="action-buttons " style="height: 100px;">
+                 <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${proveedor.id}"></i></button>
+                 <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${proveedor.id}"></i></button>
                 </td>
           `;
         this.tablaProveedores.appendChild(tr);  // Append, al tbody!
@@ -572,14 +590,31 @@ class AdminController {
       clientes.forEach(cliente => {
         const tr = document.createElement('tr');   // row
         tr.innerHTML = `
-                   <td>${cliente.id}</td>
-                <td>${cliente.nombre}</td>
-                 <td>${cliente.telefono}</td>
-               <td>${cliente.direccion}</td>
-                    <td class="action-buttons">
-                        <button class="action-button edit-button edit-cliente" data-id="${cliente.id}">Editar</button>
-                     <button class="action-button delete-button delete-cliente" data-id="${cliente.id}">Eliminar</button>
-                  </td>
+                 <td class="text-center">${cliente.nombre}</td>
+
+              <td class="text-center">
+                <!-- Llamada telefónica -->
+                <a href="tel:${cliente.telefono}" title="${cliente.telefono}" style="font-size: 22px;">
+                  <i class="fa fa-phone fa-lg"></i>
+                </a>
+
+                &nbsp;&nbsp;&nbsp; 
+
+                <!-- WhatsApp -->
+                <a style="font-size: 25px;"  title="${cliente.telefono}"
+                  href="whatsapp://send?phone=${cliente.telefono}" 
+                  title="Chatear por WhatsApp">
+                  <i class="fa-brands fa-whatsapp fa-lg"></i>
+                </a>
+              </td>
+
+                <td class="text-center">${cliente.direccion}</td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center">${cliente.iconTrueFalse()}</td>
+                <td class="action-buttons " style="height: 100px;">
+                 <button class="action-button edit-button edit-cliente" data-id="${cliente.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${cliente.id}"></i></button>
+                 <button class="action-button delete-button delete-cliente" data-id="${cliente.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${cliente.id}"></i></button>
+                </td>
                 `;
         this.tablaClientes.appendChild(tr);  // Append, al tbody!
       });
@@ -685,6 +720,7 @@ class AdminController {
     } //Finaliza TRY-CATCH
   } //CIERRA METODO  guardarCliente()
   // Reset
+
   resetFormCliente() {
     this.clienteIdInput.value = '';
     this.clienteNombreInput.value = '';
@@ -695,57 +731,53 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Productos
   //---------------------------------------------------
-async cargarProductos() {
+  async cargarProductos() {
     try {
-        const productos = await this.productoService.obtenerProductos();
-        
-        // Asegurarse de que tablaProductos existe
-        if (!this.tablaProductos) {
-            console.error('Error: tablaProductos no encontrada');
-            return;
-        }
-        
-        this.tablaProductos.innerHTML = '';
-        
-        if (!Array.isArray(productos)) {
-            console.error('Error: El resultado de obtenerProductos no es un array.');
-            return;
-        }
+      const productos = await this.productoService.obtenerProductos();
 
-        productos.forEach(producto => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${producto.id}</td>
-                <td style="width: 50px; height: 50px; border-radius: 50%">
-                    <img src="${producto.imagen}" alt="${producto.nombre}">
-                </td>
-                <td>${producto.nombre}</td>
-                <td>${producto.categoriaNombre}</td>
-                <td>${producto.marcaNombre}</td>
-                <td>$${producto.pvp.toFixed(2)}</td>
-                <td>${producto.proveedorNombre}</td>
-                <td>${producto.stock}</td>
-                <td class="action-buttons">
-                    <button class="action-button edit-button edit-producto" data-id="${producto.id}">Editar</button>
-                    <button class="action-button delete-button delete-producto" data-id="${producto.id}">Eliminar</button>
+      // Asegurarse de que tablaProductos existe
+      if (!this.tablaProductos) {
+        console.error('Error: tablaProductos no encontrada');
+        return;
+      }
+
+      this.tablaProductos.innerHTML = '';
+
+      if (!Array.isArray(productos)) {
+        console.error('Error: El resultado de obtenerProductos no es un array.');
+        return;
+      }
+
+      productos.forEach(producto => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+                <td class="text-center">${producto.nombre}</td>
+                <td class="text-center">${producto.proveedorNombre}</td>
+                <td class="text-center">${producto.stock}</td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+        
+                <td class="text-center">${producto.estado? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>'}</td>
+                <td class="action-buttons " style="height: 100px;">
+                    <button class="action-button edit-button edit-producto" data-id="${producto.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${producto.id}"></i></button>
+                    <button class="action-button delete-button delete-producto" data-id="${producto.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${producto.id}"></i></button>
                 </td>
             `;
-            this.tablaProductos.appendChild(tr);
-        });
+        this.tablaProductos.appendChild(tr);
+      });
 
-        // Configurar los listeners después de cargar los productos
-        this.setupProductoListeners();
-        
-        // Actualizar la vista de la tienda si está visible
-        if (!document.getElementById('tienda').classList.contains('hidden')) {
-            await app.tiendaController.cargarProductos();
-        }
+      // Configurar los listeners después de cargar los productos
+      this.setupProductoListeners();
+
+      // Actualizar la vista de la tienda si está visible
+      if (!document.getElementById('tienda').classList.contains('hidden')) {
+        await app.tiendaController.cargarProductos();
+      }
 
     } catch (error) {
-        console.error("Hubo un error obteniendo los productos:", error);
-        alert("Error al cargar los productos");
+      console.error("Hubo un error obteniendo los productos:", error);
+      alert("Error al cargar los productos");
     }
-}
+  }
 
   setupProductoListeners() {
     // Editar
@@ -971,7 +1003,7 @@ async cargarProductos() {
 
 
     } catch (error) {     // Errores
-                          //Feedback, si falla.
+      //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }
@@ -980,124 +1012,185 @@ async cargarProductos() {
   //-------------------------
   //Ventas (Historial)
   //-------------------------
- async cargarVentas() {
+  async cargarVentas() {
     try {
-        const tablaVentas = document.querySelector('#tablaVentas tbody');
-        const facturas = await this.facturaService.obtenerFacturas();
-        
-        if (!tablaVentas) {
-            console.error('Tabla de ventas no encontrada');
-            return;
+      const tablaVentas = document.querySelector('#tablaVentas tbody');
+      const facturas = await this.facturaService.obtenerFacturas();
+
+      if (!tablaVentas) {
+        console.error('Tabla de ventas no encontrada');
+        return;
+      }
+
+      tablaVentas.innerHTML = '';
+
+      for (const factura of facturas) {
+        // Verificar que factura y clienteId existan
+        if (!factura || !factura.clienteId) {
+          console.warn('Factura inválida o sin clienteId:', factura);
+          continue;
         }
 
-        tablaVentas.innerHTML = '';
+        // Obtener cliente
+        const cliente = await this.clienteService.obtenerClientePorId(factura.clienteId);
 
-        for (const factura of facturas) {
-            // Verificar que factura y clienteId existan
-            if (!factura || !factura.clienteId) {
-                console.warn('Factura inválida o sin clienteId:', factura);
-                continue;
-            }
-
-            // Obtener cliente
-            const cliente = await this.clienteService.obtenerClientePorId(factura.clienteId);
-            
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${factura.numeroFactura || 'N/A'}</td>
-                <td>${new Date(factura.fecha).toLocaleDateString()}</td>
-                <td>${factura.clienteNombre || 'Cliente desconocido'}</td>
-                <td>$${factura.total?.toFixed(2) || '0.00'}</td>
-                <td class="action-buttons">
-                    <button class="action-button view-button ver-factura" 
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+                <td class="text-center">${factura.numeroFactura || 'N/A'}</td>
+                <td class="text-center">${factura.clienteNombre || 'Cliente desconocido'}</td>
+                <td class="text-center">$${factura.total?.toFixed(2) || '0.00'}</td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center">${factura.estado ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>'}</td>
+                
+                <td class="action-buttons " style="height: 100px;">
+                    <button class="action-button view-button ver-factura print-btn" 
                             data-factura-id="${factura.id}" 
                             data-cliente-id="${factura.clienteId}">
-                        Ver Factura
+                        <i class="fa-solid fa-print fa-lg"></i>
                     </button>
                 </td>
             `;
-            tablaVentas.appendChild(tr);
-        }
+        tablaVentas.appendChild(tr);
+      }
 
-        this.setupVentasListeners();
+      this.setupVentasListeners();
     } catch (error) {
-        console.error('Error al cargar ventas:', error);
+      console.error('Error al cargar ventas:', error);
     }
-}
+  }
 
   // Metodo Setup para eventos dentro de la Tabla, para: Boton!
-// En AdminController.js
+  // En AdminController.js
 
-// En CheckoutController.js
-async mostrarFactura(factura) {
-  try {
+  // En CheckoutController.js
+  async mostrarFactura(factura) {
+    try {
+      // Validación inicial de la factura
       if (!factura) {
-          throw new Error('Datos de factura no válidos');
+        throw new Error('Datos de factura no válidos');
       }
 
       const invoiceModal = document.getElementById('invoiceModal');
       const invoiceDetails = document.getElementById('invoiceDetails');
-      
+
       if (!invoiceModal || !invoiceDetails) {
-          throw new Error('Elementos del modal no encontrados');
+        console.error('Elementos del modal de factura (invoiceModal o invoiceDetails) no encontrados en el DOM.');
+        throw new Error('Elementos del modal de factura no encontrados.');
       }
 
-      // Usar la plantilla de factura con esPreview = false para mostrar datos existentes
-      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false);
+      // Generar el HTML de la factura usando la plantilla
+      // Asegúrate de que InvoiceTemplate.generarHTML maneje correctamente la data
+      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false); // false indica que no es preview
 
-      // Mostrar el modal
+      // --- Inicio de la Lógica de Animación Corregida ---
+
+      // 1. Hacer el modal parte del layout (eliminar display: none)
       invoiceModal.classList.remove('hidden');
-      invoiceModal.classList.add('show');
+
+      // 2. Bloquear el scroll del body
       document.body.classList.add('modal-open');
 
-  } catch (error) {
-      console.error('Error al mostrar factura:', error);
-      alert('Error al mostrar la factura: ' + error.message);
-  }
-}
+      // 3. Usar requestAnimationFrame para aplicar la clase 'show' en el siguiente ciclo de pintura.
+      //    Esto permite que el navegador registre el estado inicial (opacity: 0, scale: 0.95)
+      //    antes de aplicar el estado final (opacity: 1, scale: 1), habilitando la transición CSS.
+      requestAnimationFrame(() => {
+        invoiceModal.classList.add('show');
+      });
 
-setupVentasListeners() {
+      // --- Fin de la Lógica de Animación Corregida ---
+
+    } catch (error) {
+      console.error('Error detallado al mostrar factura:', error);
+      // Mostrar un mensaje más útil al usuario si es apropiado
+      alert(`Error al intentar mostrar la factura: ${error.message}. Revise la consola para más detalles.`);
+    }
+  }
+
+  // El resto de tu código (setupVentasListeners, etc.) permanece igual
+  setupVentasListeners() {
     const tabla = document.getElementById('tablaVentas');
-    if (!tabla) return;
+    if (!tabla) {
+      console.warn("Elemento #tablaVentas no encontrado para añadir listeners.");
+      return;
+    }
 
     tabla.addEventListener('click', async (e) => {
-        const button = e.target.closest('.ver-factura');
-        if (!button) return;
+      const button = e.target.closest('.ver-factura');
+      if (!button) return; // No se hizo clic en el botón deseado
 
-        try {
-            const facturaId = parseInt(button.dataset.facturaId);
-            const clienteId = parseInt(button.dataset.clienteId);
+      // Deshabilitar temporalmente el botón para evitar clics múltiples
+      button.disabled = true;
+      const originalText = button.textContent;
+      button.textContent = 'Cargando...';
 
-            if (!facturaId || !clienteId) {
-                throw new Error('ID de factura o cliente inválido');
-            }
+      try {
+        // Validar IDs antes de usarlos
+        const facturaIdStr = button.dataset.facturaId;
+        const clienteIdStr = button.dataset.clienteId;
 
-            const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
-            if (!factura) {
-                throw new Error('Factura no encontrada');
-            }
-
-            const cliente = await this.clienteService.obtenerClientePorId(clienteId);
-            if (!cliente) {
-                throw new Error('Cliente no encontrado');
-            }
-
-            // Combinar datos de factura y cliente
-            const facturaCompleta = {
-                ...factura,
-                clienteNombre: cliente.nombre,
-                clienteTelefono: cliente.telefono,
-                clienteDireccion: cliente.direccion
-            };
-
-            await this.mostrarFactura(facturaCompleta);
-
-        } catch (error) {
-            console.error('Error al mostrar factura:', error);
-            alert('Error al cargar la factura: ' + error.message);
+        if (!facturaIdStr || !clienteIdStr) {
+          throw new Error('Faltan los atributos data-factura-id o data-cliente-id en el botón.');
         }
+
+        const facturaId = parseInt(facturaIdStr, 10);
+        const clienteId = parseInt(clienteIdStr, 10);
+
+        // Verificar si la conversión fue exitosa
+        if (isNaN(facturaId) || isNaN(clienteId)) {
+          throw new Error('ID de factura o cliente inválido en los atributos data-* (no es un número).');
+        }
+
+        // Obtener datos (asumiendo que this.facturaService y this.clienteService están disponibles en este contexto)
+        const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
+        if (!factura) {
+          throw new Error(`Factura con ID ${facturaId} no encontrada.`);
+        }
+
+        const cliente = await this.clienteService.obtenerClientePorId(clienteId);
+        if (!cliente) {
+          // Podrías decidir continuar sin cliente o mostrar error. Aquí lanzamos error.
+          throw new Error(`Cliente con ID ${clienteId} no encontrado para la factura ${facturaId}.`);
+        }
+
+        // Combinar datos de factura y cliente para la plantilla
+        const facturaCompleta = {
+          ...factura,
+          // Asegúrate de que los nombres de propiedad coincidan con lo esperado por InvoiceTemplate.generarHTML
+          clienteNombre: cliente.nombre,
+          clienteTelefono: cliente.telefono,
+          clienteDireccion: cliente.direccion,
+          // Añade cualquier otro campo de cliente que necesite la plantilla
+        };
+
+        // Llamar a la función corregida para mostrar la factura con animación
+        await this.mostrarFactura(facturaCompleta); // La función ahora maneja la animación
+
+      } catch (error) {
+        console.error('Error al procesar clic en Ver Factura:', error);
+        alert('Error al cargar la factura: ' + error.message);
+      } finally {
+        // Rehabilitar el botón y restaurar su texto, independientemente de si hubo error o no
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     });
-}
+  }
+
+  // Asegúrate de tener también la función para cerrar el modal de factura (parece que ya la tienes en CheckoutController, podría ser reutilizada o copiada si AdminController es una clase separada)
+  // Ejemplo (si es necesario duplicarla o refactorizarla a una clase Utils/UI):
+  cerrarFactura() {
+    const invoiceModal = document.getElementById('invoiceModal');
+    if (!invoiceModal) return; // Seguridad
+
+    // Inicia animación de salida quitando 'show'
+    invoiceModal.classList.remove('show');
+    document.body.classList.remove('modal-open'); // Permitir scroll de nuevo
+
+    // Esperar que termine la transición CSS (0.3s = 300ms) antes de ocultar con display: none
+    setTimeout(() => {
+      invoiceModal.classList.add('hidden');
+    }, 300);
+  }
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.
@@ -1110,4 +1203,4 @@ const adminController = new AdminController(
   app.facturaService
 );
 
-export {adminController};
+export { adminController };

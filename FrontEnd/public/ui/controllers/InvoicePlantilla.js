@@ -1,45 +1,41 @@
 export class InvoiceTemplate {
-    static #ultimoNumeroFactura = parseInt(localStorage.getItem('ultimoNumeroFactura') || '0');
+  static #ultimoNumeroFactura = parseInt(localStorage.getItem('ultimoNumeroFactura') || '0');
 
-    static async generarNumeroFactura() {
-        const fecha = new Date();
-        const año = fecha.getFullYear();
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        
-        // Incrementar el número secuencial
-        this.#ultimoNumeroFactura++;
-        const secuencial = String(this.#ultimoNumeroFactura).padStart(4, '0');
-        
-        // Guardar inmediatamente el nuevo número
-        localStorage.setItem('ultimoNumeroFactura', this.#ultimoNumeroFactura.toString());
-        
-        return {
-            numero: `FAC-${año}-${mes}-${dia}-${secuencial}`,
-            fecha: fecha,
-            hora: this.formatearHora(fecha)
-        };
-    }
+  static async generarNumeroFactura() {
+    const fecha = new Date();
+    const año = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
 
-    // Añadir método para confirmar el uso del número
-    static confirmarNumeroFactura() {
-        localStorage.setItem('ultimoNumeroFactura', this.#ultimoNumeroFactura.toString());
-    }
+    // Generar número aleatorio de 4 dígitos
+    const secuencial = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
 
-    static formatearHora(fecha) {
-        const hours = fecha.getHours();
-        const minutes = fecha.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 || 12;
-        return `${formattedHours}:${String(minutes).padStart(2, '0')} ${ampm}`;
-    }
+    return {
+      numero: `FAC-${año}-${mes}-${dia}-${secuencial}`,
+      fecha: fecha,
+      hora: this.formatearHora(fecha)
+    };
+  }
 
-    static generarHTML(factura, esPreview = false) {
-        const fecha = new Date(factura.fecha || new Date());
-        const numeroFactura = factura.numeroFactura || 'PREVIEW';
-        const horaFormateada = this.formatearHora(fecha);
+  // Añadir método para confirmar el uso del número
+  static confirmarNumeroFactura() {
+    localStorage.setItem('ultimoNumeroFactura', this.#ultimoNumeroFactura.toString());
+  }
 
-        const detallesHTML = factura.detalles?.map(item => `
+  static formatearHora(fecha) {
+    const hours = fecha.getHours();
+    const minutes = fecha.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${String(minutes).padStart(2, '0')} ${ampm}`;
+  }
+
+  static generarHTML(factura, esPreview = false) {
+    const fecha = new Date(factura.fecha || new Date());
+    const numeroFactura = factura.numeroFactura || 'PREVIEW';
+    const horaFormateada = this.formatearHora(fecha);
+
+    const detallesHTML = factura.detalles?.map(item => `
             <tr>
                 <td class="text-center">
                     ${item.imagen ? `<img src="${item.imagen}" alt="${item.nombre}" style="width:60px; height:70px; object-fit:cover; border-radius:50%">` : 'N/A'}
@@ -51,7 +47,7 @@ export class InvoiceTemplate {
             </tr>
         `).join('') || '';
 
-        return `
+    return `
         <div class="invoice-content">
             <div class="invoice-header">
                 <div class="invoice-header-content">
@@ -61,7 +57,7 @@ export class InvoiceTemplate {
                     </div>
                     <div class="invoice-info">
                         <div class="invoice-details">
-                            <p>No. Factura: <span id="invoiceNumber">${numeroFactura}</span></p>
+                            <p><span id="invoiceNumber">${numeroFactura}</span></p>
                             <p>Fecha: <span id="currentDate">${fecha.toLocaleDateString()}</span></p>
                             <p>Hora: <span id="currentTime">${horaFormateada}</span></p>
                         </div>
@@ -126,5 +122,5 @@ export class InvoiceTemplate {
                 </div>
             </div>
         </div>`;
-    }
+  }
 }

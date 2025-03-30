@@ -6,491 +6,494 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lunaire E-Commerce</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link rel="stylesheet" href="./../css/styles.css">
 </head>
 
 <body>
 
-  <!-- Navegación -->
-  <header>
-    <div class="nav-container">
-      <div class="logo">Lunaire</div>
-      <div class="nav-buttons">
-        <button id="btnTienda">Tienda</button>
-        <button id="btnAdmin">Panel Admin</button>
-        <button id="btnCarrito" class="cart-icon">
-          <i class="fas fa-shopping-cart"></i> Carrito
-          <span class="cart-count" id="cartCount">0</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero Section Foto principal -->
-  <section class="hero">
-    <img src="../assets/img/Lunairesinmodelo.jpg" alt="Lunaire luxury cosmetics and accessories" class="hero-image">
-  </section>
-
-  <!-- Sección Tienda -->
-  <div id="tienda" class="container">
-    <h2>Catálogo de Productos</h2>
-
-    <!-- Barra de Búsqueda -->
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Buscar en Lunaire...">
-      <button id="searchButton"><i class="fas fa-search"></i> Buscar</button>
-    </div>
-
-    <!-- Filtros y Ordenamiento -->
-    <div class="filters">
-      <select id="filterCategoria">
-        <option value="">Todas las categorías</option>
-      </select>
-      <select id="filterMarca">
-        <option value="">Todas las marcas</option>
-      </select>
-      <select id="sortBy">
-        <option value="default">Ordenar por</option>
-        <option value="price-asc">Precio: Menor a Mayor</option>
-        <option value="price-desc">Precio: Mayor a Menor</option>
-        <option value="name-asc">Nombre: A-Z</option>
-        <option value="name-desc">Nombre: Z-A</option>
-      </select>
-    </div>
-
-    <!-- Productos -->
-    <div class="products" id="productList">
-      <!-- Productos se cargarán aquí vía JS -->
+<!-- Navegación -->
+<header>
+  <div class="nav-container">
+    <div class="logo">Lunaire</div>
+    <div class="nav-buttons">
+      <button id="btnTienda">Tienda</button>
+      <button id="btnAdmin">Panel Admin</button>
+      <button id="btnCarrito" class="cart-icon">
+        <i class="fas fa-shopping-cart"></i> Carrito
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
     </div>
   </div>
+</header>
 
-  <!-- Cart Section -->
-  <div id="cartModal" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Carrito <i class="fas fa-shopping-cart fa-lg"></i></h3>
-        <button class="modal-close" id="closeCartModal" aria-label="Cerrar">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="cartSection" class="cart">
-          <div class="table-responsive-container " id="cartTable">
+<!-- Hero Section Foto principal -->
+<section class="hero">
+  <img src="../assets/img/Lunairesinmodelo.jpg" alt="Lunaire luxury cosmetics and accessories" class="hero-image">
+</section>
 
-          </div>
+<!-- Sección Tienda -->
+<div id="tienda" class="container">
+  <h2>Catálogo de Productos</h2>
+
+  <!-- Barra de Búsqueda -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Buscar en Lunaire...">
+    <button id="searchButton"><i class="fas fa-search"></i> Buscar</button>
+  </div>
+
+  <!-- Filtros y Ordenamiento -->
+  <div class="filters">
+    <select id="filterCategoria">
+      <option value="">Todas las categorías</option>
+    </select>
+    <select id="filterMarca">
+      <option value="">Todas las marcas</option>
+    </select>
+    <select id="sortBy">
+      <option value="default">Ordenar por</option>
+      <option value="price-asc">Precio: Menor a Mayor</option>
+      <option value="price-desc">Precio: Mayor a Menor</option>
+      <option value="name-asc">Nombre: A-Z</option>
+      <option value="name-desc">Nombre: Z-A</option>
+    </select>
+  </div>
+
+  <!-- Productos -->
+  <div class="products" id="productList">
+    <!-- Productos se cargarán aquí vía JS -->
+  </div>
+</div>
+
+<!-- Cart Section Carrito de compra -->
+<div id="cartModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Carrito <i class="fas fa-shopping-cart fa-lg"></i></h3>
+      <button class="modal-close" id="closeCartModal" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cartSection" class="cart">
+        <div class="table-responsive-container " id="cartTable">
+
         </div>
       </div>
-      <div class="summary-item total-item">
-        <span>Total:</span>
-        <span id="cartTotal" class="checkoutTotal">$0.00</span>
-      </div>
+    </div>
+    <div class="summary-item total-item">
+      <span>Total:</span>
+      <span id="cartTotal" class="checkoutTotal">$0.00</span>
+    </div>
 
-      <div class="modal-footer" id="cartActions">
-        <button id="btnEmptyCart" class="btn btn-outline-danger btn-icon">
-          Carrito <i class="fas fa-trash-alt fa-lg"></i>
-        </button>
-        <button id="btnCheckout" class="btn btn-success btn-icon">
-          Pagar <i class="fas fa-credit-card fa-lg"></i>
-        </button>
-      </div>
+    <div class="modal-footer" id="cartActions">
+      <button id="btnEmptyCart" class="btn btn-outline-danger btn-icon">
+        Carrito <i class="fas fa-trash-alt fa-lg"></i>
+      </button>
+      <button id="btnCheckout" class="btn btn-success btn-icon">
+        Pagar <i class="fas fa-credit-card fa-lg"></i>
+      </button>
     </div>
   </div>
+</div>
 
-
-  <!-- Sección Checkout Mejorada -->
-  <div id="checkoutOverlay" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Factura</h3>
-        <button class="modal-close" id="closeCheckoutModal" aria-label="Cerrar">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="checkout-content">
-          <!-- Datos del Cliente -->
-          <div class="checkout-section">
-            <div class="invoice-header">
-              <div class="invoice-header-content">
-                <div class="company-logo">
-                  <h1 class="logo-text">LUNAIRE</h1>
-                  <p class="logo-tagline">Luxury Cosmetics & Accessories</p>
-                </div>
-                <div class="invoice-info">
-                  <div class="invoice-details">
-                    <p>No. Factura: <span id="invoiceNumber">--</span></p>
-                    <p>Fecha: <span id="currentDate">--</span></p>
-                    <p>Hora: <span id="currentTime">--</span></p>
-                  </div>
-                </div>
+<!-- Sección Checkout Mejorada Factura de vent-->
+<div id="checkoutOverlay" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Factura</h3>
+      <button class="modal-close" id="closeCheckoutModal" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="checkout-content">
+        <!-- Datos del Cliente -->
+        <div class="checkout-section">
+          <div class="invoice-header">
+            <div class="invoice-header-content">
+              <div class="company-logo">
+                <h1 class="logo-text">LUNAIRE</h1>
+                <p class="logo-tagline">Luxury Cosmetics & Accessories</p>
               </div>
-              <div class="client-info ">
-                <div class="info-group">
-                  <label>Cliente:</label>
-                  <input class="inputFac" type="text" id="checkoutNombre" required>
-                </div>
-                <div class="info-group">
-                  <label>Teléfono:</label>
-                  <input class="inputFac" type="tel" id="checkoutTelefono" maxlength="10" required>
-                </div>
-                <div class="info-group">
-                  <label>Dirección:</label>
-                  <input class="inputFac"  type="text" id="checkoutDireccion" required>
+              <div class="invoice-info">
+                <div class="invoice-details">
+                  <p>No. Factura: <span id="invoiceNumber">--</span></p>
+                  <p>Fecha: <span id="currentDate">--</span></p>
+                  <p>Hora: <span id="currentTime">--</span></p>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Resumen del Pedido -->
-          <div class="checkout-section" style="margin-top: -3rem;">
-            <h3 class="modal-title">Detalle factura</h3>
-
-            <div class="table-responsive-container">
-              <table id="checkoutCartTable" class="checkout-table">
-                <thead>
-                  <tr>
-                    <th class="text-center" style="font-size: 18px;">IMG</th>
-                    <th class="text-center" style="font-size: 18px;">Producto</th>
-                    <th class="text-center" style="font-size: 18px;">Cant.</th>
-                    <th class="text-center" style="font-size: 18px;">Valor</th>
-                    <th class="text-center" style="font-size: 18px;">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Los ítems se generarán dinámicamente -->
-                </tbody>
-              </table>
-            </div>
-
-            <div class="checkout-summary" id="checkoutSummary">
-              <div class="summary-item">
-                <span class="subtotal" style="font-size: 20px;">Subtotal:</span>
-                <span id="checkoutSubtotalValue" style="font-size: 18px;">$0.00</span>
+            <div class="client-info ">
+              <div class="info-group">
+                <label>Cliente:</label>
+                <input class="inputFac" type="text" id="checkoutNombre" required>
               </div>
-              <div class="summary-item">
-                <span class="envio" style="font-size: 20px;">Envío:</span>
-                <span id="checkoutShippingValue" style="font-size: 18px;">$0.00</span>
+              <div class="info-group">
+                <label>Teléfono:</label>
+                <input class="inputFac" type="tel" id="checkoutTelefono" maxlength="10" required>
               </div>
-              <hr class="summary-divider">
-              <div class="summary-item total-item">
-                <span>Total:</span>
-                <span id="checkoutTotal" class="checkoutTotal">$0.00</span>
+              <div class="info-group">
+                <label>Dirección:</label>
+                <input class="inputFac" type="text" id="checkoutDireccion" required>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Resumen del Pedido -->
+        <div class="checkout-section" style="margin-top: -3rem;">
+          <h3 class="modal-title">Detalle factura</h3>
+
+          <div class="table-responsive-container">
+            <table id="checkoutCartTable" class="checkout-table">
+              <thead>
+              <tr>
+                <th class="text-center" style="font-size: 18px;">IMG</th>
+                <th class="text-center" style="font-size: 18px;">Producto</th>
+                <th class="text-center" style="font-size: 18px;">Cant.</th>
+                <th class="text-center" style="font-size: 18px;">Valor</th>
+                <th class="text-center" style="font-size: 18px;">Subtotal</th>
+              </tr>
+              </thead>
+              <tbody>
+              <!-- Los ítems se generarán dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="checkout-summary" id="checkoutSummary">
+            <div class="summary-item">
+              <span class="subtotal" style="font-size: 20px;">Subtotal:</span>
+              <span id="checkoutSubtotalValue" style="font-size: 18px;">$0.00</span>
+            </div>
+            <div class="summary-item">
+              <span class="envio" style="font-size: 20px;">Envío:</span>
+              <span id="checkoutShippingValue" style="font-size: 18px;">$0.00</span>
+            </div>
+            <hr class="summary-divider">
+            <div class="summary-item total-item">
+              <span>Total:</span>
+              <span id="checkoutTotal" class="checkoutTotal">$0.00</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button id="btnCancelCheckout" class="btn btn-outline-danger btn-icon">
-          Cancelar <i class="fas fa-times-circle fa-lg"></i>
-        </button>
-        <button id="btnConfirmCheckout" class="btn btn-success btn-icon">
-          Confirmar <i class="fas fa-check-circle fa-lg"></i>
-        </button>
+    </div>
+    <div class="modal-footer">
+      <button id="btnCancelCheckout" class="btn btn-outline-danger btn-icon">
+        Cancelar <i class="fas fa-times-circle fa-lg"></i>
+      </button>
+      <button id="btnConfirmCheckout" class="btn btn-success btn-icon">
+        Confirmar <i class="fas fa-check-circle fa-lg"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sección Factura Historial -->
+<div id="invoiceModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Factura</h3>
+      <button class="modal-close" id="btnCloseInvoice" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="invoiceDetails">
+        <!-- Invoice content will be generated by JS -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="window.print()" class="btn btn-primary no-print">
+        <i class="fas fa-print"></i> Imprimir Factura
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sección Administrador -->
+<div id="admin" class="container hidden">
+  <h2>Panel Administrador</h2>
+
+  <div class="admin-tabs">
+    <div class="admin-tab active" data-tab="categorias"><i class="fas fa-tags"></i> Categorías</div>
+    <div class="admin-tab" data-tab="marcas"><i class="fas fa-bookmark"></i> Marcas</div>
+    <div class="admin-tab" data-tab="proveedores"><i class="fas fa-truck-loading"></i> Proveedores</div>
+    <div class="admin-tab" data-tab="clientes"><i class="fas fa-users"></i> Clientes</div>
+    <div class="admin-tab" data-tab="productos"><i class="fas fa-box-open"></i> Productos</div>
+    <div class="admin-tab" data-tab="ventas"><i class="fas fa-history"></i> Historial de Ventas</div>
+  </div>
+
+  <div class="admin-panel">
+
+    <div class="admin-section" id="adminCategorias">
+      <h3><i class="fas fa-tags"></i> Gestión de Categorías</h3>
+      <form id="formCategoria" class="needs-validation" novalidate>
+        <input type="hidden" id="categoriaId">
+        <div class="form-group">
+          <label for="categoriaNombre">Nombre de Categoría</label>
+          <input type="text" id="categoriaNombre" placeholder="Ej: Maquillaje, Cuidado Facial" required>
+          <div class="invalid-feedback">Por favor ingrese un nombre de categoría.</div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetCategoriaForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Categoría</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaCategorias" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Detalles</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminMarcas">
+      <h3><i class="fas fa-bookmark"></i> Gestión de Marcas</h3>
+      <form id="formMarca" class="needs-validation" novalidate>
+        <input type="hidden" id="marcaId">
+        <div class="form-group">
+          <label for="marcaNombre">Nombre de Marca</label>
+          <input type="text" id="marcaNombre" placeholder="Ej: L'Oréal, Maybelline" required>
+          <div class="invalid-feedback">Por favor ingrese un nombre de marca.</div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetMarcaForm" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Marca</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaMarcas" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Detalles</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminProveedores">
+      <h3><i class="fas fa-truck-loading"></i> Gestión de Proveedores</h3>
+      <form id="formProveedor" class="needs-validation" novalidate>
+        <input type="hidden" id="proveedorId">
+        <div class="form-group">
+          <label for="proveedorNombre">Nombre</label>
+          <input type="text" id="proveedorNombre" placeholder="Nombre Completo o Razón Social" required>
+          <div class="invalid-feedback">Por favor ingrese el nombre del proveedor.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="proveedorTelefono">Teléfono</label>
+            <input type="tel" id="proveedorTelefono" placeholder="Teléfono de contacto" maxlength="16">
+          </div>
+        <div class="form-group">
+          <label for="proveedorDireccion">Dirección</label>
+          <input type="text" id="proveedorDireccion" placeholder="Dirección Completa">
+        </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetProveedorForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Proveedor</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaProveedores" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Teléfono</th>
+            <th style="text-align: center; font-size: 20px;">Dirección</th>
+            <th style="text-align: center; font-size: 20px;">Detalles</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminClientes">
+      <h3><i class="fas fa-users"></i> Gestión de Clientes</h3>
+      <form id="formCliente" class="needs-validation" novalidate>
+        <input type="hidden" id="clienteId">
+        <div class="form-group">
+          <label for="clienteNombre">Nombres</label>
+          <input type="text" id="clienteNombre" placeholder="Nombre completo del cliente" required>
+          <div class="invalid-feedback">Por favor ingrese el nombre del cliente.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clienteTelefono">Teléfono</label>
+            <input type="tel" id="clienteTelefono" placeholder="Teléfono de contacto" required maxlength="16">
+            <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
+          </div>
+          <div class="form-group">
+            <label for="clienteDireccion">Dirección</label>
+            <input type="text" id="clienteDireccion" placeholder="Dirección completa de entrega" required>
+            <div class="invalid-feedback">Por favor ingrese la dirección.</div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetClienteForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cliente</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaClientes" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Teléfono</th>
+            <th style="text-align: center; font-size: 20px;">Dirección</th>
+            <th style="text-align: center; font-size: 20px;">Detalles</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminProductos">
+      <h3><i class="fas fa-box-open"></i> Gestión de Productos</h3>
+      <form id="formProducto" class="needs-validation" novalidate>
+        <input type="hidden" id="productoId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoNombre">Nombre del Producto</label>
+            <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
+            <div class="invalid-feedback">Ingrese el nombre del producto.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoStock">Stock</label>
+            <input type="number" id="productoStock" placeholder="Cantidad" min="0" required>
+            <div class="invalid-feedback">Ingrese el stock (0 o más).</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoPrecio">Costo</label>
+            <input type="number" id="productoPrecio" placeholder="Costo" step="0.01" min="0" required>
+            <div class="invalid-feedback">Ingrese costo del producto.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoPVP">Venta (PVP)</label>
+            <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
+            <div class="invalid-feedback">Ingrese precio de venta.</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoCategoria">Categoría</label>
+            <select id="productoCategoria" required>
+              <option value="" disabled selected>Seleccione Categoría</option>
+            </select>
+            <div class="invalid-feedback">Seleccione una categoría.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoMarca">Marca</label>
+            <select id="productoMarca" required>
+              <option value="" disabled selected>Seleccione Marca</option>
+            </select>
+            <div class="invalid-feedback">Seleccione una marca.</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoProveedor">Proveedor</label>
+            <select id="productoProveedor" required>
+              <option value="" disabled selected>Seleccione Proveedor</option>
+            </select>
+            <div class="invalid-feedback">Seleccione un proveedor.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoImagen">URL de Imagen</label>
+            <input type="url" id="productoImagen" placeholder="https://ejemplo.com/imagen.jpg">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="productoDescripcion">Descripción</label>
+          <textarea id="productoDescripcion" placeholder="Descripción detallada del producto (opcional)"
+                    rows="4"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetProductoForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" id="guardar-producto-btn"><i class="fas fa-save"></i> Guardar
+            Producto
+          </button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaProductos" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Prod</th>
+            <th style="text-align: center; font-size: 20px;">Proveedor</th>
+            <th style="text-align: center; font-size: 20px;">Stock</th>
+            <th style="text-align: center; font-size: 20px;">Detalles</th>
+            <th style="text-align: center; font-size: 20px;">Est</th>
+            <th style="text-align: center; font-size: 20px;">Acc</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminVentas">
+      <h3><i class="fas fa-history"></i> Historial de Ventas</h3>
+      <div class="table-responsive-container">
+        <table id="tablaVentas" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Factura #</th>
+<!--            <th style="text-align: center; font-size: 20px;">Fecha</th>-->
+            <th style="text-align: center; font-size: 20px;">Cliente</th>
+            <th style="text-align: center; font-size: 20px;">Total</th>
+            <th style="text-align: center; font-size: 20px;">Detalles</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Sección Factura -->
-  <div id="invoiceModal" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Factura</h3>
-        <button class="modal-close" id="btnCloseInvoice" aria-label="Cerrar">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="invoiceDetails">
-          <!-- Invoice content will be generated by JS -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button onclick="window.print()" class="btn btn-primary no-print">
-          <i class="fas fa-print"></i> Imprimir Factura
-        </button>
-      </div>
-    </div>
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p><strong>© 2024 JavicSoftCode
+    </strong> E-Commerce. Lunaire.</p>
   </div>
+</footer>
 
-  <!-- Sección Administrador -->
-  <div id="admin" class="container hidden">
-    <h2>Panel Administrador</h2>
-
-    <div class="admin-tabs">
-      <div class="admin-tab active" data-tab="categorias"><i class="fas fa-tags"></i> Categorías</div>
-      <div class="admin-tab" data-tab="marcas"><i class="fas fa-bookmark"></i> Marcas</div>
-      <div class="admin-tab" data-tab="proveedores"><i class="fas fa-truck-loading"></i> Proveedores</div>
-      <div class="admin-tab" data-tab="clientes"><i class="fas fa-users"></i> Clientes</div>
-      <div class="admin-tab" data-tab="productos"><i class="fas fa-box-open"></i> Productos</div>
-      <div class="admin-tab" data-tab="ventas"><i class="fas fa-history"></i> Historial de Ventas</div>
-    </div>
-
-    <div class="admin-panel">
-      <div class="admin-section" id="adminCategorias">
-        <h3><i class="fas fa-tags"></i> Gestión de Categorías</h3>
-        <form id="formCategoria" class="needs-validation" novalidate>
-          <input type="hidden" id="categoriaId">
-          <div class="form-group">
-            <label for="categoriaNombre">Nombre de Categoría *</label>
-            <input type="text" id="categoriaNombre" placeholder="Ej: Maquillaje, Cuidado Facial" required>
-            <div class="invalid-feedback">Por favor ingrese un nombre de categoría.</div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetCategoriaForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Categoría</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaCategorias" class="table-admin">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminMarcas">
-        <h3><i class="fas fa-bookmark"></i> Gestión de Marcas</h3>
-        <form id="formMarca" class="needs-validation" novalidate>
-          <input type="hidden" id="marcaId">
-          <div class="form-group">
-            <label for="marcaNombre">Nombre de Marca *</label>
-            <input type="text" id="marcaNombre" placeholder="Ej: L'Oréal, Maybelline" required>
-            <div class="invalid-feedback">Por favor ingrese un nombre de marca.</div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetMarcaForm" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Marca</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaMarcas" class="table-admin">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminProveedores">
-        <h3><i class="fas fa-truck-loading"></i> Gestión de Proveedores</h3>
-        <form id="formProveedor" class="needs-validation" novalidate>
-          <input type="hidden" id="proveedorId">
-          <div class="form-group">
-            <label for="proveedorNombre">Nombre *</label>
-            <input type="text" id="proveedorNombre" placeholder="Nombre Completo o Razón Social" required>
-            <div class="invalid-feedback">Por favor ingrese el nombre del proveedor.</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="proveedorTelefono">Teléfono</label>
-              <input type="tel" id="proveedorTelefono" placeholder="Teléfono de contacto" maxlength="10">
-            </div>
-
-          </div>
-          <div class="form-group">
-            <label for="proveedorDireccion">Dirección</label>
-            <input type="text" id="proveedorDireccion" placeholder="Dirección Completa">
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetProveedorForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Proveedor</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaProveedores" class="table-admin">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-                <th>Dirección</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminClientes">
-        <h3><i class="fas fa-users"></i> Gestión de Clientes</h3>
-        <form id="formCliente" class="needs-validation" novalidate>
-          <input type="hidden" id="clienteId">
-          <div class="form-group">
-            <label for="clienteNombre">Nombre Completo *</label>
-            <input type="text" id="clienteNombre" placeholder="Nombre completo del cliente" required>
-            <div class="invalid-feedback">Por favor ingrese el nombre del cliente.</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="clienteTelefono">Teléfono *</label>
-              <input type="tel" id="clienteTelefono" placeholder="Teléfono de contacto" required maxlength="10">
-              <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
-            </div>
-            <div class="form-group">
-              <label for="clienteDireccion">Dirección *</label>
-              <input type="text" id="clienteDireccion" placeholder="Dirección completa de entrega" required>
-              <div class="invalid-feedback">Por favor ingrese la dirección.</div>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetClienteForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cliente</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaClientes" class="table-admin">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-                <th>Dirección</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminProductos">
-        <h3><i class="fas fa-box-open"></i> Gestión de Productos</h3>
-        <form id="formProducto" class="needs-validation" novalidate>
-          <input type="hidden" id="productoId">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoNombre">Nombre del Producto *</label>
-              <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
-              <div class="invalid-feedback">Ingrese el nombre del producto.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoStock">Stock *</label>
-              <input type="number" id="productoStock" placeholder="Cantidad" min="0" required>
-              <div class="invalid-feedback">Ingrese el stock (0 o más).</div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoPrecio">Precio Costo *</label>
-              <input type="number" id="productoPrecio" placeholder="Costo" step="0.01" min="0" required>
-              <div class="invalid-feedback">Ingrese el precio de costo.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoPVP">Precio Venta (PVP) *</label>
-              <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
-              <div class="invalid-feedback">Ingrese el precio de venta al público.</div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoCategoria">Categoría *</label>
-              <select id="productoCategoria" required>
-                <option value="" disabled selected>Seleccione Categoría</option>
-              </select>
-              <div class="invalid-feedback">Seleccione una categoría.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoMarca">Marca *</label>
-              <select id="productoMarca" required>
-                <option value="" disabled selected>Seleccione Marca</option>
-              </select>
-              <div class="invalid-feedback">Seleccione una marca.</div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoProveedor">Proveedor *</label>
-              <select id="productoProveedor" required>
-                <option value="" disabled selected>Seleccione Proveedor</option>
-              </select>
-              <div class="invalid-feedback">Seleccione un proveedor.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoImagen">URL de Imagen</label>
-              <input type="url" id="productoImagen" placeholder="https://ejemplo.com/imagen.jpg">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="productoDescripcion">Descripción</label>
-            <textarea id="productoDescripcion" placeholder="Descripción detallada del producto (opcional)"
-              rows="4"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetProductoForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Producto</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaProductos" class="table-admin">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Imagen</th>
-                <th>Nombre</th>
-                <th>Cat.</th>
-                <th>Marca</th>
-                <th>PVP</th>
-                <th>Proveedor</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminVentas">
-        <h3><i class="fas fa-history"></i> Historial de Ventas</h3>
-        <div class="table-responsive-container">
-          <table id="tablaVentas" class="table-admin">
-            <thead>
-              <tr>
-                <th>Factura #</th>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Total</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <strong>
-        <p>© 2024 JavicSoftCode
-      </strong> E-Commerce. Lunaire.</p>
-    </div>
-  </footer>
-
-  <script type="module" src="../ui/ui.js"></script>
+<script type="module" src="../ui/ui.js"></script>
 </body>
 
 </html>

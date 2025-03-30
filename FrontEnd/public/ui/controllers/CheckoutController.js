@@ -65,7 +65,7 @@ class CheckoutController {
 
     document.getElementById('closeCheckoutModal').addEventListener('click', () => {
       this.ocultarCheckoutModal();
-      app.carritoController.mostrarCarrito();
+     // app.carritoController.mostrarCarrito();
     });
   
     this.btnCloseInvoice.addEventListener('click', () => {
@@ -202,7 +202,7 @@ async confirmarCompra() {
         alert(`Error al confirmar la compra: ${error.message}`);
     } finally {
         this.btnConfirmCheckout.disabled = false;
-        this.btnConfirmCheckout.innerHTML = 'Confirmar Compra <i class="fas fa-check-circle fa-lg"></i>';
+        this.btnConfirmCheckout.innerHTML = 'Confirmar <i class="fas fa-check-circle fa-lg"></i>';
     }
 }
 
