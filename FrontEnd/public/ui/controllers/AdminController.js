@@ -1,12 +1,12 @@
 // FrontEnd/ui/controllers/AdminController.js
-import { app } from '../AppFactory.js';
-import { Categoria } from '../../../../BackEnd/src/models/Categoria.js';
-import { Marca } from '../../../../BackEnd/src/models/Marca.js';
-import { Proveedor } from '../../../../BackEnd/src/models/Proveedor.js';
-import { Cliente } from '../../../../BackEnd/src/models/Cliente.js';
-import { Producto } from '../../../../BackEnd/src/models/Producto.js';
-import { appService } from '../services/UшымтаService.js';
-import { InvoiceTemplate } from './InvoicePlantilla.js';
+import {app} from '../AppFactory.js';
+import {Categoria} from '../../../../BackEnd/src/models/Categoria.js';
+import {Marca} from '../../../../BackEnd/src/models/Marca.js';
+import {Proveedor} from '../../../../BackEnd/src/models/Proveedor.js';
+import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
+import {Producto} from '../../../../BackEnd/src/models/Producto.js';
+import {appService} from '../services/UшымтаService.js';
+import {InvoiceTemplate} from './InvoicePlantilla.js';
 
 
 class AdminController {
@@ -165,13 +165,20 @@ class AdminController {
         const tr = document.createElement('tr');   // row
         tr.innerHTML = `
                 <td class="text-center">${categoria.nombre}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetails" data-id="${categoria.id}"></i></td>
                 <td class="text-center">${categoria.iconTrueFalse()}</td>
                 <td class="action-buttons" style="height: 100px;">
                  <button class="action-button edit-button edit-categoria" data-id="${categoria.id}"><i class="fa-solid fa-pencil fa-lg delete" data-id="${categoria.id}"></i></button>
                  <button class="action-button delete-button delete-categoria" data-id="${categoria.id}"><i class="fa-solid fa-trash-can fa-lg edit" data-id="${categoria.id}"></i></button>
                 </td>
           `;
+        const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
+        if (btnOpenModal) {
+          btnOpenModal.addEventListener('click', () => {
+            this.openModalDetailsCat(categoria.id); // Pasar ID de la categoría seleccionada
+          });
+        }
+
         this.tablaCategorias.appendChild(tr);  // Append, al tbody!
       });
       // Configurar listeners para los botones de editar y eliminar
@@ -181,6 +188,41 @@ class AdminController {
       console.error("Error al cargar las categorías:", error);
       alert("Error al cargar las categorías."); // Mejor feedback al usuario
     }
+  }
+
+  async openModalDetailsCat(categoriaId) {
+    const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId); // Obtener solo la categoría seleccionada
+    const modalDetails = document.getElementById('categoriaModal');
+
+    if (!categoria) {
+      console.error("No se encontró la categoría");
+      return;
+    }
+
+    // Llenar el modal con la información correcta
+    document.getElementById('modalNombre').textContent = categoria.nombre;
+    document.getElementById('modalEstado').innerHTML = categoria.iconTrueFalse();
+    document.getElementById('modalFechaCreacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaCreacion);
+    document.getElementById('modalFechaActualizacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaActualizacion);
+
+    // Mostrar el modal
+    modalDetails.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+
+    requestAnimationFrame(() => {
+      modalDetails.classList.add('show');
+    });
+  }
+
+  closeModalDetailsCat() {
+    const modalDetails = document.getElementById('categoriaModal');
+
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
+
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300);
   }
 
   setupCategoriaListeners() {
@@ -224,46 +266,73 @@ class AdminController {
   // Enviar Formulario Categoria:  CREATE y UPDATE:  (categorias)
   async guardarCategoria(e) {
     e.preventDefault();
-    const categoriaId = this.categoriaIdInput.value;
-    const nombre = this.categoriaNombreInput.value;
+    const categoriaId = this.categoriaIdInput.value; // Puede ser string vacío o un ID
+    const nombre = this.categoriaNombreInput.value.trim(); // Quitar espacios extra
 
     if (!nombre) {
-      alert("Campos obligatorios");
-      return;  // Salida temprana
+      alert("El nombre es obligatorio.");
+      return;
     }
 
     let resultado;
     try {
       if (categoriaId) {
+        // --- ACTUALIZACIÓN ---
+        console.log(`Intentando actualizar categoría ID: ${categoriaId} con nombre: ${nombre}`);
+        // Preparamos solo los datos que queremos cambiar
+        const datosParaActualizar = {
+          nombre: nombre
+          // Si tuvieras otros campos en el formulario para actualizar, los añadirías aquí:
+          // descripcion: this.descripcionInput.value,
+          // estado: this.estadoCheckbox.checked
+        };
 
-        const categoriaExistente = await this.categoriaService.obtenerCategoriaPorId(parseInt(categoriaId)); //Buscar
-        categoriaExistente.nombre = nombre;
-        resultado = await this.categoriaService.actualizarCategoria(parseInt(categoriaId), categoriaExistente);
+        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
+        resultado = await this.categoriaService.actualizarCategoria(parseInt(categoriaId), datosParaActualizar);
 
-        alert("Categoria ACTUALIZADA")
+        if (resultado === null) {
+          // El servicio retornó null, indicando un error (probablemente de validación o BD)
+          alert("Error al actualizar la categoría. Revisa la consola para más detalles.");
+          // No reseteamos el form para que el usuario pueda corregir
+        } else if (resultado === parseInt(categoriaId)) {
+          // El servicio retornó el mismo ID, indicando éxito pero sin cambios guardados
+          alert("Categoría guardada.");
+          this.resetFormCategoria(); // Resetea el formulario
+          await this.cargarCategorias(); // Recarga la tabla
+          await this.cargarOpcionesProductoForm(); // Actualiza selects dependientes
+          await appService.refreshCache(); // Actualiza caché si es necesario
+        } else {
+          // El servicio retornó un ID (puede ser el mismo o uno nuevo si la lógica de update lo retornara así)
+          // y la operación implicó cambios.
+          alert("Categoría ACTUALIZADA exitosamente.");
+          this.resetFormCategoria(); // Resetea el formulario
+          await this.cargarCategorias(); // Recarga la tabla
+          await this.cargarOpcionesProductoForm(); // Actualiza selects dependientes
+          await appService.refreshCache(); // Actualiza caché si es necesario
+        }
 
       } else {
-        const nuevaCategoria = new Categoria(nombre);
+        // --- CREACIÓN ---
+        console.log(`Intentando agregar nueva categoría con nombre: ${nombre}`);
+        const nuevaCategoria = new Categoria(nombre); // El constructor se encarga de las fechas iniciales
         resultado = await this.categoriaService.agregarCategoria(nuevaCategoria);
 
-        if (resultado) {
-          alert(`EXITO Agregando Categoria, ID ${resultado} `);
-
+        if (resultado !== null) { // Si agregarCategoria retorna el nuevo ID
+          alert(`Categoría agregada exitosamente con ID: ${resultado}`);
+          this.resetFormCategoria();
+          await this.cargarCategorias();
+          await this.cargarOpcionesProductoForm();
+          await appService.refreshCache();
         } else {
-          throw new Error('Errores en Datos o Validacion.');
-        } // cierra else
-
-      }  // Fin if-else
-      if (resultado) {
-        this.resetFormCategoria();
-        //Cargar Opciones actualizadas
-        await this.cargarCategorias();
-        await this.cargarOpcionesProductoForm(); //  <--- AÑADE ESTO
-        await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
+          // agregarCategoria retornó null, indicando un error (validación, BD, etc.)
+          alert("Error al agregar la categoría. Revisa la consola.");
+          // No reseteamos el form
+        }
       }
+
     } catch (error) {
-      console.error("Error :", error);
-      alert("Revise consola") // Feedback al Usuario
+      console.error("Error en guardarCategoria:", error);
+      alert("Ocurrió un error inesperado al guardar. Revisa la consola.");
     }
   }
 
@@ -276,142 +345,224 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Marcas
   //---------------------------------------------------
-  async cargarMarcas() {
+  async guardarMarca(e) {
+    e.preventDefault();
+    const marcaId = this.marcaIdInput.value; // Puede ser string vacío o un ID
+    const nombre = this.marcaNombreInput.value.trim(); // Quitar espacios extra
+
+    if (!nombre) {
+      alert("El nombre de la marca es obligatorio.");
+      return;
+    }
+
+    let resultado;
     try {
-      const marcas = await this.marcaService.obtenerTodasLasMarcas();
-      this.tablaMarcas.innerHTML = ''; // Limpiar
+      if (marcaId) {
+        // --- ACTUALIZACIÓN ---
+        console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
+        // Preparamos solo los datos que queremos cambiar
+        const datosParaActualizar = {
+          nombre: nombre
+          // Si permitieras actualizar otros campos desde el form de marca, los añadirías aquí
+          // estado: this.marcaEstadoCheckbox.checked
+        };
 
-      if (!Array.isArray(marcas)) {
-        console.error("Error: marcas is not an array.");
-        return;
+        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
+        resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
+
+        if (resultado === null) {
+          // El servicio retornó null, indicando un error (validación, BD, etc.)
+          alert("Error al actualizar la marca. Revisa la consola.");
+          // No reseteamos el form para que el usuario pueda corregir
+        } else if (resultado === parseInt(marcaId)) {
+          // El servicio retornó el mismo ID, puede indicar éxito con o sin cambios guardados
+          // (Depende de si tu `actualizarMarca` retorna ID en ambos casos)
+          // Asumimos que si retorna el ID, fue exitoso. El log del servicio dirá si hubo cambios.
+          alert("Marca guardada/actualizada exitosamente.");
+          this.resetFormMarca(); // Resetea el formulario
+          await this.cargarMarcas(); // Recarga la tabla de marcas
+          await this.cargarOpcionesProductoForm(); // Actualiza selects dependientes
+          await appService.refreshCache(); // Actualiza caché si es necesario
+        }
+        // No necesitas un 'else' adicional si el caso de éxito (con o sin cambios) retorna el ID.
+
+      } else {
+        // --- CREACIÓN ---
+        console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
+        // Crea la instancia. El constructor de BaseModel maneja las fechas iniciales.
+        const nuevaMarca = new Marca(nombre);
+        // Llama al servicio para agregar
+        resultado = await this.marcaService.agregarMarca(nuevaMarca);
+
+        if (resultado !== null) { // Si agregarMarca retorna el nuevo ID
+          alert(`Marca agregada exitosamente con ID: ${resultado}`);
+          this.resetFormMarca();
+          await this.cargarMarcas();
+          await this.cargarOpcionesProductoForm();
+          await appService.refreshCache();
+        } else {
+          // agregarMarca retornó null, indicando un error
+          alert("Error al agregar la marca. Revisa la consola.");
+          // No reseteamos el form
+        }
       }
-      marcas.forEach(marca => {
-        const tr = document.createElement('tr');   // row
-        tr.innerHTML = `
-                <td class="text-center">${marca.nombre}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
-                <td class="text-center">${marca.iconTrueFalse()}</td>
-                <td class="action-buttons" style="height: 100px;">
-                 <button class="action-button edit-button edit-marca" data-id="${marca.id}"><i class="fa-solid fa-pencil fa-lg delete" data-id="${marca.id}"></i></button>
-                 <button class="action-button delete-button delete-marca" data-id="${marca.id}"><i class="fa-solid fa-trash-can fa-lg edit" data-id="${marca.id}"></i></button>
-                </td>
-               `;
-        this.tablaMarcas.appendChild(tr);  // Append, al tbody!
-      });
-
-      // Configurar listeners para los botones de editar y eliminar
-      this.setupMarcaListeners();
 
     } catch (error) {
-      console.error("Error al cargar las Marcas:", error);
-      alert("Error al cargar las Marcas."); // Mejor feedback al usuario
+      console.error("Error en guardarMarca:", error);
+      alert("Ocurrió un error inesperado al guardar la marca. Revisa la consola.");
     }
   }
 
-  // setupMarcaListeners
+  // --- Asegúrate de tener el método resetFormMarca ---
+  resetFormMarca() {
+    this.marcaIdInput.value = '';       // Reset ID (oculto)
+    this.marcaNombreInput.value = ''; // Reset Nombre (visible)
+    // Resetea otros campos del form de marca si los tienes
+  }
+
+  // --- Asegúrate de tener el método cargarMarcas ---
+  async cargarMarcas() {
+    try {
+      // Asumo que tienes una tabla similar a la de categorías (this.tablaMarcas)
+      // y que llamas a this.marcaService.obtenerTodasLasMarcas()
+      const marcas = await this.marcaService.obtenerTodasLasMarcas();
+      const tabla = document.getElementById('tabla-marcas-body'); // Asegúrate que el ID es correcto
+      if (!tabla) {
+        console.error("Elemento tbody para marcas no encontrado");
+        return;
+      }
+      tabla.innerHTML = ''; // Limpiar tabla
+
+      if (!Array.isArray(marcas)) {
+        console.error("Error: marcas no es un array.");
+        return;
+      }
+
+      marcas.forEach(marca => {
+        const tr = document.createElement('tr');
+        // Adapta este HTML a cómo quieres mostrar las marcas
+        tr.innerHTML = `
+                <td class="text-center">${marca.nombre}</td>
+                <td class="text-center">
+                    <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer"   id="btnOpenModalDetails"     data-id="${marca.id}"
+                     title="Ver Detalles"></i>
+                 </td>
+                 <td class="text-center">${marca.iconTrueFalse()}</td>
+                <td class="action-buttons" style="height: 100px;">
+                    <button class="action-button edit-button edit-marca" data-id="${marca.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${marca.id}"></i></button>
+                    <button class="action-button delete-button delete-marca" data-id="${marca.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${marca.id}"></i></button>
+                </td>
+          `;
+        const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
+        if (btnOpenModal) {
+          btnOpenModal.addEventListener('click', () => {
+            this.openModalDetailsMar(marca.id); // Pasar ID de la categoría seleccionada
+          });
+        }
+        tabla.appendChild(tr);
+      });
+
+      // Vuelve a configurar los listeners para los botones de editar/eliminar de marcas
+      this.setupMarcaListeners();
+
+    } catch (error) {
+      console.error("Error al cargar las marcas:", error);
+      alert("Error al cargar las marcas.");
+    }
+  }
+
+  // --- Asegúrate de tener openModalDetailsMar (si usas modal) y setupMarcaListeners ---
+  // Deben ser similares a los de categoría pero usando marcaService y los IDs/elementos correctos.
+
   setupMarcaListeners() {
-    // Editar
-    this.tablaMarcas.querySelectorAll('.edit-marca').forEach(button => {
-      button.addEventListener('click', async (e) => { // Pone Evento click
+    const tabla = document.getElementById('tabla-marcas-body'); // ID del tbody de marcas
+    if (!tabla) return;
 
-        const marcaId = parseInt(e.target.dataset.id);        // Obtiene
+    // Editar Marca
+    tabla.querySelectorAll('.edit-marca').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        // Prevenir que el click en el icono active el botón si están anidados incorrectamente
+        e.stopPropagation();
+        const targetElement = e.target.closest('button'); // Asegura obtener el botón
+        if (!targetElement) return;
 
-        const marca = await this.marcaService.obtenerMarcaPorId(marcaId); // Marca por ID
-
-        if (marca) { // Marca existe!
-          // Cargar  form
-          this.marcaIdInput.value = marca.id;   // carga de datos
-          this.marcaNombreInput.value = marca.nombre;//
+        const marcaId = parseInt(targetElement.dataset.id);
+        const marca = await this.marcaService.obtenerMarcaPorId(marcaId);
+        if (marca) {
+          this.marcaIdInput.value = marca.id;
+          this.marcaNombreInput.value = marca.nombre;
+          // Carga otros campos del formulario si existen
+          window.scrollTo(0, 0); // Opcional: scroll al formulario
         }
       });
     });
 
     // Eliminar Marca
-    this.tablaMarcas.querySelectorAll('.delete-marca').forEach(button => { // forEach para el boton eliminar
-      button.addEventListener('click', async (e) => {               //
-        const marcaId = parseInt(e.target.dataset.id);     //
+    tabla.querySelectorAll('.delete-marca').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const targetElement = e.target.closest('button');
+        if (!targetElement) return;
 
-        // --- CONFIRMACION ---
-        if (confirm("Esta seguro de eliminar?")) { //
-
-          //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-          const result = await this.marcaService.eliminarMarca(marcaId);  //
-
-          //Actualiza
-
-          if (result !== null) {
-            await this.cargarMarcas();      // Vuelve a cargar marcas
-            // Para actualizar select de Productos.
-            await this.cargarOpcionesProductoForm(); //   productos
+        const marcaId = parseInt(targetElement.dataset.id);
+        if (confirm(`¿Está seguro de eliminar la marca con ID ${marcaId}?`)) {
+          const result = await this.marcaService.eliminarMarca(marcaId);
+          if (result !== null) { // O if (result === true) si eliminarMarca retorna boolean
+            alert('Marca eliminada correctamente.');
+            await this.cargarMarcas();
+            await this.cargarOpcionesProductoForm();
+            await appService.refreshCache();
+            this.resetFormMarca(); // Limpia el form por si acaso
+          } else {
+            alert('Error al eliminar la marca.');
           }
-        }  //Cierra confirm()
-      }); //cierra Listener
-    });  // cierra forEach, setupMarcaListeners
-  } //cierra metodo
+        }
+      });
+    });
+  }
 
-  // Enviar Formulario Marca:  CREATE y UPDATE:
-  async guardarMarca(e) { // METODO, RECIBE EL EVENTO
-    e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
+  // Necesitarás un método similar a openModalDetailsCat pero para Marcas
+  async openModalDetailsMar(marcaId) {
+    const marca = await this.marcaService.obtenerMarcaPorId(marcaId); // Usa el servicio de Marca
+    const modalDetails = document.getElementById('marcaModal'); // Asegúrate que tienes un modal con este ID
 
-    const marcaId = this.marcaIdInput.value;       //Desde elemento del DOM! -> HTML
-    const nombre = this.marcaNombreInput.value;       // Valor en la caja texto
-
-    if (!nombre) {
-      alert("Campos obligatorios");
-      return;  // Salida temprana
+    if (!modalDetails) {
+      console.error("Modal para detalles de Marca no encontrado (marcaModal)");
+      return;
     }
-    let resultado;
-    try {
-      if (marcaId) {  // Si ya  id , es para:  *ACTUALIZACION*:
 
-        const marcaExistente = await this.marcaService.obtenerMarcaPorId(parseInt(marcaId)); //Buscar
-        //Cambiar nombre, segun  *NUEVO* VALOR:
+    if (!marca) {
+      console.error("No se encontró la marca con ID:", marcaId);
+      alert("No se pudo cargar la información de la marca.");
+      return;
+    }
 
-        marcaExistente.nombre = nombre;
+    // Llenar el modal con la información correcta - Adapta los IDs a tu modal de marca
+    document.getElementById('modalMarcaNombre').textContent = marca.nombre;
+    document.getElementById('modalMarcaEstado').innerHTML = marca.iconTrueFalse();
+    // Formatea las fechas usando el método de la instancia de Marca (heredado de BaseModel)
+    document.getElementById('modalMarcaFechaCreacion').textContent = marca.formatEcuadorDateTime(marca.fechaCreacion);
+    document.getElementById('modalMarcaFechaActualizacion').textContent = marca.formatEcuadorDateTime(marca.fechaActualizacion);
 
-        resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), marcaExistente); // Persistir cambios
-        //Actualizar Vista:
-        alert("Marca ACTUALIZADA") //Feedback al usuario!
+    // Mostrar el modal (adapta las clases si usas otro framework/lógica CSS)
+    modalDetails.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => {
+      modalDetails.classList.add('show');
+    });
+  }
 
+  // Necesitarás un método para cerrar el modal de Marca
+  closeModalDetailsMar() {
+    const modalDetails = document.getElementById('marcaModal'); // ID del modal de marca
+    if (!modalDetails) return;
 
-      } else { // Si NO, ... CREAR
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
 
-        const nuevaMarca = new Marca(nombre); // crea *INSTANCIA* Marca
-        //Asigna
-        resultado = await this.marcaService.agregarMarca(nuevaMarca); //  await *RETORNA* id Generado.
-
-        //Solo Si id *EXISTE* despues de haber sido agregado
-        if (resultado) {
-
-          //Añadir Fila
-          alert(`EXITO Agregando Marca, ID ${resultado} `);
-
-        } else { // Fallo registro,  por  razon
-          throw new Error('Errores en Datos o Validacion.');
-        } // cierra else
-
-      }
-      // Fin  if-else
-
-      if (resultado) {
-        this.resetFormMarca()
-        //Cargar Opciones actualizadas
-        await this.cargarMarcas();// llama, volver cargar los datos, *ACTUALIZADOS*.
-        await this.cargarOpcionesProductoForm();
-        await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
-      }
-
-    } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-      console.error("Error :", error); // Programador
-      alert("Revise consola") // Feedback al Usuario
-    } //Finaliza TRY-CATCH
-
-  } //CIERRA METODO  guardarMarca()
-  // Reset
-  resetFormMarca() {
-
-    this.marcaIdInput.value = '';
-    this.marcaNombreInput.value = '';
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300); // Tiempo de la transición CSS
   }
 
   //---------------------------------------------------
@@ -754,14 +905,20 @@ class AdminController {
                 <td class="text-center">${producto.nombre}</td>
                 <td class="text-center">${producto.proveedorNombre}</td>
                 <td class="text-center">${producto.stock}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProd" data-id="${producto.id}"></i></td>
         
-                <td class="text-center">${producto.estado? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>'}</td>
+                <td class="text-center">${producto.estado ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>'}</td>
                 <td class="action-buttons " style="height: 100px;">
                     <button class="action-button edit-button edit-producto" data-id="${producto.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${producto.id}"></i></button>
                     <button class="action-button delete-button delete-producto" data-id="${producto.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${producto.id}"></i></button>
                 </td>
             `;
+        const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProd');
+        if (btnOpenModal) {
+          btnOpenModal.addEventListener('click', () => {
+            this.openModalDetailsProd(producto.id); // Pasar ID de la  seleccionada
+          });
+        }
         this.tablaProductos.appendChild(tr);
       });
 
@@ -778,6 +935,60 @@ class AdminController {
       alert("Error al cargar los productos");
     }
   }
+
+  async openModalDetailsProd(productoId) {
+    // Obtener la INSTANCIA del producto
+    const producto = await this.productoService.obtenerProductoPorId(productoId);
+    const modalDetails = document.getElementById('productoModal'); // ID del modal de producto
+
+    if (!modalDetails) {
+      console.error("Modal para detalles de Producto no encontrado (productoModal)");
+      return;
+    }
+
+    if (!producto) {
+      console.error("No se encontró el producto con ID:", productoId);
+      alert("No se pudo cargar la información del producto.");
+      return;
+    }
+
+    // Llenar el modal - Adapta los IDs a tu modal de producto
+    document.getElementById('modalProdNombre').textContent = producto.nombre;
+    document.getElementById('modalProdCatNombre').textContent = producto.categoriaNombre;
+    document.getElementById('modalProdMarNombre').textContent = producto.marcaNombre;
+    document.getElementById('modalProdProvNombre').textContent = producto.proveedorNombre;
+    document.getElementById('modalProdCosto').textContent = producto.precio; // Formatear como moneda si quieres
+    document.getElementById('modalProdPVP').textContent = producto.pvp;       // Formatear como moneda si quieres
+    document.getElementById('modalProdCant').textContent = producto.cantidad;       // Formatear como moneda si quieres
+    document.getElementById('modalProdStock').textContent = producto.stock;
+    document.getElementById('modalProdDesc').textContent = producto.descripcion || 'N/A';
+    document.getElementById('modalProdIMG').innerHTML = '<img   style="max-width: 120%; height: 100%; border-radius: 8px; border:2px solid #800000"  src="' + producto.imagen + '" alt="Imagen de producto">';
+
+    // document.getElementById('modalProdIMG').textContent = producto.imagen;
+    document.getElementById('modalProdEstado').innerHTML = producto.iconTrueFalse(); // Usar método de instancia
+
+    document.getElementById('modalProdFechaCreacion').textContent = producto.formatEcuadorDateTime(producto.fechaCreacion);
+    document.getElementById('modalProdFechaActualizacion').textContent = producto.formatEcuadorDateTime(producto.fechaActualizacion);
+
+    // Mostrar el modal
+    modalDetails.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => {
+      modalDetails.classList.add('show');
+    });
+  }
+
+  closeModalDetailsProd() {
+    const modalDetails = document.getElementById('productoModal');
+
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
+
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300);
+  }
+
 
   setupProductoListeners() {
     // Editar
@@ -826,6 +1037,7 @@ class AdminController {
 
     });  // cierra forEach, setupProductoListeners
   } //cierra metodo
+
   // Enviar Formulario Producto:  CREATE y UPDATE:
   async guardarProducto(e) {
     e.preventDefault();
@@ -839,116 +1051,106 @@ class AdminController {
     const pvp = this.productoPVPInput.value;
     const descripcion = this.productoDescripcionInput.value;
     const imagen = this.productoImagenInput.value;
-
-
-    //1.  Validaciones *previas* a la conversión:
+  
+    // 1. Validaciones previas:
     if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
       alert("Todos los campos marcados con (*) son obligatorios");
       return;  // Salida temprana si faltan campos
     }
-
-    // 2. Conversión de datos *antes* de crear la instancia:
+  
+    // 2. Conversión de datos:
     const precioNumerico = parseFloat(precio);
     const pvpNumerico = parseFloat(pvp);
     const stockNumerico = parseInt(stock, 10);
     const categoriaIdNumerico = parseInt(categoriaId, 10);
     const marcaIdNumerico = parseInt(marcaId, 10);
     const proveedorIdNumerico = parseInt(proveedorId, 10);
-
-    // Comprobaciones *adicionales* (que deberían estar en las validaciones, idealmente):
+  
+    // Comprobaciones adicionales:
     if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
-      isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
-      alert("Error:  Valores numéricos inválidos.");
-      return; // Salida temprana
+        isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
+      alert("Error: Valores numéricos inválidos.");
+      return;
     }
     if (precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0) {
-      alert('No se permiten números negativos')
-      return
+      alert('No se permiten números negativos');
+      return;
     }
-
-    let resultado; // Declaración de resultado
+  
+    let resultado;
     try {
-
-      // 3.  Lógica para crear/actualizar:
       if (productoId) {
         // ACTUALIZAR
         const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
         if (!productoExistente) {
-          alert("Error: Producto no encontrado."); // Mejor mensaje
+          alert("Error: Producto no encontrado.");
           return;
         }
-
-        // *No* modificamos productoExistente directamente todavía.
-        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico)
+  
+        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
         const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
         const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-
-        //  *Aquí*, crea un *nuevo* objeto con los datos actualizados
+  
         const productoActualizado = {
-          ...productoExistente,  // Copia todas las propiedades existentes
-          nombre: nombre,          // Valores actualizados/convertidos:
+          ...productoExistente,
+          nombre: nombre,
           precio: precioNumerico,
           categoriaId: categoriaIdNumerico,
-          categoriaNombre: categoria.nombre,  // <- Usar los datos de las búsquedas.
+          categoriaNombre: categoria.nombre,
           marcaId: marcaIdNumerico,
-          marcaNombre: marca.nombre,          // <- Usar los datos de las búsquedas.
+          marcaNombre: marca.nombre,
           proveedorId: proveedorIdNumerico,
-          proveedorNombre: proveedor.nombre, // <- Usar los datos de las búsquedas
+          proveedorNombre: proveedor.nombre,
           stock: stockNumerico,
           pvp: pvpNumerico,
           descripcion: descripcion,
           imagen: imagen,
-          id: parseInt(productoId),     //  MUY IMPORTANTE, para el update
-
+          id: parseInt(productoId),
         };
-
+  
         resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
         if (resultado !== null) {
           alert("Producto ACTUALIZADO");
         }
-
       } else {
         // CREAR
-
-        //  *Aquí* se crea el *nuevo* producto *antes* de llamar al servicio.
         const nuevoProducto = new Producto(
-          nombre,
-          categoriaIdNumerico, // Usar ya los valores *numéricos*.
-          '', //  temporal
-          marcaIdNumerico,
-          '',
-          proveedorIdNumerico,
-          '',
-          precioNumerico,
-          pvpNumerico,
-          stockNumerico,
-          descripcion,
-          imagen
+          nombre,                  // nombre
+          true,                    // estado (activo)
+          new Date(),              // fechaCreacion
+          new Date(),              // fechaActualizacion
+          categoriaIdNumerico,     // categoriaId
+          '',                      // categoriaNombre (temporal)
+          marcaIdNumerico,         // marcaId
+          '',                      // marcaNombre (temporal)
+          proveedorIdNumerico,     // proveedorId
+          '',                      // proveedorNombre (temporal)
+          precioNumerico,          // precio
+          pvpNumerico,             // pvp
+          stockNumerico,           // cantidad
+          descripcion,             // descripcion
+          imagen                   // imagen
         );
-        // Ya no necesitas idGenerator
         resultado = await this.productoService.agregarProducto(nuevoProducto);
         if (resultado) {
-          alert(`EXITO Agregando Producto, ID ${resultado} `); //Muestra id creado.
+          alert(`EXITO Agregando Producto, ID ${resultado} `);
         }
-      } //  else/crear
-
-
-      // 4.  *Después* de agregar/actualizar, y *si* fue exitoso:
-
+      }
+  
       if (resultado !== null && resultado !== undefined) {
         this.resetFormProducto();
         await this.cargarProductos();
-        await this.cargarOpcionesProductoForm(); // <-  Para actualizar los selects!
-        await appService.refreshCache(); // <- ¡Importante!
-      } else { // Si resultado es null
+        await this.cargarOpcionesProductoForm();
+        await appService.refreshCache();
+      } else {
         throw new Error('Errores en Datos o Validacion.');
       }
-
     } catch (error) {
       console.error("Error :", error);
-      alert("Revise consola");  // Mejor feedback
+      alert("Revise consola");
     }
   }
+  
 
   // Reset
   resetFormProducto() {
@@ -1003,7 +1205,7 @@ class AdminController {
 
 
     } catch (error) {     // Errores
-      //Feedback, si falla.
+                          //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }
@@ -1154,12 +1356,8 @@ class AdminController {
 
         // Combinar datos de factura y cliente para la plantilla
         const facturaCompleta = {
-          ...factura,
-          // Asegúrate de que los nombres de propiedad coincidan con lo esperado por InvoiceTemplate.generarHTML
-          clienteNombre: cliente.nombre,
-          clienteTelefono: cliente.telefono,
-          clienteDireccion: cliente.direccion,
-          // Añade cualquier otro campo de cliente que necesite la plantilla
+          ...factura, // Asegúrate de que los nombres de propiedad coincidan con lo esperado por InvoiceTemplate.generarHTML
+          clienteNombre: cliente.nombre, clienteTelefono: cliente.telefono, clienteDireccion: cliente.direccion, // Añade cualquier otro campo de cliente que necesite la plantilla
         };
 
         // Llamar a la función corregida para mostrar la factura con animación
@@ -1194,13 +1392,6 @@ class AdminController {
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.
-const adminController = new AdminController(
-  app.categoriaService,
-  app.marcaService,
-  app.proveedorService,
-  app.clienteService,
-  app.productoService,
-  app.facturaService
-);
+const adminController = new AdminController(app.categoriaService, app.marcaService, app.proveedorService, app.clienteService, app.productoService, app.facturaService);
 
-export { adminController };
+export {adminController};

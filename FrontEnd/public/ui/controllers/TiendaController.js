@@ -84,7 +84,7 @@ class TiendaController {
             <div class="product-title">${producto.nombre}</div>
             <div class="product-category">Categoría: ${producto.categoriaNombre}</div>
             <div class="product-brand">Marca: ${producto.marcaNombre}</div>
-            <div class="product-price">$${producto.pvp.toFixed(2)}</div>
+            <div class="product-price">$${producto.pvp}</div>
             <div class="product-description">${producto.descripcion}</div>
             <button class="btn btn-primary btn-block add-to-cart" data-id="${producto.id}">
               Agregar al Carrito

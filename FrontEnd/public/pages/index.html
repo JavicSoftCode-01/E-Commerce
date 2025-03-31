@@ -97,6 +97,7 @@
   </div>
 </div>
 
+
 <!-- Sección Checkout Mejorada Factura de vent-->
 <div id="checkoutOverlay" class="modal hidden">
   <div class="modal-overlay"></div>
@@ -257,6 +258,24 @@
       </div>
     </div>
 
+    <!-- Modal para mostrar la información de la categoría -->
+    <div id="categoriaModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalDetails" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre Cat.:</strong> <span id="modalNombre"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacion"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacion"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstado" style="font-size: 30px;"></span></p>
+        </div>
+      </div>
+    </div>
+
+
     <div class="admin-section hidden" id="adminMarcas">
       <h3><i class="fas fa-bookmark"></i> Gestión de Marcas</h3>
       <form id="formMarca" class="needs-validation" novalidate>
@@ -282,8 +301,25 @@
             <th style="text-align: center; font-size: 20px;">Acciones</th>
           </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="tabla-marcas-body"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Modal para mostrar la información de la marca -->
+    <div id="marcaModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalMarDetails" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre Cat.:</strong> <span id="modalMarcaNombre"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalMarcaFechaCreacion"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalMarcaFechaActualizacion"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalMarcaEstado" style="font-size: 30px;"></span></p>
+        </div>
       </div>
     </div>
 
@@ -301,10 +337,10 @@
             <label for="proveedorTelefono">Teléfono</label>
             <input type="tel" id="proveedorTelefono" placeholder="Teléfono de contacto" maxlength="16">
           </div>
-        <div class="form-group">
-          <label for="proveedorDireccion">Dirección</label>
-          <input type="text" id="proveedorDireccion" placeholder="Dirección Completa">
-        </div>
+          <div class="form-group">
+            <label for="proveedorDireccion">Dirección</label>
+            <input type="text" id="proveedorDireccion" placeholder="Dirección Completa">
+          </div>
         </div>
         <div class="form-actions">
           <button type="button" id="resetProveedorForm" class="btn btn-secondary"><i class="fas fa-times"></i>
@@ -463,6 +499,74 @@
       </div>
     </div>
 
+    <!-- Modal para mostrar la información de la marca -->
+    <!--    <div id="productoModal" class="modal hidden">-->
+    <!--      <div class="modal-overlay"></div>-->
+    <!--      <div class="modal-content">-->
+    <!--        <div class="modal-header">-->
+    <!--          <h3 class="modal-title">Detalles</h3>-->
+    <!--          <button id="btnCloseModalProdDetails" class="modal-close" aria-label="Cerrar">×</button>-->
+    <!--        </div>-->
+    <!--        <div class="modal-body">-->
+    <!--          <p><strong>IMG:</strong> <span id="modalProdIMG"></span></p>-->
+    <!--          <p><strong>Producto:</strong> <span id="modalProdNombre"></span></p>-->
+    <!--          <p><strong>Categoría:</strong> <span id="modalProdCatNombre"></span></p>-->
+    <!--          <p><strong>Marca:</strong> <span id="modalProdMarNombre"></span></p>-->
+    <!--          <p><strong>Proveedor:</strong> <span id="modalProdProvNombre"></span></p>-->
+    <!--          <p><strong>Costo:</strong> <span id="modalProdCosto"></span></p>-->
+    <!--          <p><strong>PVP:</strong> <span id="modalProdPVP"></span></p>-->
+    <!--          <p><strong>Cantidad:</strong> <span id="modalProdCant"></span></p>-->
+    <!--          <p><strong>Stock:</strong> <span id="modalProdStock"></span></p>-->
+    <!--          <p><strong>Descripción.:</strong> <span id="modalProdDesc"></span></p>-->
+    <!--          <p><strong>Estado:</strong> <span id="modalProdEstado"></span></p>-->
+    <!--          <p><strong>Fecha de Creación:</strong> <span id="modalProdFechaCreacion"></span></p>-->
+    <!--          <p><strong>Fecha de Actualización:</strong> <span id="modalProdFechaActualizacion"></span></p>-->
+    <!--        </div>-->
+    <!--      </div>-->
+    <!--    </div>-->
+    <div id="productoModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalProdDetails" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <!-- Sección superior con imagen y datos principales -->
+          <div class="modal-body-top" style="display: flex; gap: 3rem;">
+            <!-- Imagen del producto -->
+            <div class="modal-img" style="flex: 1;">
+              <span id="modalProdIMG"></span>
+              <!--          <img id="modalProdIMG" src="" alt="Imagen del producto" style="max-width: 100%; height: auto;">-->
+            </div>
+            <!-- Datos principales -->
+            <div class="modal-info" style="flex: 2;">
+              <h4 id="modalProdNombre">Nombre del Producto</h4>
+              <p><strong>Categoría:</strong> <span id="modalProdCatNombre"></span></p>
+              <p><strong>Marca:</strong> <span id="modalProdMarNombre"></span></p>
+              <p><strong>Proveedor:</strong> <span id="modalProdProvNombre"></span></p>
+              <p><strong>Costo:</strong> <span id="modalProdCosto"></span></p>
+              <p><strong>PVP:</strong> <span id="modalProdPVP"></span></p>
+              <p><strong>Cantidad:</strong> <span id="modalProdCant"></span></p>
+              <p><strong>Stock:</strong> <span id="modalProdStock"></span></p>
+            </div>
+          </div>
+
+          <!-- Sección inferior con información adicional -->
+          <div class="modal-body-bottom" style="margin-top: 20px;">
+            <div class="modal-details">
+              <p><strong>Descripción:</strong> <span id="modalProdDesc"></span></p>
+              <p><strong>Fecha de Creación:</strong> <span id="modalProdFechaCreacion"></span></p>
+              <p><strong>Fecha de Actualización:</strong> <span id="modalProdFechaActualizacion"></span></p>
+              <p style="text-align: right"><strong>Estado:</strong> <span id="modalProdEstado"
+                                                                          style="font-size: 30px;"></span></p>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="admin-section hidden" id="adminVentas">
       <h3><i class="fas fa-history"></i> Historial de Ventas</h3>
       <div class="table-responsive-container">
@@ -470,7 +574,7 @@
           <thead>
           <tr>
             <th style="text-align: center; font-size: 20px;">Factura #</th>
-<!--            <th style="text-align: center; font-size: 20px;">Fecha</th>-->
+            <!--            <th style="text-align: center; font-size: 20px;">Fecha</th>-->
             <th style="text-align: center; font-size: 20px;">Cliente</th>
             <th style="text-align: center; font-size: 20px;">Total</th>
             <th style="text-align: center; font-size: 20px;">Detalles</th>

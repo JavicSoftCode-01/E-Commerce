@@ -5,21 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BackEnd/src/models/BaseModel.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/BaseModel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/BasePersona.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/BasePersona.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Categoria.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Categoria.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Cliente.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Cliente.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Factura.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Factura.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Marca.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Marca.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Proveedor.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Proveedor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Producto.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Producto.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/CategoriaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/CategoriaService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CarritoController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/InvoicePlantilla.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/InvoicePlantilla.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/ui.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,22 +43,22 @@
     <option name="sortByType" value="true" />
     <option name="sortKey" value="BY_TYPE" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.negra.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/JavicSoftCode-01/PycharmProjects/E-Commerce",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.negra.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/JavicSoftCode-01/PycharmProjects/E-Commerce&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\JavicSoftCode-01\Downloads\E-Commerce\BackEnd\src" />

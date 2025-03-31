@@ -48,6 +48,8 @@ class CheckoutController {
       subtotal += item.precio * item.cantidad;
     });
 
+
+
     // Update summary values
     document.getElementById('checkoutSubtotalValue').textContent = `$${subtotal.toFixed(2)}`;
     const shipping = 0; // Or calculate shipping cost
@@ -67,21 +69,21 @@ class CheckoutController {
       this.ocultarCheckoutModal();
      // app.carritoController.mostrarCarrito();
     });
-  
+
     this.btnCloseInvoice.addEventListener('click', () => {
       this.cerrarFactura();
       if (document.getElementById('admin').classList.contains('show')) {
         document.getElementById('admin').classList.remove('hidden');
       }
     });
- 
+
     this.btnConfirmCheckout.addEventListener('click', () => this.confirmarCompra());
-    
+
   }
 
   async mostrarCheckoutModal() {
     const modal = document.getElementById('checkoutOverlay');
-    
+
     // Generar número de factura y guardar toda la información temporal
     const facturaInfo = await InvoiceTemplate.generarNumeroFactura();
     this.facturaTemp = {
@@ -89,7 +91,7 @@ class CheckoutController {
         fecha: facturaInfo.fecha,
         hora: facturaInfo.hora
     };
-    
+
     // Mostrar la información en el modal
     document.getElementById('invoiceNumber').textContent = this.facturaTemp.numeroFactura;
     document.getElementById('currentDate').textContent = this.facturaTemp.fecha.toLocaleDateString();
@@ -98,19 +100,19 @@ class CheckoutController {
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
     this.cargarResumenPedido();
-    
+
     requestAnimationFrame(() => {
         modal.classList.add('show');
     });
 }
-  
+
   ocultarCheckoutModal() {
     const modal = document.getElementById('checkoutOverlay');
-    
+
     // Start hide animation
     modal.classList.remove('show');
     document.body.classList.remove('modal-open');
-    
+
     // Wait for animation to finish before hiding
     setTimeout(() => {
       modal.classList.add('hidden');
@@ -181,18 +183,18 @@ async confirmarCompra() {
 
           // Usar la información temporal guardada
          const factura = await this.facturaService.generarFactura(
-             nuevoCliente, 
-             carrito, 
+             nuevoCliente,
+             carrito,
              this.facturaTemp
          );
- 
+
          // Limpiar la información temporal
          this.facturaTemp = null;
 
         // Si todo sale bien, mostrar factura y limpiar carrito
         this.ocultarCheckoutModal();
         await this.mostrarFactura(factura);
-        
+
         carrito.vaciarCarrito();
         app.tiendaController.actualizarContadorCarrito();
         this.limpiarFormularioCliente();
@@ -234,7 +236,7 @@ async mostrarFactura(factura) {
     try {
         const invoiceModal = document.getElementById('invoiceModal');
         const invoiceDetails = document.getElementById('invoiceDetails');
-        
+
         if (!invoiceModal || !invoiceDetails) {
             throw new Error('Elementos del modal de factura no encontrados');
         }
@@ -257,11 +259,11 @@ async mostrarFactura(factura) {
 
 cerrarFactura() {
   const invoiceModal = document.getElementById('invoiceModal');
-  
+
   // Start closing animation
   invoiceModal.classList.remove('show');
   document.body.classList.remove('modal-open');
-  
+
   // Wait for animation to finish before hiding
   setTimeout(() => {
     invoiceModal.classList.add('hidden');

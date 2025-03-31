@@ -1,7 +1,7 @@
 // BackEnd/src/services/ProductoService.js
-import { IndexedDB } from '../database/indexdDB.js';
-import { Validar } from '../utils/validar.js';
-import { Producto } from '../models/Producto.js';
+import {IndexedDB} from '../database/indexdDB.js';
+import {Validar} from '../utils/validar.js';
+import {Producto} from '../models/Producto.js';
 
 /**
  * 🔰🔰Servicio para la gestión de productos.
@@ -30,12 +30,12 @@ class ProductoService extends IndexedDB {
     try {
       // Validaciones
       const nombreValidado = await Validar.nombreBM(producto.nombre, this);
-
+  
       if (!producto.categoriaId || !producto.marcaId || !producto.proveedorId) {
         console.error("Error: categoriaId, marcaId o proveedorId son nulos o no definidos.", producto);
         return null;
       }
-
+  
       const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(producto.categoriaId);
       const marcaValida = await this.marcaService.obtenerMarcaPorId(producto.marcaId);
       const proveedorValido = await this.proveedorService.obtenerProveedorPorId(producto.proveedorId);
@@ -43,9 +43,9 @@ class ProductoService extends IndexedDB {
       const pvpValidado = Validar.precio(producto.pvp);
       const cantidadValidada = Validar.cantidadStock(producto.cantidad);
       const descripcionValidada = Validar.descripcion(producto.descripcion);
-
+  
       if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
-        !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
+          !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
         console.error("Error: Alguna validación falló.", {
           nombreValidado,
           categoriaValida,
@@ -58,90 +58,49 @@ class ProductoService extends IndexedDB {
         });
         return null;
       }
-
+  
       // Obtener el último ID y generar el siguiente
       const productos = await this.obtenerProductos();
-      const lastId = productos.length > 0
-        ? Math.max(...productos.map(p => p.id))
-        : 0;
+      const lastId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) : 0;
       const nextId = lastId + 1;
-
-      // Crear nueva instancia del producto con ID
+  
+      // Crear nueva instancia del producto con ID usando el orden correcto
       const nuevoProducto = new Producto(
-        nombreValidado,
-        categoriaValida.id,
-        categoriaValida.nombre,
-        marcaValida.id,
-        marcaValida.nombre,
-        proveedorValido.id,
-        proveedorValido.nombre,
-        precioValidado,
-        pvpValidado,
-        cantidadValidada,
-        descripcionValidada,
-        producto.imagen
+        nombreValidado,          // nombre
+        true,                    // estado
+        new Date(),              // fechaCreacion
+        new Date(),              // fechaActualizacion
+        categoriaValida.id,      // categoriaId
+        categoriaValida.nombre,  // categoriaNombre
+        marcaValida.id,          // marcaId
+        marcaValida.nombre,      // marcaNombre
+        proveedorValido.id,      // proveedorId
+        proveedorValido.nombre,  // proveedorNombre
+        precioValidado,          // precio
+        pvpValidado,             // pvp
+        cantidadValidada,        // cantidad
+        descripcionValidada,     // descripcion
+        producto.imagen          // imagen
       );
-
+  
       // Asignar el ID antes de guardar
       nuevoProducto.id = nextId;
-
+  
       // Guardar el producto
       await super.add(nuevoProducto);
       console.info(`Producto agregado con ID: ${nextId}`);
       return nextId;
-
+  
     } catch (error) {
       console.error('Error al agregar producto:', error);
       return null;
     }
   }
+  
 
-  /**
-   * Actualiza un producto existente en la base de datos.
-   * @param {number} id - ID del producto a actualizar.
-   * @param {Producto} productoActualizado - Objeto producto con los datos actualizados.
-   * @returns {Promise<number|null>} - El ID del producto actualizado o null si falla.
-   */
-  // async actualizarProducto(id, productoActualizado) {
-  //   try {
-  //     const nombreValidado = await Validar.nombreBM(productoActualizado.nombre, this, id);
-  //     const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(productoActualizado.categoriaId);
-  //     const marcaValida = await this.marcaService.obtenerMarcaPorId(productoActualizado.marcaId);
-  //     const proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoActualizado.proveedorId);
-  //     const precioValidado = Validar.precio(productoActualizado.precio);
-  //     const pvpValidado = Validar.precio(productoActualizado.pvp);
-  //     const cantidadValidada = Validar.cantidadStock(productoActualizado.cantidad);
-  //     const descripcionValidada = Validar.descripcion(productoActualizado.descripcion);
-  //     //No se debe poder cambiar el stock directamente, se usa el metodo updateStock
-  //     if (productoActualizado.hasOwnProperty('stock')) {
-  //       console.warn('Advertencia: El stock no se puede actualizar directamente aquí. Utiliza la función para actualizar el Stock.');
-  //       delete productoActualizado.stock;
-  //     }
-  //     if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
-  //       !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
-  //       return null; // Alguna validación falló. Los mensajes ya se habrán mostrado.
-  //     }
-  //     //Asigna datos validos
-  //     productoActualizado.nombre = nombreValidado;
-  //     productoActualizado.categoriaNombre = categoriaValida.nombre;
-  //     productoActualizado.marcaNombre = marcaValida.nombre;
-  //     productoActualizado.proveedorNombre = proveedorValido.nombre;
-  //     productoActualizado.precio = precioValidado;
-  //     productoActualizado.pvp = pvpValidado;
-  //     productoActualizado.cantidad = cantidadValidada;
-  //     productoActualizado.descripcion = descripcionValidada;
-  //     const updatedId = await super.update(id, productoActualizado);
-  //     console.info(`Producto con ID ${id} actualizado correctamente.`);
-  //     return updatedId;
-  //   } catch (error) {
-  //     console.error(`Error al actualizar producto con ID ${id}:`, error);
-  //     return null;
-  //   }
-  // }
-  // ... (dentro de actualizarProducto)
   async actualizarProducto(id, productoActualizado) {
     try {
-      //  *antes* de acceder a producto.categoriaId, etc.:
+      // Validaciones iniciales
       if (!productoActualizado.categoriaId || !productoActualizado.marcaId || !productoActualizado.proveedorId) {
         console.error("Error: categoriaId, marcaId o proveedorId son nulos o no definidos.", productoActualizado);
         return null;
@@ -152,13 +111,13 @@ class ProductoService extends IndexedDB {
       const proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoActualizado.proveedorId);
       const precioValidado = Validar.precio(productoActualizado.precio);
       const pvpValidado = Validar.precio(productoActualizado.pvp);
-      const cantidadValidada = Validar.cantidadStock(productoActualizado.stock); //Se corrigio el stock
+      // Se corrigió la validación: ahora se usa stock para validar cantidad
+      const cantidadValidada = Validar.cantidadStock(productoActualizado.stock);
       const descripcionValidada = Validar.descripcion(productoActualizado.descripcion);
-      //No se debe poder cambiar el stock directamente, se usa el metodo updateStock
-
-      // Comprobación de *todas* las validaciones
+  
+      // Comprobación de todas las validaciones
       if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
-        !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
+          !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
         console.error("Error: Alguna validación falló.", {
           nombreValidado,
           categoriaValida,
@@ -171,63 +130,142 @@ class ProductoService extends IndexedDB {
         });
         return null;
       }
-
-      //Asigna datos validos
+  
+      // Asigna datos validados
       productoActualizado.nombre = nombreValidado;
-      productoActualizado.categoriaId = categoriaValida.id
+      productoActualizado.categoriaId = categoriaValida.id;
       productoActualizado.categoriaNombre = categoriaValida.nombre;
-      productoActualizado.marcaId = marcaValida.id
+      productoActualizado.marcaId = marcaValida.id;
       productoActualizado.marcaNombre = marcaValida.nombre;
-      productoActualizado.proveedorId = proveedorValido.id
+      productoActualizado.proveedorId = proveedorValido.id;
       productoActualizado.proveedorNombre = proveedorValido.nombre;
       productoActualizado.precio = precioValidado;
       productoActualizado.pvp = pvpValidado;
-      productoActualizado.stock = cantidadValidada;//Se corrigio el stock
+      productoActualizado.stock = cantidadValidada;
       productoActualizado.descripcion = descripcionValidada;
-
-      //  *Después* de las validaciones (y solo si todas son exitosas), construir el *nuevo* objeto.
+  
+      // Reconstruir el objeto Producto respetando el orden del constructor:
       const nuevoProducto = new Producto(
-        nombreValidado,
-        categoriaValida.id,
-        categoriaValida.nombre,
-        marcaValida.id,
-        marcaValida.nombre,
-        proveedorValido.id,
-        proveedorValido.nombre,
-        precioValidado,
-        pvpValidado,
-        cantidadValidada,
-        descripcionValidada,
-        productoActualizado.imagen
+        nombreValidado,                         // nombre
+        productoActualizado.estado,             // estado (mantiene el actual)
+        productoActualizado.fechaCreacion,      // fechaCreacion (se conserva)
+        new Date(),                             // fechaActualizacion (actualizada)
+        categoriaValida.id,                     // categoriaId
+        categoriaValida.nombre,                 // categoriaNombre
+        marcaValida.id,                         // marcaId
+        marcaValida.nombre,                     // marcaNombre
+        proveedorValido.id,                     // proveedorId
+        proveedorValido.nombre,                 // proveedorNombre
+        precioValidado,                         // precio
+        pvpValidado,                            // pvp
+        cantidadValidada,                       // cantidad
+        descripcionValidada,                    // descripcion
+        productoActualizado.imagen              // imagen
       );
-
+  
       nuevoProducto.id = id;
       const updatedId = await super.update(id, nuevoProducto);
-
-      // Sincronizar el carrito inmediatamente después de la actualización
-            // Sincronizar el carrito después de actualizar el producto
-            if (window.app && window.app.carritoController) {
-              await window.app.carritoController.sincronizarCarrito();
-          }
-
+  
+      // Sincronizar el carrito inmediatamente después de la actualización, si aplica
+      if (window.app && window.app.carritoController) {
+        await window.app.carritoController.sincronizarCarrito();
+      }
+  
       console.info(`Producto con ID ${id} actualizado correctamente.`);
       return updatedId;
-
+  
     } catch (error) {
       console.error(`Error al actualizar producto con ID ${id}:`, error);
       return null;
     }
   }
+  
 
-  /**
-   * Obtiene productos filtrados y ordenados.
-   * @param {Object} [filtros={}] - Objeto con los filtros a aplicar.
-   * @param {number} [filtros.categoria] - ID de la categoría para filtrar.
-   * @param {number} [filtros.marca] - ID de la marca para filtrar.
-   * @param {string} [filtros.search] - Texto de búsqueda.
-   * @param {string} [filtros.sort] - Criterio de ordenamiento ('price-asc', 'price-desc', 'name-asc', 'name-desc').
-   * @returns {Promise<Array<Producto>>} - Un array con los productos filtrados y ordenados, o un array vacío si falla.
-   */
+  // async obtenerProductos(filtros = {}) {
+  //   try {
+  //     let productos = await super.getAll();
+  //     // Filtro por categoría (usando el ID)
+  //     if (filtros.categoria) {
+  //       productos = productos.filter(producto => producto.categoriaId === filtros.categoria);
+  //     }
+  //     // Filtro por marca (usando el ID)
+  //     if (filtros.marca) {
+  //       productos = productos.filter(producto => producto.marcaId === filtros.marca);
+  //     }
+  //     // Filtro por texto
+  //     if (filtros.search) {
+  //       const busqueda = filtros.search.toLowerCase();
+  //       productos = productos.filter(producto =>
+  //         producto.nombre.toLowerCase().includes(busqueda) ||
+  //         (producto.descripcion && producto.descripcion.toLowerCase().includes(busqueda))
+  //       );
+  //     }
+  //     // Ordenamiento
+  //     if (filtros.sort) {
+  //       switch (filtros.sort) {
+  //         case 'price-asc':
+  //           productos.sort((a, b) => a.pvp - b.pvp);
+  //           break;
+  //         case 'price-desc':
+  //           productos.sort((a, b) => b.pvp - a.pvp);
+  //           break;
+  //         case 'name-asc':
+  //           productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+  //           break;
+  //         case 'name-desc':
+  //           productos.sort((a, b) => b.nombre.localeCompare(a.nombre));
+  //           break;
+  //       }
+  //     }
+  //
+  //     console.info('Productos obtenidos:', productos);
+  //     return productos;
+  //   } catch (error) {
+  //     console.error('Error al obtener productos:', error);
+  //     return []; // Devuelve un array vacío
+  //   }
+  // }
+  //
+
+  async obtenerProductoPorId(id) {
+    try {
+      const productoData = await super.getById(id); // Obtiene datos crudos de IndexedDB
+  
+      if (productoData) {
+        // Crear una NUEVA INSTANCIA de Producto usando los datos recuperados.
+        const instanciaProducto = new Producto(
+          productoData.nombre,
+          productoData.estado,             // Para BaseModel e iconTrueFalse
+          productoData.fechaCreacion,      // Para BaseModel
+          productoData.fechaActualizacion, // Para BaseModel
+          productoData.categoriaId,
+          productoData.categoriaNombre,
+          productoData.marcaId,
+          productoData.marcaNombre,
+          productoData.proveedorId,
+          productoData.proveedorNombre,
+          productoData.precio,
+          productoData.pvp,
+          productoData.cantidad,
+          productoData.descripcion,
+          productoData.imagen
+        );
+        instanciaProducto.id = productoData.id; // Asignar el ID a la instancia
+        // Si deseas conservar el stock actual en lugar de derivarlo de cantidad:
+        instanciaProducto.stock = productoData.stock;
+  
+        return instanciaProducto; // Devuelve la instancia correctamente configurada
+      } else {
+        console.warn(`No se encontró ningún producto con ID ${id}.`);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error al obtener producto con ID ${id}:`, error);
+      return null;
+    }
+  }
+  
+
   async obtenerProductos(filtros = {}) {
     try {
       let productos = await super.getAll();
@@ -272,26 +310,21 @@ class ProductoService extends IndexedDB {
     }
   }
 
-  /**
-   * Obtiene un producto por su ID.
-   * @param {number} id - ID del producto a obtener.
-   * @returns {Promise<Producto|null>} - El producto encontrado o null si no se encuentra o falla.
-   */
-  async obtenerProductoPorId(id) {
-    try {
-      const producto = await super.getById(id);
-      if (producto) {
-        console.info(`Producto con ID ${id} obtenido:`, producto);
-        return producto;
-      } else {
-        console.warn(`No se encontró ningún producto con ID ${id}.`);
-        return null;
-      }
-    } catch (error) {
-      console.error(`Error al obtener producto con ID ${id}:`, error);
-      return null;
-    }
-  }
+  // async obtenerProductoPorId(id) {
+  //   try {
+  //     const producto = await super.getById(id);
+  //     if (producto) {
+  //       console.info(`Producto con ID ${id} obtenido:`, producto);
+  //       return producto;
+  //     } else {
+  //       console.warn(`No se encontró ningún producto con ID ${id}.`);
+  //       return null;
+  //     }
+  //   } catch (error) {
+  //     console.error(`Error al obtener producto con ID ${id}:`, error);
+  //     return null;
+  //   }
+  // }
 
   /**
    * Actualiza el stock de un producto, ya sea por venta o reposición.
@@ -334,6 +367,7 @@ class ProductoService extends IndexedDB {
       return null;
     }
   }
+
   /**
    * Elimina un producto por su ID.
    * @param {number} id - ID del producto a eliminar.
@@ -350,4 +384,4 @@ class ProductoService extends IndexedDB {
   }
 }
 
-export { ProductoService };
+export {ProductoService};

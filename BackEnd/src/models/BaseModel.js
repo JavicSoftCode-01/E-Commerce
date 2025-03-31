@@ -11,26 +11,71 @@ class BaseModel {
    * Crea una instancia de BaseModel.
    * @param {string} nombre - Nombre de la categoría, marca o producto.
    * @param {boolean} [estado=true] - Indica si el item está activo (true) o inactivo (false). Por defecto es true.
-   * @param {Date} [fechaCreacion=null] - Fecha de creación. Si no se proporciona, se usa la fecha actual.
-   * @param {Date} [fechaActualizacion=null] - Fecha de última actualización. Si no se proporciona, se usa la fecha actual.
+   * @param {Date | string | number | null} [fechaCreacionInput=null] - Fecha de creación (puede ser Date, ISO String, timestamp o null). Si es null o inválida, se usa la fecha actual.
+   * @param {Date | string | number | null} [fechaActualizacionInput=null] - Fecha de última actualización (puede ser Date, ISO String, timestamp o null). Si es null o inválida, se usa la fecha de creación.
    */
-  constructor(nombre, estado = true, fechaCreacion = null, fechaActualizacion = null) {
+  constructor(nombre, estado = true, fechaCreacionInput = null, fechaActualizacionInput = null) {
     this.nombre = nombre;
-    this.fechaCreacion = fechaCreacion instanceof Date ? fechaCreacion : new Date();
-    this.fechaActualizacion = fechaActualizacion instanceof Date ? fechaActualizacion : this.fechaCreacion;
     this.estado = estado;
+
+    // --- Procesamiento robusto de fechaCreacion ---
+    let creacionDate = null;
+    // 1. Si ya es un objeto Date válido, usarlo.
+    if (fechaCreacionInput instanceof Date && !isNaN(fechaCreacionInput)) {
+        creacionDate = fechaCreacionInput;
+    }
+    // 2. Si no es Date pero existe, intentar convertirlo (desde ISO string o timestamp)
+    else if (fechaCreacionInput) {
+        try {
+            const parsedDate = new Date(fechaCreacionInput);
+            if (!isNaN(parsedDate)) { // Verificar si la conversión fue exitosa
+                creacionDate = parsedDate;
+            }
+        } catch (e) {
+            console.warn("Error al parsear fechaCreacionInput, se usará fecha actual:", fechaCreacionInput, e);
+        }
+    }
+    // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fecha/hora actual.
+    //    Esto SÓLO debería pasar en la creación inicial si no se pasa nada.
+    this.fechaCreacion = creacionDate instanceof Date ? creacionDate : new Date();
+
+
+    // --- Procesamiento robusto de fechaActualizacion ---
+    let actualizacionDate = null;
+    // 1. Si ya es un objeto Date válido, usarlo.
+    if (fechaActualizacionInput instanceof Date && !isNaN(fechaActualizacionInput)) {
+        actualizacionDate = fechaActualizacionInput;
+    }
+    // 2. Si no es Date pero existe, intentar convertirlo.
+    else if (fechaActualizacionInput) {
+        try {
+            const parsedDate = new Date(fechaActualizacionInput);
+            if (!isNaN(parsedDate)) {
+                actualizacionDate = parsedDate;
+            }
+        } catch (e) {
+            console.warn("Error al parsear fechaActualizacionInput, se usará fecha de creación:", fechaActualizacionInput, e);
+        }
+    }
+    // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fechaCreacion (ya procesada).
+    //    Esto pasa en la creación inicial o si la fecha guardada era inválida.
+    this.fechaActualizacion = actualizacionDate instanceof Date ? actualizacionDate : this.fechaCreacion;
+
+    // El método prepareForUpdate() se encargará de poner la fecha actual CUANDO se actualice.
   }
 
   /**
-   * Método (opcional) para preparar el objeto antes de guardarlo,
-   * asegurando que la fecha de actualización se establezca.
-   * Este método debería llamarse desde los servicios ANTES de actualizar en la BD.
+   * Prepara el objeto para ser guardado tras una actualización.
+   * Establece la fechaActualizacion a la fecha y hora EXACTAS de la modificación.
+   * Este método DEBE llamarse DESPUÉS de detectar que hubo cambios reales
+   * y ANTES de guardar en la base de datos.
    */
   prepareForUpdate() {
-    this.fechaActualizacion = new Date();
+    this.fechaActualizacion = new Date(); // Pone la fecha y hora actuales
   }
 
-  /**
+  // ... (resto de métodos como iconTrueFalse y formatEcuadorDateTime se mantienen igual) ...
+    /**
    * NUEVO MÉTODO: Genera el HTML para un icono visual que representa el estado (activo/inactivo).
    * Utiliza Font Awesome para los iconos.
    * @returns {string} Una cadena HTML con el icono <i class="..."></i> apropiado.
@@ -59,10 +104,13 @@ class BaseModel {
 
     try {
       // Convierte a objeto Date (maneja strings ISO o timestamps)
-      const dateObject = new Date(dateValue);
+       // *** Importante: Asegurarse que dateValue sea un objeto Date antes de formatear ***
+       // La lógica del constructor ahora debería asegurar esto, pero una doble verificación no hace daño.
+      const dateObject = dateValue instanceof Date ? dateValue : new Date(dateValue);
 
       // Verifica si la conversión resultó en una fecha válida
       if (isNaN(dateObject.getTime())) {
+         console.warn("Intentando formatear fecha inválida:", dateValue);
         return 'Fecha inválida';
       }
 
@@ -87,6 +135,7 @@ class BaseModel {
       return 'Error formato'; // Placeholder en caso de error inesperado
     }
   }
+
 }
 
 export { BaseModel };
