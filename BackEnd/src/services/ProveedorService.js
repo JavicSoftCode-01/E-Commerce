@@ -91,7 +91,7 @@ class ProveedorService extends IndexedDB {
       const proveedores = await super.getAll();
       // Convertir a instancias de Proveedor.
       const proveedoresInstancias = proveedores.map(proveedor => {
-        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion);
+        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion, proveedor.estado, proveedor.fechaCreacion, proveedor.fechaActualizacion);
         nuevoProveedor.id = proveedor.id
         return nuevoProveedor
       });
@@ -113,7 +113,7 @@ class ProveedorService extends IndexedDB {
       const proveedor = await super.getById(id);
       if (proveedor) {
         //Crear la instancia de proveedor
-        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion);
+        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion , proveedor.estado, proveedor.fechaCreacion, proveedor.fechaActualizacion);
         nuevoProveedor.id = proveedor.id;
         console.info(`Proveedor con ID ${id} obtenido:`, nuevoProveedor);
         return nuevoProveedor; // Retorna la instancia.

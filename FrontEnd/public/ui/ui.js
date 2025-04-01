@@ -52,6 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       adminController.closeModalDetailsCli();
     });
 
+    document.getElementById('btnCloseModalDetailsProveedor').addEventListener('click', () => {
+      adminController.closeModalDetailsProveedor();
+    });
+
 
 
 

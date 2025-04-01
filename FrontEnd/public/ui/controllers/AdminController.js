@@ -599,13 +599,19 @@ class AdminController {
               </td>
 
                 <td class="text-center">${proveedor.direccion}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProveedor" data-id="${proveedor.id}"></i></td>
                 <td class="text-center">${proveedor.iconTrueFalse()}</td>
                 <td class="action-buttons " style="height: 100px;">
                  <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${proveedor.id}"></i></button>
                  <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${proveedor.id}"></i></button>
                 </td>
           `;
+        const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProveedor');
+        if (btnOpenModal) {
+          btnOpenModal.addEventListener('click', () => {
+            this.openModalDetailsProveedor(proveedor.id); // Pasar ID de la proveedor seleccionada
+          });
+        }
         this.tablaProveedores.appendChild(tr);  // Append, al tbody!
       });
 
@@ -617,6 +623,38 @@ class AdminController {
       alert("Error al cargar los Proveedores."); // Mejor feedback al usuario
     }
   }
+
+  async openModalDetailsProveedor(proveedorId) {
+    const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // Obtener solo la proveedor seleccionada
+    const modalDetails = document.getElementById('proveedorModal');
+    if (!proveedor) {
+      console.error("No se encontró el proveedor");
+      return;
+    }
+    // Llenar el modal con la información correcta
+    document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
+    document.getElementById('modalTelefonoProveedor').textContent = proveedor.telefono;
+    document.getElementById('modalDireccionProveedor').textContent = proveedor.direccion;
+    document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
+    document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
+    document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
+    // Mostrar el modal
+    modalDetails.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => {
+      modalDetails.classList.add('show');
+    });
+  }
+
+  closeModalDetailsProveedor() {
+    const modalDetails = document.getElementById('proveedorModal');
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300);
+  }
+  
 
   // setupProveedorListeners
   setupProveedorListeners() {
