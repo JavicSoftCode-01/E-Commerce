@@ -794,6 +794,7 @@ h3 {
 
 .admin-section {
     margin-bottom: var(--spacing-xl);
+   
 }
 
 .admin-section h3 {
@@ -978,6 +979,8 @@ form textarea {
     color: var(--danger);
 }
 
+
+
 .was-validated :invalid~.invalid-feedback,
 .was-validated :invalid~.valid-feedback {
     display: block;
@@ -1066,7 +1069,9 @@ form textarea {
     opacity: 0.85;
 }
 
-.edit-button, .delete-button, .print-btn {
+.edit-button,
+.delete-button,
+.print-btn {
     background-color: #A41A24;
     padding: 8px;
     font-size: 22px;
@@ -1883,6 +1888,87 @@ body.modal-open {
 }
 
 /** icono de WS */
-.fa-whatsapp{
+.fa-whatsapp {
     color: forestgreen;
+}
+
+/* --- Toggle Switch Styles --- */
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-input {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+.toggle-label {
+    cursor: pointer;
+    width: 60px;
+    height: 30px;
+    background: #dc3545;
+    display: block;
+    border-radius: 100px;
+    position: relative;
+    margin-right: 10px;
+}
+
+.toggle-label:after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 90px;
+    transition: 0.3s;
+}
+
+.toggle-input:checked+.toggle-label {
+    background: #28a745;
+}
+
+.toggle-input:checked+.toggle-label:after {
+    left: calc(100% - 5px);
+    transform: translateX(-100%);
+}
+
+.estado-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.estado-indicator {
+    display: inline-block;
+    width: 24px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.edit-button i {
+    color: #830203;
+    /* Color rojo oscuro para el botón de editar */
+}
+
+.delete-button i {
+    color: #830203;
+    /* Color rojo oscuro para el botón de eliminar */
 }

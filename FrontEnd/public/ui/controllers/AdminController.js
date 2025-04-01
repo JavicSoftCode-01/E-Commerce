@@ -27,14 +27,29 @@ class AdminController {
     this.formCategoria = document.getElementById('formCategoria');
     this.categoriaIdInput = document.getElementById('categoriaId');
     this.categoriaNombreInput = document.getElementById('categoriaNombre');
+
+    this.categoriaEstadoInput = document.getElementById('categoriaEstado');
+    this.estadoTextoSpan = document.getElementById('estadoTexto');
     this.tablaCategorias = document.getElementById('tablaCategorias').querySelector('tbody');
+    // Agregar listener para el cambio de estado
+    this.categoriaEstadoInput.addEventListener('change', () => {
+      this.estadoTextoSpan.textContent = this.categoriaEstadoInput.checked ? 'Activo' : 'Inactivo';
+    });
     // this.btnResetCategoriaForm = document.getElementById('resetCategoriaForm') //ya no es necesario
 
     // Elementos Marcas
     this.formMarca = document.getElementById('formMarca');
     this.marcaIdInput = document.getElementById('marcaId');
     this.marcaNombreInput = document.getElementById('marcaNombre');
+
+    this.marcaEstadoInput = document.getElementById('marcaEstado');
+    this.estadoMarcaTextoSpan = document.getElementById('estadoMarcaTexto');
     this.tablaMarcas = document.getElementById('tablaMarcas').querySelector('tbody');
+
+    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
+    this.marcaEstadoInput.addEventListener('change', () => {
+      this.estadoMarcaTextoSpan.textContent = this.marcaEstadoInput.checked ? 'Activo' : 'Inactivo';
+    });
     // this.btnResetMarcaForm = document.getElementById('resetMarcaForm')//ya no es necesario
 
     // Elementos Proveedores
@@ -43,7 +58,15 @@ class AdminController {
     this.proveedorNombreInput = document.getElementById('proveedorNombre');
     this.proveedorTelefonoInput = document.getElementById('proveedorTelefono');
     this.proveedorDireccionInput = document.getElementById('proveedorDireccion');
+
+    this.proveedorEstadoInput = document.getElementById('proveedorEstado');
+    this.estadoProveedorTextoSpan = document.getElementById('estadoProveedorTexto');
     this.tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
+
+    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)  
+    this.proveedorEstadoInput.addEventListener('change', () => {
+      this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
+    });
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
     // Elementos Clientes
@@ -152,41 +175,59 @@ class AdminController {
   // Métodos CRUD para Categorías
   //---------------------------------------------------
 
+  // adminController.js
   async cargarCategorias() {
     try {
       const categorias = await appService.getCategorias();
-      this.tablaCategorias.innerHTML = ''; // Limpiar
+      this.tablaCategorias.innerHTML = '';
 
       if (!Array.isArray(categorias)) {
         console.error("Error: categorias is not an array.");
         return;
       }
+
       categorias.forEach(categoria => {
-        const tr = document.createElement('tr');   // row
+        const tr = document.createElement('tr');
         tr.innerHTML = `
-                <td class="text-center">${categoria.nombre}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetails" data-id="${categoria.id}"></i></td>
-                <td class="text-center">${categoria.iconTrueFalse()}</td>
-                <td class="action-buttons" style="height: 100px;">
-                 <button class="action-button edit-button edit-categoria" data-id="${categoria.id}"><i class="fa-solid fa-pencil fa-lg delete" data-id="${categoria.id}"></i></button>
-                 <button class="action-button delete-button delete-categoria" data-id="${categoria.id}"><i class="fa-solid fa-trash-can fa-lg edit" data-id="${categoria.id}"></i></button>
-                </td>
-          `;
+        <td class="text-center">${categoria.nombre}</td>
+        <td class="text-center">
+          <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetails" data-id="${categoria.id}"></i>
+        </td>
+        <td class="text-center">
+          <div class="estado-cell">
+            <span class="estado-indicator hidden">${categoria.iconTrueFalse()}</span>
+            <input type="checkbox" id="categoriaEstadoToggle${categoria.id}" class="toggle-input estado-toggle" data-id="${categoria.id}" ${categoria.estado ? 'checked' : ''}>
+            <label for="categoriaEstadoToggle${categoria.id}" class="toggle-label"></label>
+          </div>
+        </td>
+        <td class="text-center">
+          <div class="action-buttons">
+            <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">
+              <i class="fa-solid fa-pencil fa-lg" data-id="${categoria.id}"></i>
+            </button>
+            <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">
+              <i class="fa-solid fa-trash-can fa-lg" data-id="${categoria.id}"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
         const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
         if (btnOpenModal) {
           btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsCat(categoria.id); // Pasar ID de la categoría seleccionada
+            this.openModalDetailsCat(categoria.id);
           });
         }
 
-        this.tablaCategorias.appendChild(tr);  // Append, al tbody!
+        this.tablaCategorias.appendChild(tr);
       });
-      // Configurar listeners para los botones de editar y eliminar
+
+      // Configurar listeners para los botones y toggles
       this.setupCategoriaListeners();
 
     } catch (error) {
       console.error("Error al cargar las categorías:", error);
-      alert("Error al cargar las categorías."); // Mejor feedback al usuario
+      alert("Error al cargar las categorías.");
     }
   }
 
@@ -228,15 +269,17 @@ class AdminController {
   setupCategoriaListeners() {
     // Editar
     this.tablaCategorias.querySelectorAll('.edit-categoria').forEach(button => {
-      button.addEventListener('click', async (e) => { // Pone Evento click
+      button.addEventListener('click', async (e) => {
+        const categoriaId = parseInt(e.target.dataset.id);
+        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId);
 
-        const categoriaId = parseInt(e.target.dataset.id);        // Obtiene
-        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId); // Categoria por ID
+        if (categoria) {
+          this.categoriaIdInput.value = categoria.id;
+          this.categoriaNombreInput.value = categoria.nombre;
 
-        if (categoria) { // Categoria existe!
-          // Cargar  form
-          this.categoriaIdInput.value = categoria.id;   // carga de datos
-          this.categoriaNombreInput.value = categoria.nombre;//
+          // Establecer el estado del toggle
+          this.categoriaEstadoInput.checked = categoria.estado;
+          this.estadoTextoSpan.textContent = categoria.estado ? 'Activo' : 'Inactivo';
         }
       });
     });
@@ -260,7 +303,34 @@ class AdminController {
         }  //Cierra confirm()
       }); //cierra Listener
     });  // cierra forEach, setupCategoriaListeners
+    // Nuevo: Toggle para cambiar estado en la tabla
+    this.tablaCategorias.querySelectorAll('.estado-toggle').forEach(toggle => {
+      toggle.addEventListener('change', async (e) => {
+        const categoriaId = parseInt(e.target.dataset.id);
+        const nuevoEstado = e.target.checked;
 
+        try {
+          const resultado = await this.categoriaService.actualizarCategoria(categoriaId, {
+            estado: nuevoEstado
+          });
+
+          if (resultado !== null) {
+            // Actualizar la vista sin recargar toda la tabla
+            const tdEstado = e.target.closest('td').querySelector('.estado-indicator');
+            if (tdEstado) {
+              tdEstado.innerHTML = nuevoEstado ?
+                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
+                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+            }
+          }
+        } catch (error) {
+          console.error('Error al actualizar estado:', error);
+          // Revertir cambio en UI en caso de error
+          e.target.checked = !nuevoEstado;
+          alert("Error al actualizar el estado de la categoría.");
+        }
+      });
+    });
   } //cierra metodo
 
   // Enviar Formulario Categoria:  CREATE y UPDATE:  (categorias)
@@ -268,6 +338,7 @@ class AdminController {
     e.preventDefault();
     const categoriaId = this.categoriaIdInput.value; // Puede ser string vacío o un ID
     const nombre = this.categoriaNombreInput.value.trim(); // Quitar espacios extra
+    const estado = this.categoriaEstadoInput.checked; // Obtener el estado del checkbox
 
     if (!nombre) {
       alert("El nombre es obligatorio.");
@@ -281,10 +352,8 @@ class AdminController {
         console.log(`Intentando actualizar categoría ID: ${categoriaId} con nombre: ${nombre}`);
         // Preparamos solo los datos que queremos cambiar
         const datosParaActualizar = {
-          nombre: nombre
-          // Si tuvieras otros campos en el formulario para actualizar, los añadirías aquí:
-          // descripcion: this.descripcionInput.value,
-          // estado: this.estadoCheckbox.checked
+          nombre: nombre,
+          estado: estado // Actualiza el estado también
         };
 
         // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
@@ -314,7 +383,7 @@ class AdminController {
       } else {
         // --- CREACIÓN ---
         console.log(`Intentando agregar nueva categoría con nombre: ${nombre}`);
-        const nuevaCategoria = new Categoria(nombre); // El constructor se encarga de las fechas iniciales
+        const nuevaCategoria = new Categoria(nombre, estado); // El constructor se encarga de las fechas iniciales
         resultado = await this.categoriaService.agregarCategoria(nuevaCategoria);
 
         if (resultado !== null) { // Si agregarCategoria retorna el nuevo ID
@@ -340,6 +409,8 @@ class AdminController {
   resetFormCategoria() {
     this.categoriaIdInput.value = '';       // Reset ID (oculto)
     this.categoriaNombreInput.value = ''; // Reset Nombre (visible)
+    this.categoriaEstadoInput.checked = true; // Resetear a activo por defecto
+    this.estadoTextoSpan.textContent = 'Activo';
   }
 
   //---------------------------------------------------
@@ -347,8 +418,9 @@ class AdminController {
   //---------------------------------------------------
   async guardarMarca(e) {
     e.preventDefault();
-    const marcaId = this.marcaIdInput.value; // Puede ser string vacío o un ID
-    const nombre = this.marcaNombreInput.value.trim(); // Quitar espacios extra
+    const marcaId = this.marcaIdInput.value;
+    const nombre = this.marcaNombreInput.value.trim();
+    const estado = this.marcaEstadoInput.checked;
 
     if (!nombre) {
       alert("El nombre de la marca es obligatorio.");
@@ -360,50 +432,37 @@ class AdminController {
       if (marcaId) {
         // --- ACTUALIZACIÓN ---
         console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
-        // Preparamos solo los datos que queremos cambiar
         const datosParaActualizar = {
-          nombre: nombre
-          // Si permitieras actualizar otros campos desde el form de marca, los añadirías aquí
-          // estado: this.marcaEstadoCheckbox.checked
+          nombre: nombre,
+          estado: estado
         };
 
-        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
         resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
 
         if (resultado === null) {
-          // El servicio retornó null, indicando un error (validación, BD, etc.)
           alert("Error al actualizar la marca. Revisa la consola.");
-          // No reseteamos el form para que el usuario pueda corregir
         } else if (resultado === parseInt(marcaId)) {
-          // El servicio retornó el mismo ID, puede indicar éxito con o sin cambios guardados
-          // (Depende de si tu `actualizarMarca` retorna ID en ambos casos)
-          // Asumimos que si retorna el ID, fue exitoso. El log del servicio dirá si hubo cambios.
           alert("Marca guardada/actualizada exitosamente.");
-          this.resetFormMarca(); // Resetea el formulario
-          await this.cargarMarcas(); // Recarga la tabla de marcas
-          await this.cargarOpcionesProductoForm(); // Actualiza selects dependientes
-          await appService.refreshCache(); // Actualiza caché si es necesario
+          this.resetFormMarca();
+          await this.cargarMarcas();
+          await this.cargarOpcionesProductoForm();
+          await appService.refreshCache();
         }
-        // No necesitas un 'else' adicional si el caso de éxito (con o sin cambios) retorna el ID.
 
       } else {
         // --- CREACIÓN ---
         console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
-        // Crea la instancia. El constructor de BaseModel maneja las fechas iniciales.
-        const nuevaMarca = new Marca(nombre);
-        // Llama al servicio para agregar
+        const nuevaMarca = new Marca(nombre, estado);
         resultado = await this.marcaService.agregarMarca(nuevaMarca);
 
-        if (resultado !== null) { // Si agregarMarca retorna el nuevo ID
+        if (resultado !== null) {
           alert(`Marca agregada exitosamente con ID: ${resultado}`);
           this.resetFormMarca();
           await this.cargarMarcas();
           await this.cargarOpcionesProductoForm();
           await appService.refreshCache();
         } else {
-          // agregarMarca retornó null, indicando un error
           alert("Error al agregar la marca. Revisa la consola.");
-          // No reseteamos el form
         }
       }
 
@@ -413,20 +472,21 @@ class AdminController {
     }
   }
 
+
   // --- Asegúrate de tener el método resetFormMarca ---
   resetFormMarca() {
     this.marcaIdInput.value = '';       // Reset ID (oculto)
     this.marcaNombreInput.value = ''; // Reset Nombre (visible)
     // Resetea otros campos del form de marca si los tienes
+    this.marcaEstadoInput.checked = true; // Resetear a activo por defecto
+    this.estadoMarcaTextoSpan.textContent = 'Activo';
   }
 
   // --- Asegúrate de tener el método cargarMarcas ---
   async cargarMarcas() {
     try {
-      // Asumo que tienes una tabla similar a la de categorías (this.tablaMarcas)
-      // y que llamas a this.marcaService.obtenerTodasLasMarcas()
       const marcas = await this.marcaService.obtenerTodasLasMarcas();
-      const tabla = document.getElementById('tabla-marcas-body'); // Asegúrate que el ID es correcto
+      const tabla = document.getElementById('tabla-marcas-body');
       if (!tabla) {
         console.error("Elemento tbody para marcas no encontrado");
         return;
@@ -440,29 +500,37 @@ class AdminController {
 
       marcas.forEach(marca => {
         const tr = document.createElement('tr');
-        // Adapta este HTML a cómo quieres mostrar las marcas
         tr.innerHTML = `
-                <td class="text-center">${marca.nombre}</td>
-                <td class="text-center">
-                    <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer"   id="btnOpenModalDetails"     data-id="${marca.id}"
-                     title="Ver Detalles"></i>
-                 </td>
-                 <td class="text-center">${marca.iconTrueFalse()}</td>
-                <td class="action-buttons" style="height: 100px;">
-                    <button class="action-button edit-button edit-marca" data-id="${marca.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${marca.id}"></i></button>
-                    <button class="action-button delete-button delete-marca" data-id="${marca.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${marca.id}"></i></button>
-                </td>
-          `;
+          <td class="text-center">${marca.nombre}</td>
+          <td class="text-center">
+            <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetails" data-id="${marca.id}" title="Ver Detalles"></i>
+          </td>
+        
+          <td class="text-center">
+            <div class="estado-cell">
+            <span class="estado-indicatorMarca hidden">${marca.iconTrueFalse()}</span>
+              <input type="checkbox" id="marcaEstadoToggle${marca.id}" class="toggle-input estado-toggleMarca" data-id="${marca.id}" ${marca.estado ? 'checked' : ''}>
+              <label for="marcaEstadoToggle${marca.id}" class="toggle-label"></label>
+            </div>
+          </td>
+        
+          <td class="text-center">
+             <div class="action-buttons">
+               <button class="action-button edit-button edit-marca" data-id="${marca.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${marca.id}"></i></button>
+               <button class="action-button delete-button delete-marca" data-id="${marca.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${marca.id}"></i></button>
+             </div>
+            </td>
+        `;
         const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
         if (btnOpenModal) {
           btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsMar(marca.id); // Pasar ID de la categoría seleccionada
+            this.openModalDetailsMar(marca.id);
           });
         }
         tabla.appendChild(tr);
       });
 
-      // Vuelve a configurar los listeners para los botones de editar/eliminar de marcas
+      // Reconfigura los listeners para botones y toggles
       this.setupMarcaListeners();
 
     } catch (error) {
@@ -471,8 +539,7 @@ class AdminController {
     }
   }
 
-  // --- Asegúrate de tener openModalDetailsMar (si usas modal) y setupMarcaListeners ---
-  // Deben ser similares a los de categoría pero usando marcaService y los IDs/elementos correctos.
+
 
   setupMarcaListeners() {
     const tabla = document.getElementById('tabla-marcas-body'); // ID del tbody de marcas
@@ -481,9 +548,8 @@ class AdminController {
     // Editar Marca
     tabla.querySelectorAll('.edit-marca').forEach(button => {
       button.addEventListener('click', async (e) => {
-        // Prevenir que el click en el icono active el botón si están anidados incorrectamente
         e.stopPropagation();
-        const targetElement = e.target.closest('button'); // Asegura obtener el botón
+        const targetElement = e.target.closest('button');
         if (!targetElement) return;
 
         const marcaId = parseInt(targetElement.dataset.id);
@@ -491,8 +557,10 @@ class AdminController {
         if (marca) {
           this.marcaIdInput.value = marca.id;
           this.marcaNombreInput.value = marca.nombre;
-          // Carga otros campos del formulario si existen
-          window.scrollTo(0, 0); // Opcional: scroll al formulario
+          // Establecer el estado del toggle en el formulario
+          this.marcaEstadoInput.checked = marca.estado;
+          this.estadoMarcaTextoSpan.textContent = marca.estado ? 'Activo' : 'Inactivo';
+          window.scrollTo(0, 0);
         }
       });
     });
@@ -507,19 +575,49 @@ class AdminController {
         const marcaId = parseInt(targetElement.dataset.id);
         if (confirm(`¿Está seguro de eliminar la marca con ID ${marcaId}?`)) {
           const result = await this.marcaService.eliminarMarca(marcaId);
-          if (result !== null) { // O if (result === true) si eliminarMarca retorna boolean
+          if (result !== null) {
             alert('Marca eliminada correctamente.');
             await this.cargarMarcas();
             await this.cargarOpcionesProductoForm();
             await appService.refreshCache();
-            this.resetFormMarca(); // Limpia el form por si acaso
+            this.resetFormMarca();
           } else {
             alert('Error al eliminar la marca.');
           }
         }
       });
     });
+
+    // Toggle para cambiar estado desde la tabla (sin pasar por el formulario)
+    tabla.querySelectorAll('.estado-toggleMarca').forEach(toggle => {
+      toggle.addEventListener('change', async (e) => {
+        const marcaId = parseInt(e.target.dataset.id);
+        const nuevoEstado = e.target.checked;
+
+        try {
+          const resultado = await this.marcaService.actualizarMarca(marcaId, {
+            estado: nuevoEstado
+          });
+
+          if (resultado !== null) {
+            // Actualizar la vista sin recargar toda la tabla
+            const tdEstado = e.target.closest('td').querySelector('.estado-indicatorMarca');
+            if (tdEstado) {
+              tdEstado.innerHTML = nuevoEstado ?
+                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
+                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+            }
+          }
+        } catch (error) {
+          console.error('Error al actualizar estado:', error);
+          // Revertir cambio en UI en caso de error
+          e.target.checked = !nuevoEstado;
+          alert("Error al actualizar el estado de la marca.");
+        }
+      });
+    });
   }
+
 
   // Necesitarás un método similar a openModalDetailsCat pero para Marcas
   async openModalDetailsMar(marcaId) {
@@ -600,11 +698,21 @@ class AdminController {
 
                 <td class="text-center">${proveedor.direccion}</td>
                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProveedor" data-id="${proveedor.id}"></i></td>
-                <td class="text-center">${proveedor.iconTrueFalse()}</td>
-                <td class="action-buttons " style="height: 100px;">
+                
+                 <td class="text-center">
+                    <div class="estado-cell">
+                      <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
+                      <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? 'checked' : ''}>
+                      <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
+                    </div>
+                  </td>
+               
+              <td class="text-center">
+                <div class="action-buttons">
                  <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${proveedor.id}"></i></button>
                  <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${proveedor.id}"></i></button>
-                </td>
+                </div>
+              </td>
           `;
         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProveedor');
         if (btnOpenModal) {
@@ -654,7 +762,7 @@ class AdminController {
       modalDetails.classList.add('hidden');
     }, 300);
   }
-  
+
 
   // setupProveedorListeners
   setupProveedorListeners() {
@@ -672,6 +780,10 @@ class AdminController {
           this.proveedorNombreInput.value = proveedor.nombre;//
           this.proveedorDireccionInput.value = proveedor.direccion;
           this.proveedorTelefonoInput.value = proveedor.telefono;
+          // Establecer el estado del toggle en el formulario
+          this.proveedorEstadoInput.checked = proveedor.estado;
+          this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
+          window.scrollTo(0, 0);
         }
       });
     });
@@ -692,13 +804,39 @@ class AdminController {
             await this.cargarOpcionesProductoForm(); //   productos
 
           }
+        }
+      });
+    });
 
-        }  //Cierra confirm()
-      }); //cierra Listener
+    // Nuevo: Toggle para cambiar estado en la tabla
+    this.tablaProveedores.querySelectorAll('.estado-toggleProveedor').forEach(toggle => {
+      toggle.addEventListener('change', async (e) => {
+        const proveedorId = parseInt(e.target.dataset.id);
+        const nuevoEstado = e.target.checked;
 
-    });  // cierra forEach, setupProveedorListeners
+        try {
+          const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {
+            estado: nuevoEstado
+          });
 
-  } //cierra metodo
+          if (resultado !== null) {
+            // Actualizar la vista sin recargar toda la tabla
+            const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProveedor');
+            if (tdEstado) {
+              tdEstado.innerHTML = nuevoEstado ?
+                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
+                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+            }
+          }
+        } catch (error) {
+          console.error('Error al actualizar estado:', error);
+          // Revertir cambio en UI en caso de error
+          e.target.checked = !nuevoEstado;
+          alert("Error al actualizar el estado del proveedor.");
+        }
+      });
+    });
+  }
 
   // Enviar Formulario Proveedor:  CREATE y UPDATE:
   async guardarProveedor(e) { // METODO, RECIBE EL EVENTO
@@ -707,6 +845,7 @@ class AdminController {
     const nombre = this.proveedorNombreInput.value;       // Valor en la caja texto
     const direccion = this.proveedorDireccionInput.value;
     const telefono = this.proveedorTelefonoInput.value;
+    const estado = this.proveedorEstadoInput.checked; // Obtener el estado del checkbox
     if (!nombre || !direccion) {
       alert("Campos obligatorios");
       return;  // Salida temprana
@@ -720,11 +859,13 @@ class AdminController {
         proveedorExistente.nombre = nombre;
         proveedorExistente.direccion = direccion;
         proveedorExistente.telefono = telefono;
+        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
+
         resultado = await this.proveedorService.actualizarProveedor(parseInt(proveedorId), proveedorExistente); // Persistir cambios
         //Actualizar Vista:
         alert("Proveedor ACTUALIZADO") //Feedback al usuario!
       } else { // Si NO, ... CREAR
-        const nuevoProveedor = new Proveedor(nombre, telefono, direccion); // crea *INSTANCIA* Proveedor
+        const nuevoProveedor = new Proveedor(nombre, telefono, direccion, estado); // crea *INSTANCIA* Proveedor
 
         //Asigna
         resultado = await this.proveedorService.agregarProveedor(nuevoProveedor); //  await *RETORNA* id Generado.
@@ -762,6 +903,8 @@ class AdminController {
     this.proveedorNombreInput.value = '';
     this.proveedorDireccionInput.value = '';
     this.proveedorTelefonoInput.value = '';
+    this.proveedorEstadoInput.checked = true; // Resetear a activo por defecto
+    this.estadoProveedorTextoSpan.textContent = 'Activo'; // Resetear texto del estado
   }
 
   //---------------------------------------------------
@@ -799,11 +942,21 @@ class AdminController {
 
                 <td class="text-center">${cliente.direccion}</td>
                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsCliente" data-id="${cliente.id}"></i></td>
-                <td class="text-center">${cliente.iconTrueFalse()}</td>
-                <td class="action-buttons " style="height: 100px;">
+               
+                  <td class="text-center">
+                  <div class="estado-cell">
+                    <span class="estado-indicatorCliente hidden">${cliente.iconTrueFalse()}</span>
+                    <input type="checkbox" id="clienteEstadoToggle${cliente.id}" class="toggle-input estado-toggleCliente" data-id="${cliente.id}" ${cliente.estado ? 'checked' : ''}>
+                    <label for="clienteEstadoToggle${cliente.id}" class="toggle-label"></label>
+                  </div>
+
+                <td class"text-center">
+                <div class="action-buttons" >
                  <button class="action-button edit-button edit-cliente" data-id="${cliente.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${cliente.id}"></i></button>
                  <button class="action-button delete-button delete-cliente" data-id="${cliente.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${cliente.id}"></i></button>
+                </div>
                 </td>
+               
                 `;
         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsCliente');
         if (btnOpenModal) {

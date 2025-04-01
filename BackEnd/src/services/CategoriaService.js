@@ -44,48 +44,54 @@ class CategoriaService extends IndexedDB {
     }
   }
 
-     async actualizarCategoria(id, datosActualizados) {
-        try {
-            // 1. Validar el nombre si se proporcionó para actualizar
-            // Nota: Asumimos que datosActualizados es un objeto como { nombre: "nuevoNombre", /* otros campos */ }
-            // Si solo se actualiza el nombre, solo validamos eso.
-            const nombreValidado = await Validar.nombreBM(datosActualizados.nombre, this, id);
-            if (!nombreValidado) {
-                return null; // La validación falló.
-            }
-
-            // 2. Obtener la categoría ACTUAL desde la BD (¡usando el método corregido!)
-            const categoriaExistente = await this.obtenerCategoriaPorId(id);
-            if (!categoriaExistente) {
-                console.warn(`No se encontró categoría para actualizar con ID ${id}`);
-                return null; // No se encontró el registro
-            }
-
-            // 3. Comparar si hubo cambios reales
-            let huboCambios = false;
-            if (categoriaExistente.nombre !== nombreValidado) {
-                categoriaExistente.nombre = nombreValidado; // Actualiza el nombre en la instancia
-                huboCambios = true;
-            }
-
-            // 4. Si hubo cambios, actualizar timestamp y guardar en BD
-            if (huboCambios) {
-                categoriaExistente.prepareForUpdate(); // ¡Llamar aquí para actualizar fechaActualizacion!
-                const updatedId = await super.update(id, categoriaExistente); // Guarda el objeto COMPLETO
-                console.info(`Categoría con ID ${id} actualizada correctamente porque hubo cambios.`);
-                return updatedId; // Retorna el ID confirmando la actualización
-            } else {
-                console.info(`Categoría con ID ${id} no tuvo cambios detectados. No se actualizó fechaActualizacion ni se guardó.`);
-                // Puedes decidir qué retornar aquí. Retornar el ID puede ser útil.
-                // O podrías retornar un objeto indicando que no hubo cambios: { id: id, updated: false }
-                return id;
-            }
-
-        } catch (error) {
-            console.error(`Error al actualizar categoría con ID ${id}:`, error);
-            return null; // Error durante el proceso
+  async actualizarCategoria(id, datosActualizados) {
+    try {
+      // 1. Validar el nombre si se proporcionó para actualizar
+      let nombreValidado = datosActualizados.nombre;
+      if (nombreValidado) {
+        nombreValidado = await Validar.nombreBM(nombreValidado, this, id);
+        if (!nombreValidado) {
+          return null; // La validación falló.
         }
+      }
+  
+      // 2. Obtener la categoría actual desde la BD
+      const categoriaExistente = await this.obtenerCategoriaPorId(id);
+      if (!categoriaExistente) {
+        console.warn(`No se encontró categoría para actualizar con ID ${id}`);
+        return null;
+      }
+  
+      // 3. Comparar si hubo cambios reales
+      let huboCambios = false;
+      
+      // Verificar cambios en el nombre
+      if (nombreValidado && categoriaExistente.nombre !== nombreValidado) {
+        categoriaExistente.nombre = nombreValidado;
+        huboCambios = true;
+      }
+      
+      // Verificar cambios en el estado
+      if (datosActualizados.estado !== undefined && categoriaExistente.estado !== datosActualizados.estado) {
+        categoriaExistente.estado = datosActualizados.estado;
+        huboCambios = true;
+      }
+  
+      // 4. Si hubo cambios, actualizar timestamp y guardar en BD
+      if (huboCambios) {
+        categoriaExistente.prepareForUpdate();
+        const updatedId = await super.update(id, categoriaExistente);
+        console.info(`Categoría con ID ${id} actualizada correctamente.`);
+        return updatedId;
+      } else {
+        console.info(`Categoría con ID ${id} no tuvo cambios detectados.`);
+        return id;
+      }
+    } catch (error) {
+      console.error(`Error al actualizar categoría con ID ${id}:`, error);
+      return null;
     }
+  }
 
     async obtenerTodasLasCategorias() {
       try {

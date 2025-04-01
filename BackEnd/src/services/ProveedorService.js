@@ -59,54 +59,70 @@ class ProveedorService extends IndexedDB {
    */
   async actualizarProveedor(id, proveedorActualizado) {
     try {
-      const nombreValidado = await Validar.nombreBP(proveedorActualizado.nombre);
-      const direccionValidada = Validar.direccionBP(proveedorActualizado.direccion);
-      const telefonoValidado = await Validar.telefonoBP(proveedorActualizado.telefono, this, id);
-      if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-        return null; // Los errores de validación se manejan en los métodos de Validar.
-      }
-      //Obtener instancia
+      // 1. Obtener la instancia actual del proveedor
       const proveedorExistente = await this.obtenerProveedorPorId(id);
       if (!proveedorExistente) {
-        return null
+        console.warn(`No se encontró proveedor con ID ${id}`);
+        return null;
       }
-
-      //Comparar si hubo cambios reales
+  
+      // 2. Validar cada campo solo si se proporcionó un nuevo valor,
+      //    y en caso contrario, usar el valor existente.
+      let nombreValidado = proveedorActualizado.nombre !== undefined
+        ? await Validar.nombreBP(proveedorActualizado.nombre)
+        : proveedorExistente.nombre;
+      let direccionValidada = proveedorActualizado.direccion !== undefined
+        ? Validar.direccionBP(proveedorActualizado.direccion)
+        : proveedorExistente.direccion;
+      let telefonoValidado = proveedorActualizado.telefono !== undefined
+        ? await Validar.telefonoBP(proveedorActualizado.telefono, this, id)
+        : proveedorExistente.telefono;
+  
+      // Si se pasó un campo para actualizar y falla la validación, se retorna null.
+      if ((proveedorActualizado.nombre !== undefined && !nombreValidado) ||
+          (proveedorActualizado.direccion !== undefined && !direccionValidada) ||
+          (proveedorActualizado.telefono !== undefined && !telefonoValidado)) {
+        return null;
+      }
+  
+      // 3. Comparar si hubo cambios reales
       let huboCambios = false;
       if (proveedorExistente.nombre !== nombreValidado) {
-        proveedorExistente.nombre = nombreValidado; // Actualiza el nombre en la instancia
+        proveedorExistente.nombre = nombreValidado;
         huboCambios = true;
       }
       if (proveedorExistente.direccion !== direccionValidada) {
-        proveedorExistente.direccion = direccionValidada; // Actualiza la dirección en la instancia
+        proveedorExistente.direccion = direccionValidada;
         huboCambios = true;
       }
       if (proveedorExistente.telefono !== telefonoValidado) {
-        proveedorExistente.telefono = telefonoValidado; // Actualiza el teléfono en la instancia
+        proveedorExistente.telefono = telefonoValidado;
         huboCambios = true;
       }
 
-      // Si no hubo cambios, no es necesario actualizar
-      if (!huboCambios) {
-
-      //Actualizar datos.
-      proveedorExistente.nombre = nombreValidado;
-      proveedorExistente.direccion = direccionValidada;
-      proveedorExistente.telefono = telefonoValidado;
-      const updatedId = await super.update(id, proveedorExistente); // Guarda instancia
-      console.info(`Proveedor con ID ${id} actualizado correctamente.`);
-      return updatedId;
+       // Verificar cambios en el estado
+       if (proveedorActualizado.estado !== undefined && proveedorExistente.estado !== proveedorActualizado.estado) {
+        proveedorExistente.estado = proveedorActualizado.estado;
+        huboCambios = true;
       }
-      // Si hubo cambios, actualizar timestamp y guardar en BD
-      proveedorExistente.prepareForUpdate(); // ¡Llamar aquí para actualizar fechaActualizacion!
-      const updatedId = await super.update(id, proveedorExistente); // Guarda el objeto COMPLETO
-      console.info(`Proveedor con ID ${id} actualizado correctamente porque hubo cambios.`);
+  
+      // 4. Si no hubo cambios, retornamos el ID sin actualizar
+      if (!huboCambios) {
+        console.info(`Proveedor con ID ${id} no tuvo cambios detectados.`);
+        return id;
+      }
+  
+      // 5. Si hubo cambios, actualizar el timestamp y guardar en la BD
+      proveedorExistente.prepareForUpdate();
+      const updatedId = await super.update(id, proveedorExistente);
+      console.info(`Proveedor con ID ${id} actualizado correctamente.`);
       return updatedId;
     } catch (error) {
       console.error(`Error al actualizar proveedor con ID ${id}:`, error);
       return null;
     }
   }
+  
 
   /**
    * Obtiene todos los proveedores.
