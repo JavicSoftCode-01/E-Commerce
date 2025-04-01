@@ -66,6 +66,26 @@ class ClienteService extends IndexedDB {
             if (!clienteExistente) {
                 return null;
             }
+
+            // Comparar si hubo cambios reales
+            let huboCambios = false;
+            if (clienteExistente.nombre !== nombreValidado) {
+                clienteExistente.nombre = nombreValidado; // Actualiza el nombre en la instancia
+                huboCambios = true;
+            }
+            if (clienteExistente.direccion !== direccionValidada) {
+                clienteExistente.direccion = direccionValidada; // Actualiza la dirección en la instancia
+                huboCambios = true;
+            }
+            if (clienteExistente.telefono !== telefonoValidado) {
+                clienteExistente.telefono = telefonoValidado; // Actualiza el teléfono en la instancia
+                huboCambios = true;
+            }
+
+            // Si no hubo cambios, no es necesario actualizar
+            if (!huboCambios) {
+
+
             // Actualizar los datos.
             clienteExistente.nombre = nombreValidado;
             clienteExistente.direccion = direccionValidada;
@@ -73,6 +93,13 @@ class ClienteService extends IndexedDB {
             const updatedId = await super.update(id, clienteExistente);  // Guardar instancia.
             console.info(`Cliente con ID ${id} actualizado correctamente.`);
             return updatedId;
+            // Si hubo cambios, actualizar timestamp y guardar en BD
+            } else {
+                clienteExistente.prepareForUpdate(); // Llamar aquí para actualizar fechaActualizacion
+                const updatedId = await super.update(id, clienteExistente); // Guarda el objeto COMPLETO
+                console.info(`Cliente con ID ${id} actualizado correctamente porque hubo cambios.`);
+                return updatedId;
+            }
         } catch (error) {
             console.error(`Error al actualizar cliente con ID ${id}:`, error);
             return null;

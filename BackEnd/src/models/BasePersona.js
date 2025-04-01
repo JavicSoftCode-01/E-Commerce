@@ -16,19 +16,58 @@ class BasePersona {
    * @param {Date} [fechaCreacion] - Fecha de creación. Si no se proporciona, se usa la fecha actual.
    * @param {Date} [fechaActualizacion] - Fecha de última actualización. Si no se proporciona, se usa la fecha actual.
    */
-  constructor(nombre, telefono, direccion, estado = true, fechaCreacion = null, fechaActualizacion = null) {
+  constructor(nombre, telefono, direccion, estado = true, fechaCreacionInput = null, fechaActualizacionInput = null) {
     // Campos originales
     this.nombre = nombre;
     this.telefono = telefono;
     this.direccion = direccion;
+    this.estado = estado; // true = activo, false = inactivo
 
-    // Nuevos campos
-    // Si no se provee fechaCreacion, usar la actual. Útil al crear un NUEVO registro.
-    this.fechaCreacion = fechaCreacion instanceof Date ? fechaCreacion : new Date();
-    // La fecha de actualización inicial es igual a la de creación.
-    this.fechaActualizacion = fechaActualizacion instanceof Date ? fechaActualizacion : this.fechaCreacion;
-    // El estado por defecto es true (activo).
-    this.estado = estado;
+     // --- Procesamiento robusto de fechaCreacion ---
+     let creacionDate = null;
+     // 1. Si ya es un objeto Date válido, usarlo.
+     if (fechaCreacionInput instanceof Date && !isNaN(fechaCreacionInput)) {
+         creacionDate = fechaCreacionInput;
+     }
+     // 2. Si no es Date pero existe, intentar convertirlo (desde ISO string o timestamp)
+     else if (fechaCreacionInput) {
+         try {
+             const parsedDate = new Date(fechaCreacionInput);
+             if (!isNaN(parsedDate)) { // Verificar si la conversión fue exitosa
+                 creacionDate = parsedDate;
+             }
+         } catch (e) {
+             console.warn("Error al parsear fechaCreacionInput, se usará fecha actual:", fechaCreacionInput, e);
+         }
+     }
+     // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fecha/hora actual.
+     //    Esto SÓLO debería pasar en la creación inicial si no se pasa nada.
+     this.fechaCreacion = creacionDate instanceof Date ? creacionDate : new Date();
+ 
+ 
+     // --- Procesamiento robusto de fechaActualizacion ---
+     let actualizacionDate = null;
+     // 1. Si ya es un objeto Date válido, usarlo.
+     if (fechaActualizacionInput instanceof Date && !isNaN(fechaActualizacionInput)) {
+         actualizacionDate = fechaActualizacionInput;
+     }
+     // 2. Si no es Date pero existe, intentar convertirlo.
+     else if (fechaActualizacionInput) {
+         try {
+             const parsedDate = new Date(fechaActualizacionInput);
+             if (!isNaN(parsedDate)) {
+                 actualizacionDate = parsedDate;
+             }
+         } catch (e) {
+             console.warn("Error al parsear fechaActualizacionInput, se usará fecha de creación:", fechaActualizacionInput, e);
+         }
+     }
+     // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fechaCreacion (ya procesada).
+     //    Esto pasa en la creación inicial o si la fecha guardada era inválida.
+     this.fechaActualizacion = actualizacionDate instanceof Date ? actualizacionDate : this.fechaCreacion;
+ 
+     // El método prepareForUpdate() se encargará de poner la fecha actual CUANDO se actualice.
+   
   }
 
   /**
@@ -70,10 +109,13 @@ class BasePersona {
 
     try {
       // Convierte a objeto Date (maneja strings ISO o timestamps)
-      const dateObject = new Date(dateValue);
+       // *** Importante: Asegurarse que dateValue sea un objeto Date antes de formatear ***
+       // La lógica del constructor ahora debería asegurar esto, pero una doble verificación no hace daño.
+      const dateObject = dateValue instanceof Date ? dateValue : new Date(dateValue);
 
       // Verifica si la conversión resultó en una fecha válida
       if (isNaN(dateObject.getTime())) {
+         console.warn("Intentando formatear fecha inválida:", dateValue);
         return 'Fecha inválida';
       }
 

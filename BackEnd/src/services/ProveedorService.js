@@ -69,12 +69,37 @@ class ProveedorService extends IndexedDB {
       if (!proveedorExistente) {
         return null
       }
+
+      //Comparar si hubo cambios reales
+      let huboCambios = false;
+      if (proveedorExistente.nombre !== nombreValidado) {
+        proveedorExistente.nombre = nombreValidado; // Actualiza el nombre en la instancia
+        huboCambios = true;
+      }
+      if (proveedorExistente.direccion !== direccionValidada) {
+        proveedorExistente.direccion = direccionValidada; // Actualiza la dirección en la instancia
+        huboCambios = true;
+      }
+      if (proveedorExistente.telefono !== telefonoValidado) {
+        proveedorExistente.telefono = telefonoValidado; // Actualiza el teléfono en la instancia
+        huboCambios = true;
+      }
+
+      // Si no hubo cambios, no es necesario actualizar
+      if (!huboCambios) {
+
       //Actualizar datos.
       proveedorExistente.nombre = nombreValidado;
       proveedorExistente.direccion = direccionValidada;
       proveedorExistente.telefono = telefonoValidado;
       const updatedId = await super.update(id, proveedorExistente); // Guarda instancia
       console.info(`Proveedor con ID ${id} actualizado correctamente.`);
+      return updatedId;
+      }
+      // Si hubo cambios, actualizar timestamp y guardar en BD
+      proveedorExistente.prepareForUpdate(); // ¡Llamar aquí para actualizar fechaActualizacion!
+      const updatedId = await super.update(id, proveedorExistente); // Guarda el objeto COMPLETO
+      console.info(`Proveedor con ID ${id} actualizado correctamente porque hubo cambios.`);
       return updatedId;
     } catch (error) {
       console.error(`Error al actualizar proveedor con ID ${id}:`, error);
