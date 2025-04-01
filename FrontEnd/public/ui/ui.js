@@ -38,15 +38,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btnCloseModalDetails').addEventListener('click', () => {
       adminController.closeModalDetailsCat();
       adminController.closeModalDetailsMar();
-    })
+    });
 
     document.getElementById('btnCloseModalMarDetails').addEventListener('click', () => {
       adminController.closeModalDetailsMar();
-    })
+    });
 
     document.getElementById('btnCloseModalProdDetails').addEventListener('click', () => {
       adminController.closeModalDetailsProd();
-    })
+    });
+
+    document.getElementById('btnCloseModalDetailsCliente').addEventListener('click', () => {
+      adminController.closeModalDetailsCli();
+    });
 
 
 

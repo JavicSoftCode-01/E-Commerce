@@ -1,12 +1,12 @@
 // FrontEnd/ui/controllers/AdminController.js
-import {app} from '../AppFactory.js';
-import {Categoria} from '../../../../BackEnd/src/models/Categoria.js';
-import {Marca} from '../../../../BackEnd/src/models/Marca.js';
-import {Proveedor} from '../../../../BackEnd/src/models/Proveedor.js';
-import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
-import {Producto} from '../../../../BackEnd/src/models/Producto.js';
-import {appService} from '../services/UшымтаService.js';
-import {InvoiceTemplate} from './InvoicePlantilla.js';
+import { app } from '../AppFactory.js';
+import { Categoria } from '../../../../BackEnd/src/models/Categoria.js';
+import { Marca } from '../../../../BackEnd/src/models/Marca.js';
+import { Proveedor } from '../../../../BackEnd/src/models/Proveedor.js';
+import { Cliente } from '../../../../BackEnd/src/models/Cliente.js';
+import { Producto } from '../../../../BackEnd/src/models/Producto.js';
+import { appService } from '../services/UшымтаService.js';
+import { InvoiceTemplate } from './InvoicePlantilla.js';
 
 
 class AdminController {
@@ -760,13 +760,19 @@ class AdminController {
               </td>
 
                 <td class="text-center">${cliente.direccion}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsCliente" data-id="${cliente.id}"></i></td>
                 <td class="text-center">${cliente.iconTrueFalse()}</td>
                 <td class="action-buttons " style="height: 100px;">
                  <button class="action-button edit-button edit-cliente" data-id="${cliente.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${cliente.id}"></i></button>
                  <button class="action-button delete-button delete-cliente" data-id="${cliente.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${cliente.id}"></i></button>
                 </td>
                 `;
+        const btnOpenModal = tr.querySelector('#btnOpenModalDetailsCliente');
+        if (btnOpenModal) {
+          btnOpenModal.addEventListener('click', () => {
+            this.openModalDetailsCli(cliente.id); // Pasar ID de la categoría seleccionada
+          });
+        }
         this.tablaClientes.appendChild(tr);  // Append, al tbody!
       });
 
@@ -777,6 +783,40 @@ class AdminController {
       console.error("Error al cargar los Clientes:", error);
       alert("Error al cargar los Clientes."); // Mejor feedback al usuario
     }
+  }
+
+  async openModalDetailsCli(clienteId) {
+    const cliente = await this.clienteService.obtenerClientePorId(clienteId); // Obtener solo el cliente seleccionado
+    const modalDetails = document.getElementById('clienteModal');
+    if (!cliente) {
+      console.error("No se encontró el cliente");
+      return;
+    }
+    // Llenar el modal con la información correcta
+    document.getElementById('modalNombreCliente').textContent = cliente.nombre;
+    document.getElementById('modalTelefonoCliente').textContent = cliente.telefono;
+    document.getElementById('modalDireccionCliente').textContent = cliente.direccion;
+    document.getElementById('modalEstadoCliente').innerHTML = cliente.iconTrueFalse();
+    document.getElementById('modalFechaCreacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaCreacion);
+    document.getElementById('modalFechaActualizacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaActualizacion);
+
+    // Mostrar el modal
+    modalDetails.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => {
+      modalDetails.classList.add('show');
+    });
+  }
+
+  closeModalDetailsCli() {
+    const modalDetails = document.getElementById('clienteModal');
+
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
+
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300);
   }
 
   // setupClienteListeners
@@ -1051,13 +1091,13 @@ class AdminController {
     const pvp = this.productoPVPInput.value;
     const descripcion = this.productoDescripcionInput.value;
     const imagen = this.productoImagenInput.value;
-  
+
     // 1. Validaciones previas:
     if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
       alert("Todos los campos marcados con (*) son obligatorios");
       return;  // Salida temprana si faltan campos
     }
-  
+
     // 2. Conversión de datos:
     const precioNumerico = parseFloat(precio);
     const pvpNumerico = parseFloat(pvp);
@@ -1065,10 +1105,10 @@ class AdminController {
     const categoriaIdNumerico = parseInt(categoriaId, 10);
     const marcaIdNumerico = parseInt(marcaId, 10);
     const proveedorIdNumerico = parseInt(proveedorId, 10);
-  
+
     // Comprobaciones adicionales:
     if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
-        isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
+      isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
       alert("Error: Valores numéricos inválidos.");
       return;
     }
@@ -1076,7 +1116,7 @@ class AdminController {
       alert('No se permiten números negativos');
       return;
     }
-  
+
     let resultado;
     try {
       if (productoId) {
@@ -1086,11 +1126,11 @@ class AdminController {
           alert("Error: Producto no encontrado.");
           return;
         }
-  
+
         const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
         const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
         const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-  
+
         const productoActualizado = {
           ...productoExistente,
           nombre: nombre,
@@ -1107,7 +1147,7 @@ class AdminController {
           imagen: imagen,
           id: parseInt(productoId),
         };
-  
+
         resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
         if (resultado !== null) {
           alert("Producto ACTUALIZADO");
@@ -1136,7 +1176,7 @@ class AdminController {
           alert(`EXITO Agregando Producto, ID ${resultado} `);
         }
       }
-  
+
       if (resultado !== null && resultado !== undefined) {
         this.resetFormProducto();
         await this.cargarProductos();
@@ -1150,7 +1190,7 @@ class AdminController {
       alert("Revise consola");
     }
   }
-  
+
 
   // Reset
   resetFormProducto() {
@@ -1205,7 +1245,7 @@ class AdminController {
 
 
     } catch (error) {     // Errores
-                          //Feedback, si falla.
+      //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }
@@ -1394,4 +1434,4 @@ class AdminController {
 // Instancia única para toda la aplicación.
 const adminController = new AdminController(app.categoriaService, app.marcaService, app.proveedorService, app.clienteService, app.productoService, app.facturaService);
 
-export {adminController};
+export { adminController };

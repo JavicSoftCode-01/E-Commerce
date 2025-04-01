@@ -366,6 +366,25 @@
       </div>
     </div>
 
+    <!-- Modal para mostrar la información del proveedor -->
+    <div id="proveedorModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalDetailsProveedor" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre:</strong> <span id="modalNombreProveedor"></span></p>
+          <p><strong>Teléfono:</strong> <span id="modalTelefonoProveedor"></span></p>
+          <p><strong>Dirección:</strong> <span id="modalDireccionProveedor"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacionProveedor"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacionProveedor"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstadoProveedor" style="font-size: 30px;"></span></p>
+        </div>
+      </div>
+    </div>
+
     <div class="admin-section hidden" id="adminClientes">
       <h3><i class="fas fa-users"></i> Gestión de Clientes</h3>
       <form id="formCliente" class="needs-validation" novalidate>
@@ -408,6 +427,25 @@
           </thead>
           <tbody></tbody>
         </table>
+      </div>
+    </div>
+
+     <!-- Modal para mostrar la información de la cliente -->
+     <div id="clienteModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalDetailsCliente" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre:</strong> <span id="modalNombreCliente"></span></p>
+          <p><strong>Teléfono:</strong> <span id="modalTelefonoCliente"></span></p>
+          <p><strong>Dirección:</strong> <span id="modalDireccionCliente"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacionCliente"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacionCliente"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstadoCliente" style="font-size: 30px;"></span></p>
+        </div>
       </div>
     </div>
 
