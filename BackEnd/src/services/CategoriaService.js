@@ -3,6 +3,7 @@
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
 import {Categoria} from '../models/Categoria.js';
+import {ProductoService} from './ProductoService.js';
 
 /**
  * Servicio para la gestión de categorías.
@@ -135,19 +136,29 @@ class CategoriaService extends IndexedDB {
     }
 
 
-  async eliminarCategoria(id) {
-    try {
-      await super.delete(id);
-      alert(`Categoría con ID ${id} eliminada correctamente.`);
-
-      console.info(`Categoría con ID ${id} eliminada correctamente.`);
-
-    } catch (error) {
-      console.error(`Error al eliminar la categoría con ID ${id}:`, error);
-      // return false;   <- Ya no es necesario, con los otros cambios ya se hace un return
-      return null
+    async eliminarCategoria(id) {
+      try {
+        // Verificar dependencias con productos
+        const productoService = new ProductoService(this, null, null);
+        const dependencias = await productoService.verificarDependencias('categoria', id);
+        
+        if (dependencias && dependencias.hasDependencies) {
+          alert(`No se puede eliminar la categoría porque está siendo utilizada por ${dependencias.count} producto(s).`);
+          console.warn(`Imposible eliminar: La categoría con ID ${id} está siendo utilizada por ${dependencias.count} producto(s).`);
+          return false;
+        }
+        
+        // Si no hay dependencias, proceder con la eliminación
+        await super.delete(id);
+        alert(`Categoría con ID ${id} eliminada correctamente.`);
+        console.info(`Categoría con ID ${id} eliminada correctamente.`);
+        return true;
+        
+      } catch (error) {
+        console.error(`Error al eliminar la categoría con ID ${id}:`, error);
+        return null;
+      }
     }
-  }
 }
 
 export {CategoriaService};

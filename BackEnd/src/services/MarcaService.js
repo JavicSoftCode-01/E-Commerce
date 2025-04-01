@@ -2,6 +2,7 @@
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
 import {Marca} from '../models/Marca.js';
+import {ProductoService} from './ProductoService.js';
 
 /**
  * 🔰🔰Servicio para la gestión de marcas.
@@ -162,70 +163,7 @@ class MarcaService extends IndexedDB {
    * @param {Marca} marcaActualizada - Objeto marca con los datos actualizados.
    * @returns {Promise<number|null>} - El ID de la marca actualizada o null si falla.
    */
-  // async actualizarMarca(id, marcaActualizada) {
-  //   try {
-  //     const nombreValidado = await Validar.nombreBM(marcaActualizada.nombre, this, id);
-  //     if (!nombreValidado) {
-  //       return null; // Ya se registró el error en Validar.nombreBM
-  //     }
-  //     // Obtiene la marca de la DB
-  //     const marcaExistente = await this.obtenerMarcaPorId(id);
-  //     if (!marcaExistente) {
-  //       return null;
-  //     }
-  //     marcaExistente.nombre = nombreValidado; // Actualiza
-  //     const updatedId = await super.update(id, marcaExistente); // Guarda los cambios
-  //     console.info(`Marca con ID ${id} actualizada correctamente.`);
-  //     return updatedId;
-  //   } catch (error) {
-  //     console.error(`Error al actualizar marca con ID ${id}:`, error);
-  //     return null;
-  //   }
-  // }
-  //
-  // /**
-  //  * Obtiene todas las marcas.
-  //  * @returns {Promise<Array<Marca>>} - Un array con todas las marcas o un array vacío en caso de error.
-  //  */
-  // async obtenerTodasLasMarcas() {
-  //   try {
-  //     const marcas = await super.getAll();
-  //     // map para crear instancias.
-  //     const marcasInstancias = marcas.map(marca => {
-  //       const nuevaMarca = new Marca(marca.nombre);  // Crea una instancia de Marca.
-  //       nuevaMarca.id = marca.id
-  //       return nuevaMarca;  // Devuelve la instancia
-  //     });
-  //     console.info('Marcas obtenidas:', marcasInstancias);
-  //     return marcasInstancias; // Devuelve instancias
-  //   } catch (error) {
-  //     console.error('Error al obtener todas las marcas:', error);
-  //     return []; // Devuelve un array vacío en caso de error.
-  //   }
-  // }
-  //
-  // /**
-  //  * Obtiene una marca por su ID.
-  //  * @param {number} id - ID de la marca a obtener.
-  //  * @returns {Promise<Marca|null>} - La marca encontrada o null si no se encuentra.
-  //  */
-  // async obtenerMarcaPorId(id) {
-  //   try {
-  //     const marca = await super.getById(id);
-  //     if (marca) {
-  //       const nuevaMarca = new Marca(marca.nombre); // Crea instancia
-  //       nuevaMarca.id = marca.id
-  //       console.info(`Marca con ID ${id} obtenida:`, nuevaMarca);
-  //       return nuevaMarca;  // Devuelve instancia
-  //     } else {
-  //       console.warn(`No se encontró ninguna marca con ID ${id}.`);
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error al obtener Marca con ID ${id}:`, error);
-  //     return null;
-  //   }
-  // }
+ 
 
   /**
    * Elimina una marca por su ID.
@@ -234,9 +172,22 @@ class MarcaService extends IndexedDB {
    */
   async eliminarMarca(id) {
     try {
+      // Verificar dependencias con productos
+      const productoService = new ProductoService(null, this, null);
+      const dependencias = await productoService.verificarDependencias('marca', id);
+      
+      if (dependencias && dependencias.hasDependencies) {
+        alert(`No se puede eliminar la marca porque está siendo utilizada por ${dependencias.count} producto(s).`);
+        console.warn(`Imposible eliminar: La marca con ID ${id} está siendo utilizada por ${dependencias.count} producto(s).`);
+        return false;
+      }
+      
+      // Si no hay dependencias, proceder con la eliminación
       await super.delete(id);
-      alert(`Categoría con ID ${id} eliminada correctamente.`);
-      console.info(`La marca con ID ${id} fue eliminada correctamente.`);
+      alert(`Marca con ID ${id} eliminada correctamente.`);
+      console.info(`Marca con ID ${id} fue eliminada correctamente.`);
+      return true;
+      
     } catch (error) {
       console.error(`Error al intentar eliminar la marca con ID ${id}:`, error);
       return null;

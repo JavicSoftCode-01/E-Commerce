@@ -181,52 +181,6 @@ class ProductoService extends IndexedDB {
   }
   
 
-  // async obtenerProductos(filtros = {}) {
-  //   try {
-  //     let productos = await super.getAll();
-  //     // Filtro por categoría (usando el ID)
-  //     if (filtros.categoria) {
-  //       productos = productos.filter(producto => producto.categoriaId === filtros.categoria);
-  //     }
-  //     // Filtro por marca (usando el ID)
-  //     if (filtros.marca) {
-  //       productos = productos.filter(producto => producto.marcaId === filtros.marca);
-  //     }
-  //     // Filtro por texto
-  //     if (filtros.search) {
-  //       const busqueda = filtros.search.toLowerCase();
-  //       productos = productos.filter(producto =>
-  //         producto.nombre.toLowerCase().includes(busqueda) ||
-  //         (producto.descripcion && producto.descripcion.toLowerCase().includes(busqueda))
-  //       );
-  //     }
-  //     // Ordenamiento
-  //     if (filtros.sort) {
-  //       switch (filtros.sort) {
-  //         case 'price-asc':
-  //           productos.sort((a, b) => a.pvp - b.pvp);
-  //           break;
-  //         case 'price-desc':
-  //           productos.sort((a, b) => b.pvp - a.pvp);
-  //           break;
-  //         case 'name-asc':
-  //           productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-  //           break;
-  //         case 'name-desc':
-  //           productos.sort((a, b) => b.nombre.localeCompare(a.nombre));
-  //           break;
-  //       }
-  //     }
-  //
-  //     console.info('Productos obtenidos:', productos);
-  //     return productos;
-  //   } catch (error) {
-  //     console.error('Error al obtener productos:', error);
-  //     return []; // Devuelve un array vacío
-  //   }
-  // }
-  //
-
   async obtenerProductoPorId(id) {
     try {
       const productoData = await super.getById(id); // Obtiene datos crudos de IndexedDB
@@ -310,21 +264,6 @@ class ProductoService extends IndexedDB {
     }
   }
 
-  // async obtenerProductoPorId(id) {
-  //   try {
-  //     const producto = await super.getById(id);
-  //     if (producto) {
-  //       console.info(`Producto con ID ${id} obtenido:`, producto);
-  //       return producto;
-  //     } else {
-  //       console.warn(`No se encontró ningún producto con ID ${id}.`);
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error al obtener producto con ID ${id}:`, error);
-  //     return null;
-  //   }
-  // }
 
   /**
    * Actualiza el stock de un producto, ya sea por venta o reposición.
@@ -367,6 +306,40 @@ class ProductoService extends IndexedDB {
       return null;
     }
   }
+
+  // Primero, agreguemos un método al ProductoService para verificar dependencias
+
+// En ProductoService.js, añade esta función:
+async verificarDependencias(tipo, id) {
+  try {
+    const productos = await this.obtenerProductos();
+    let dependencias = [];
+    
+    switch(tipo) {
+      case 'categoria':
+        dependencias = productos.filter(producto => producto.categoriaId === id);
+        break;
+      case 'marca':
+        dependencias = productos.filter(producto => producto.marcaId === id);
+        break;
+      case 'proveedor':
+        dependencias = productos.filter(producto => producto.proveedorId === id);
+        break;
+      default:
+        console.error(`Tipo de dependencia desconocido: ${tipo}`);
+        return null;
+    }
+    
+    return {
+      hasDependencies: dependencias.length > 0,
+      count: dependencias.length,
+      productos: dependencias
+    };
+  } catch (error) {
+    console.error(`Error al verificar dependencias de ${tipo} con ID ${id}:`, error);
+    return null;
+  }
+}
 
   /**
    * Elimina un producto por su ID.

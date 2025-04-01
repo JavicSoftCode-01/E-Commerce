@@ -2,6 +2,7 @@
 import {IndexedDB} from '../database/indexdDB.js';
 import {Validar} from '../utils/validar.js';
 import {Proveedor} from '../models/Proveedor.js';
+import {ProductoService} from './ProductoService.js';
 
 /**
  * 🔰 Servicio para la gestión de proveedores.
@@ -159,14 +160,28 @@ class ProveedorService extends IndexedDB {
    */
   async eliminarProveedor(id) {
     try {
+      // Verificar dependencias con productos
+      const productoService = new ProductoService(null, null, this);
+      const dependencias = await productoService.verificarDependencias('proveedor', id);
+      
+      if (dependencias && dependencias.hasDependencies) {
+        alert(`No se puede eliminar el proveedor porque está siendo utilizado por ${dependencias.count} producto(s).`);
+        console.warn(`Imposible eliminar: El proveedor con ID ${id} está siendo utilizado por ${dependencias.count} producto(s).`);
+        return false;
+      }
+      
+      // Si no hay dependencias, proceder con la eliminación
       await super.delete(id);
-      alert(`Proveedor con ID ${id} eliminado correctamente`);
+      alert(`Proveedor con ID ${id} eliminado correctamente.`);
       console.info(`Proveedor con ID ${id} eliminado correctamente.`);
+      return true;
+      
     } catch (error) {
       console.error(`Error al eliminar proveedor con ID ${id}:`, error);
       return null;
     }
   }
+  
 }
 
 export {ProveedorService};
