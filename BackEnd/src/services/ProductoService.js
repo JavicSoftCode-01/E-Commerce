@@ -252,38 +252,30 @@ class ProductoService extends IndexedDB {
 
   async obtenerProductoPorId(id) {
     try {
-      const productoData = await super.getById(id); // Obtiene datos crudos de IndexedDB
-  
-      if (productoData) {
-        // Crear una NUEVA INSTANCIA de Producto usando los datos recuperados.
-        const instanciaProducto = new Producto(
-          productoData.nombre,
-          productoData.estado,             // Para BaseModel e iconTrueFalse
-          productoData.fechaCreacion,      // Para BaseModel
-          productoData.fechaActualizacion, // Para BaseModel
-          productoData.categoriaId,
-          productoData.categoriaNombre,
-          productoData.marcaId,
-          productoData.marcaNombre,
-          productoData.proveedorId,
-          productoData.proveedorNombre,
-          productoData.precio,
-          productoData.pvp,
-          productoData.cantidad,
-          productoData.descripcion,
-          productoData.imagen
-        );
-        instanciaProducto.id = productoData.id; // Asignar el ID a la instancia
-        // Si deseas conservar el stock actual en lugar de derivarlo de cantidad:
-        instanciaProducto.stock = productoData.stock;
-  
-        return instanciaProducto; // Devuelve la instancia correctamente configurada
-      } else {
-        console.warn(`No se encontró ningún producto con ID ${id}.`);
-        return null;
-      }
+      const productoData = await super.getById(id);
+      if (!productoData) return null;
+      const producto = new Producto(
+        productoData.nombre,
+        productoData.estado,
+        productoData.fechaCreacion,
+        productoData.fechaActualizacion,
+        productoData.categoriaId,
+        productoData.categoriaNombre,
+        productoData.marcaId,
+        productoData.marcaNombre,
+        productoData.proveedorId,
+        productoData.proveedorNombre,
+        productoData.precio,
+        productoData.pvp,
+        productoData.cantidad,
+        productoData.descripcion,
+        productoData.imagen
+      );
+      producto.id = productoData.id;
+      producto.stock = productoData.stock || productoData.cantidad;
+      return producto;
     } catch (error) {
-      console.error(`Error al obtener producto con ID ${id}:`, error);
+      console.error(`Error al obtener producto ${id}:`, error);
       return null;
     }
   }
@@ -344,34 +336,23 @@ class ProductoService extends IndexedDB {
     try {
       const producto = await this.obtenerProductoPorId(productoId);
       if (!producto) {
-        console.error(`No se encontró el producto con ID ${productoId}`);
+        console.error(`Producto ${productoId} no encontrado`);
         return null;
       }
 
-      // Si es una venta (cantidad negativa), validar que haya suficiente stock
-      if (cantidad < 0 && Math.abs(cantidad) > producto.stock) {
-        console.error(`Stock insuficiente. Stock actual: ${producto.stock}, Cantidad solicitada: ${Math.abs(cantidad)}`);
+      const nuevoStock = producto.stock + cantidad;
+      if (nuevoStock < 0) {
+        console.error(`Stock insuficiente para ${producto.nombre}. Actual: ${producto.stock}, Solicitado: ${Math.abs(cantidad)}`);
         return null;
       }
 
-      // Actualizar el stock
-      producto.stock += cantidad; // Si cantidad es negativa, restará del stock
-
-      // Validar que el stock no sea negativo después de la operación
-      if (producto.stock < 0) {
-        console.error("El stock no puede ser negativo");
-        return null;
-      }
-
-      const actualizado = await super.update(productoId, producto);
-      if (actualizado) {
-        console.info(`Stock actualizado para producto ${productoId}. Nuevo stock: ${producto.stock}`);
-        return true;
-      }
-      return null;
-
+      producto.stock = nuevoStock;
+      producto.fechaActualizacion = new Date().toISOString();
+      await super.update(productoId, producto);
+      console.info(`Stock actualizado para ${productoId}. Nuevo stock: ${producto.stock}`);
+      return true;
     } catch (error) {
-      console.error("Error al actualizar el stock:", error);
+      console.error(`Error al actualizar stock de ${productoId}:`, error);
       return null;
     }
   }

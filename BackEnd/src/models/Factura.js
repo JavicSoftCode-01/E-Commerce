@@ -2,19 +2,22 @@ class DetalleFactura {
   constructor(productoId, nombre, precio, cantidad) {
     this.productoId = productoId;
     this.nombre = nombre;
-    this.precio = precio;
-    this.cantidad = cantidad;
-    this.subtotal = this.precio * this.cantidad;
+    this.precio = parseFloat(precio) || 0; // Asegura que sea un número
+    this.cantidad = parseInt(cantidad, 10) || 0; // Asegura que sea un entero
+    this.subtotal = this.calcularSubtotal(); // Calcula subtotal al instanciar
+  }
+
+  calcularSubtotal() {
+    return this.precio * this.cantidad; // Método explícito para subtotal
   }
 }
 
 class Factura {
   constructor(clienteId, detalles) {
-    this.id = null; // Será asignado por FacturaService
+    this.id = null; // Asignado por FacturaService
     this.clienteId = clienteId;
-    this.numeroFactura = null; // Será asignado usando InvoiceTemplate
+    this.numeroFactura = null; // Asignado por InvoiceTemplate
     this.fecha = new Date().toISOString();
-
     this.detalles = detalles || [];
     this.total = 0;
     this.subtotal = 0;
@@ -23,49 +26,35 @@ class Factura {
     this.clienteNombre = '';
     this.clienteTelefono = '';
     this.clienteDireccion = '';
+    this.fechaActualizacion = this.fecha; // Inicialmente igual a fecha de creación
+    this.calcularTotales(); // Calcula al instanciar
   }
 
-  calcularTotalFactura() {
-    return this.detalles.reduce((sum, detalle) => sum + detalle.subtotal, 0);
+  calcularTotales() {
+    this.subtotal = this.detalles.reduce((sum, detalle) => sum + detalle.calcularSubtotal(), 0);
+    this.total = this.subtotal + this.envio; // Incluye envío si aplica
   }
 
   static formatEcuadorDateTime(dateValue) {
-    // Si no hay valor, retorna un placeholder
-    if (!dateValue) {
-      return 'N/A';
-    }
-
+    if (!dateValue) return 'N/A';
     try {
-      // Convierte a objeto Date (maneja strings ISO o timestamps)
       const dateObject = new Date(dateValue);
-
-      // Verifica si la conversión resultó en una fecha válida
-      if (isNaN(dateObject.getTime())) {
-        return 'Fecha inválida';
-      }
-
-      // Opciones para el formateador Intl.DateTimeFormat
+      if (isNaN(dateObject.getTime())) return 'Fecha inválida';
       const options = {
-        timeZone: 'America/Guayaquil', // Zona horaria principal de Ecuador Continental (UTC-5)
-        year: 'numeric',    // Ejemplo: 2024
-        month: '2-digit',   // Ejemplo: 03 (para Marzo)
-        day: '2-digit',     // Ejemplo: 29
-        hour: '2-digit',    // Ejemplo: 06 (para 6 PM si hour12 es true)
-        minute: '2-digit',  // Ejemplo: 52
-        // second: '2-digit', // Descomenta si necesitas los segundos
-        hour12: true        // Usar formato AM/PM (true) o 24 horas (false)
+        timeZone: 'America/Guayaquil',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
       };
-
-      // Crea el formateador y formatea la fecha
-      const formatter = new Intl.DateTimeFormat('es-EC', options); // 'es-EC' para formato Español Ecuador
-      return formatter.format(dateObject);
-
+      return new Intl.DateTimeFormat('es-EC', options).format(dateObject);
     } catch (error) {
-      console.error("Error formateando fecha:", dateValue, error);
-      return 'Error formato'; // Placeholder en caso de error inesperado
+      console.error('Error formateando fecha:', error);
+      return 'Error formato';
     }
   }
-
 }
 
-export {Factura, DetalleFactura};
+export { Factura, DetalleFactura };

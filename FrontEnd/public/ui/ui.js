@@ -56,9 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       adminController.closeModalDetailsProveedor();
     });
 
-    document.getElementById('btnCloseModalDetailsHistorial').addEventListener('click', () => {
-      adminController.closeModalDetailsHistorial();
-    });
+
 
     // Load store components after event listeners
     await app.tiendaController.cargarProductos();
