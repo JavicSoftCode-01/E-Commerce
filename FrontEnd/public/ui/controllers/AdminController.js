@@ -90,7 +90,16 @@ class AdminController {
     this.productoPVPInput = document.getElementById('productoPVP');
     this.productoDescripcionInput = document.getElementById('productoDescripcion');
     this.productoImagenInput = document.getElementById('productoImagen');
+
+    this.productoEstadoInput = document.getElementById('productoEstado');
+    this.estadoProductoTextoSpan = document.getElementById('estadoProductoTexto');
     this.tablaProductos = document.getElementById('tablaProductos').querySelector('tbody');
+
+    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
+    this.productoEstadoInput.addEventListener('change', () => {
+      this.estadoProductoTextoSpan.textContent = this.productoEstadoInput.checked ? 'Activo' : 'Inactivo';
+    });
+
 
     // Elementos Ventas (factura)
     this.tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
@@ -1138,10 +1147,18 @@ class AdminController {
                 <td class="text-center">${producto.stock}</td>
                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProd" data-id="${producto.id}"></i></td>
         
-                <td class="text-center">${producto.estado ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>'}</td>
-                <td class="action-buttons " style="height: 100px;">
+                 <td class="text-center">
+            <div class="estado-cell">
+              <input type="checkbox" id="productoEstadoToggle${producto.id}" class="toggle-input estado-toggleProducto" data-id="${producto.id}" ${producto.estado ? 'checked' : ''}>
+              <label for="productoEstadoToggle${producto.id}" class="toggle-label"></label>
+            </div>
+          </td> 
+     
+<td class="text-center">
+                <div class="action-buttons">
                     <button class="action-button edit-button edit-producto" data-id="${producto.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${producto.id}"></i></button>
                     <button class="action-button delete-button delete-producto" data-id="${producto.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${producto.id}"></i></button>
+                </div>
                 </td>
             `;
         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProd');
@@ -1241,7 +1258,10 @@ class AdminController {
           this.productoStockInput.value = producto.stock;
           this.productoPVPInput.value = producto.pvp;
           this.productoDescripcionInput.value = producto.descripcion;
-          this.productoImagenInput.value = producto.imagen
+          this.productoImagenInput.value = producto.imagen;
+          this.productoEstadoInput.checked = producto.estado; // Asignar estado al checkbox
+          this.estadoProductoTextoSpan.textContent = producto.estado ? 'Activo' : 'Inactivo'; // Cambiar texto del estado
+          window.scrollTo(0, 0); // Desplazar la ventana hacia arriba
         }
       });
     });
@@ -1267,6 +1287,34 @@ class AdminController {
       }); //cierra Listener
 
     });  // cierra forEach, setupProductoListeners
+    // Nuevo: Toggle para cambiar estado en la tabla
+    this.tablaProductos.querySelectorAll('.estado-toggleProducto').forEach(toggle => {
+      toggle.addEventListener('change', async (e) => {
+        const productoId = parseInt(e.target.dataset.id);
+        const nuevoEstado = e.target.checked;
+
+        try {
+          const resultado = await this.productoService.actualizarProducto(productoId, {
+            estado: nuevoEstado
+          });
+
+          if (resultado !== null) {
+            // Actualizar la vista sin recargar toda la tabla
+            const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProducto');
+            if (tdEstado) {
+              tdEstado.innerHTML = nuevoEstado ?
+                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
+                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+            }
+          }
+        } catch (error) {
+          console.error('Error al actualizar estado:', error);
+          // Revertir cambio en UI en caso de error
+          e.target.checked = !nuevoEstado;
+          alert("Error al actualizar el estado del producto.");
+        }
+      });
+    });
   } //cierra metodo
 
   // Enviar Formulario Producto:  CREATE y UPDATE:
@@ -1282,6 +1330,7 @@ class AdminController {
     const pvp = this.productoPVPInput.value;
     const descripcion = this.productoDescripcionInput.value;
     const imagen = this.productoImagenInput.value;
+    const estado = this.productoEstadoInput.checked; // Obtener el estado del checkbox
 
     // 1. Validaciones previas:
     if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
@@ -1337,6 +1386,7 @@ class AdminController {
           descripcion: descripcion,
           imagen: imagen,
           id: parseInt(productoId),
+          estado: estado, // Actualizar el estado
         };
 
         resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
@@ -1395,6 +1445,8 @@ class AdminController {
     this.productoPVPInput.value = ''
     this.productoDescripcionInput.value = ''
     this.productoImagenInput.value = ''
+    this.productoEstadoInput.checked = true; // Resetear a activo por defecto
+    this.estadoProductoTextoSpan.textContent = 'Activo'; // Resetear texto del estado
   }
 
   async cargarOpcionesProductoForm() {

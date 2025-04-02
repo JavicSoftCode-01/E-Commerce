@@ -97,83 +97,152 @@ class ProductoService extends IndexedDB {
     }
   }
   
-
   async actualizarProducto(id, productoActualizado) {
     try {
-      // Validaciones iniciales
-      if (!productoActualizado.categoriaId || !productoActualizado.marcaId || !productoActualizado.proveedorId) {
-        console.error("Error: categoriaId, marcaId o proveedorId son nulos o no definidos.", productoActualizado);
+      // 1. Obtener la instancia actual del producto desde la BD
+      const productoExistente = await this.obtenerProductoPorId(id);
+      if (!productoExistente) {
+        console.warn(`Producto con ID ${id} no encontrado.`);
         return null;
       }
-      const nombreValidado = await Validar.nombreBM(productoActualizado.nombre, this, id);
-      const categoriaValida = await this.categoriaService.obtenerCategoriaPorId(productoActualizado.categoriaId);
-      const marcaValida = await this.marcaService.obtenerMarcaPorId(productoActualizado.marcaId);
-      const proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoActualizado.proveedorId);
-      const precioValidado = Validar.precio(productoActualizado.precio);
-      const pvpValidado = Validar.precio(productoActualizado.pvp);
-      // Se corrigió la validación: ahora se usa stock para validar cantidad
-      const cantidadValidada = Validar.cantidadStock(productoActualizado.stock);
-      const descripcionValidada = Validar.descripcion(productoActualizado.descripcion);
+      
+      // 2. Validar y obtener valores, usando los enviados o los actuales si no se modifican
   
-      // Comprobación de todas las validaciones
-      if (!nombreValidado || !categoriaValida || !marcaValida || !proveedorValido ||
-          !precioValidado || !pvpValidado || !cantidadValidada || !descripcionValidada) {
-        console.error("Error: Alguna validación falló.", {
-          nombreValidado,
-          categoriaValida,
-          marcaValida,
-          proveedorValido,
-          precioValidado,
-          pvpValidado,
-          cantidadValidada,
-          descripcionValidada
-        });
-        return null;
+      // Validar o conservar el nombre
+      let nombreValidado;
+      if (productoActualizado.nombre !== undefined) {
+        nombreValidado = await Validar.nombreBM(productoActualizado.nombre, this, id);
+        if (!nombreValidado) return null;
+      } else {
+        nombreValidado = productoExistente.nombre;
       }
   
-      // Asigna datos validados
-      productoActualizado.nombre = nombreValidado;
-      productoActualizado.categoriaId = categoriaValida.id;
-      productoActualizado.categoriaNombre = categoriaValida.nombre;
-      productoActualizado.marcaId = marcaValida.id;
-      productoActualizado.marcaNombre = marcaValida.nombre;
-      productoActualizado.proveedorId = proveedorValido.id;
-      productoActualizado.proveedorNombre = proveedorValido.nombre;
-      productoActualizado.precio = precioValidado;
-      productoActualizado.pvp = pvpValidado;
-      productoActualizado.stock = cantidadValidada;
-      productoActualizado.descripcion = descripcionValidada;
-  
-      // Reconstruir el objeto Producto respetando el orden del constructor:
-      const nuevoProducto = new Producto(
-        nombreValidado,                         // nombre
-        productoActualizado.estado,             // estado (mantiene el actual)
-        productoActualizado.fechaCreacion,      // fechaCreacion (se conserva)
-        new Date(),                             // fechaActualizacion (actualizada)
-        categoriaValida.id,                     // categoriaId
-        categoriaValida.nombre,                 // categoriaNombre
-        marcaValida.id,                         // marcaId
-        marcaValida.nombre,                     // marcaNombre
-        proveedorValido.id,                     // proveedorId
-        proveedorValido.nombre,                 // proveedorNombre
-        precioValidado,                         // precio
-        pvpValidado,                            // pvp
-        cantidadValidada,                       // cantidad
-        descripcionValidada,                    // descripcion
-        productoActualizado.imagen              // imagen
-      );
-  
-      nuevoProducto.id = id;
-      const updatedId = await super.update(id, nuevoProducto);
-  
-      // Sincronizar el carrito inmediatamente después de la actualización, si aplica
-      if (window.app && window.app.carritoController) {
-        await window.app.carritoController.sincronizarCarrito();
+      // Para campos foráneos: si se envían se buscan, si no se usan los actuales
+      let categoriaValida;
+      if (productoActualizado.categoriaId !== undefined) {
+        categoriaValida = await this.categoriaService.obtenerCategoriaPorId(productoActualizado.categoriaId);
+        if (!categoriaValida) return null;
+      } else {
+        categoriaValida = await this.categoriaService.obtenerCategoriaPorId(productoExistente.categoriaId);
       }
   
-      console.info(`Producto con ID ${id} actualizado correctamente.`);
-      return updatedId;
+      let marcaValida;
+      if (productoActualizado.marcaId !== undefined) {
+        marcaValida = await this.marcaService.obtenerMarcaPorId(productoActualizado.marcaId);
+        if (!marcaValida) return null;
+      } else {
+        marcaValida = await this.marcaService.obtenerMarcaPorId(productoExistente.marcaId);
+      }
   
+      let proveedorValido;
+      if (productoActualizado.proveedorId !== undefined) {
+        proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoActualizado.proveedorId);
+        if (!proveedorValido) return null;
+      } else {
+        proveedorValido = await this.proveedorService.obtenerProveedorPorId(productoExistente.proveedorId);
+      }
+  
+      // Validar o conservar el precio
+      let precioValidado;
+      if (productoActualizado.precio !== undefined) {
+        precioValidado = Validar.precio(productoActualizado.precio);
+        if (!precioValidado) return null;
+      } else {
+        precioValidado = productoExistente.precio;
+      }
+  
+      // Validar o conservar el pvp
+      let pvpValidado;
+      if (productoActualizado.pvp !== undefined) {
+        pvpValidado = Validar.precio(productoActualizado.pvp);
+        if (!pvpValidado) return null;
+      } else {
+        pvpValidado = productoExistente.pvp;
+      }
+  
+      // Validar o conservar el stock
+      let cantidadValidada;
+      if (productoActualizado.stock !== undefined) {
+        cantidadValidada = Validar.cantidadStock(productoActualizado.stock);
+        if (!cantidadValidada) return null;
+      } else {
+        cantidadValidada = productoExistente.stock;
+      }
+  
+      // Validar o conservar la descripción
+      let descripcionValidada;
+      if (productoActualizado.descripcion !== undefined) {
+        descripcionValidada = Validar.descripcion(productoActualizado.descripcion);
+        if (!descripcionValidada) return null;
+      } else {
+        descripcionValidada = productoExistente.descripcion;
+      }
+      
+      // 3. Comparar campo por campo para detectar cambios
+      let huboCambios = false;
+  
+      // Estado (por ejemplo, el toggle)
+      if (productoActualizado.estado !== undefined && productoExistente.estado !== productoActualizado.estado) {
+        productoExistente.estado = productoActualizado.estado;
+        huboCambios = true;
+      }
+  
+      if (nombreValidado !== productoExistente.nombre) {
+        productoExistente.nombre = nombreValidado;
+        huboCambios = true;
+      }
+      if (categoriaValida.id !== productoExistente.categoriaId) {
+        productoExistente.categoriaId = categoriaValida.id;
+        productoExistente.categoriaNombre = categoriaValida.nombre;
+        huboCambios = true;
+      }
+      if (marcaValida.id !== productoExistente.marcaId) {
+        productoExistente.marcaId = marcaValida.id;
+        productoExistente.marcaNombre = marcaValida.nombre;
+        huboCambios = true;
+      }
+      if (proveedorValido.id !== productoExistente.proveedorId) {
+        productoExistente.proveedorId = proveedorValido.id;
+        productoExistente.proveedorNombre = proveedorValido.nombre;
+        huboCambios = true;
+      }
+      if (precioValidado !== productoExistente.precio) {
+        productoExistente.precio = precioValidado;
+        huboCambios = true;
+      }
+      if (pvpValidado !== productoExistente.pvp) {
+        productoExistente.pvp = pvpValidado;
+        huboCambios = true;
+      }
+      if (cantidadValidada !== productoExistente.stock) {
+        productoExistente.stock = cantidadValidada;
+        huboCambios = true;
+      }
+      if (descripcionValidada !== productoExistente.descripcion) {
+        productoExistente.descripcion = descripcionValidada;
+        huboCambios = true;
+      }
+      // Actualizar la imagen solo si se envía y es diferente
+      if (productoActualizado.imagen !== undefined && productoActualizado.imagen !== productoExistente.imagen) {
+        productoExistente.imagen = productoActualizado.imagen;
+        huboCambios = true;
+      }
+  
+      // 4. Si hubo cambios, actualizar el timestamp y guardar en la BD
+      if (huboCambios) {
+        productoExistente.prepareForUpdate();
+        const updatedId = await super.update(id, productoExistente);
+        console.info(`Producto con ID ${id} actualizado correctamente.`);
+        // Sincroniza el carrito si es necesario
+        if (window.app && window.app.carritoController) {
+          await window.app.carritoController.sincronizarCarrito();
+        }
+        return updatedId;
+      } else {
+        console.info(`Producto con ID ${id} no tuvo cambios detectados.`);
+        return id;
+      }
+      
     } catch (error) {
       console.error(`Error al actualizar producto con ID ${id}:`, error);
       return null;
