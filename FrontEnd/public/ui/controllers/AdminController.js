@@ -1516,25 +1516,38 @@ class AdminController {
           continue;
         }
 
-        // Obtener cliente
+        // Obtener cliente (opcional si ya viene la info)
         const cliente = await this.clienteService.obtenerClientePorId(factura.clienteId);
+
+        // Definir el icono según el estado de la factura
+        let estadoIcon = '';
+        if (factura.estado === 'pendiente') {
+          estadoIcon = '<i class="fa-solid fa-hourglass fa-lg" style="color: #ffc107;" title="Pendiente"></i>';
+        } else if (factura.estado === 'completado') {
+          estadoIcon = '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Completado"></i>';
+        } else if (factura.estado === 'denegado') {
+          estadoIcon = '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Denegado"></i>';
+        }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-                <td class="text-center">${factura.numeroFactura || 'N/A'}</td>
-                <td class="text-center">${factura.clienteNombre || 'Cliente desconocido'}</td>
-                <td class="text-center">$${factura.total?.toFixed(2) || '0.00'}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
-                <td class="text-center">${factura.estado ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>'}</td>
-                
-                <td class="action-buttons " style="height: 100px;">
-                    <button class="action-button view-button ver-factura print-btn" 
-                            data-factura-id="${factura.id}" 
-                            data-cliente-id="${factura.clienteId}">
-                        <i class="fa-solid fa-print fa-lg"></i>
-                    </button>
-                </td>
-            `;
+          <td class="text-center">${factura.numeroFactura || 'N/A'}</td>
+          <td class="text-center">${factura.clienteNombre || 'Cliente desconocido'}</td>
+          <td class="text-center">$${factura.total?.toFixed(2) || '0.00'}</td>
+          <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue"></i></td>
+          <td class="text-center  data-factura-id="${factura.id}">
+            ${estadoIcon}
+          </td>
+          <td class="text-center">
+          <div class="action-button">
+            <button class=" view-button ver-factura print-btn" 
+                    data-factura-id="${factura.id}" 
+                    data-cliente-id="${factura.clienteId}">
+              <i class="fa-solid fa-print fa-lg"></i>
+            </button>
+          </div>
+          </td>
+        `;
         tablaVentas.appendChild(tr);
       }
 
@@ -1544,54 +1557,123 @@ class AdminController {
     }
   }
 
-  // Metodo Setup para eventos dentro de la Tabla, para: Boton!
-  // En AdminController.js
+  
 
-  // En CheckoutController.js
   async mostrarFactura(factura) {
     try {
-      // Validación inicial de la factura
-      if (!factura) {
-        throw new Error('Datos de factura no válidos');
-      }
+      if (!factura) throw new Error('Datos de factura no válidos');
 
       const invoiceModal = document.getElementById('invoiceModal');
       const invoiceDetails = document.getElementById('invoiceDetails');
-
+      const invoiceStateText = document.getElementById('invoiceStateText');
       if (!invoiceModal || !invoiceDetails) {
-        console.error('Elementos del modal de factura (invoiceModal o invoiceDetails) no encontrados en el DOM.');
+        console.error('Elementos del modal de factura no encontrados.');
         throw new Error('Elementos del modal de factura no encontrados.');
       }
 
       // Generar el HTML de la factura usando la plantilla
-      // Asegúrate de que InvoiceTemplate.generarHTML maneje correctamente la data
-      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false); // false indica que no es preview
+      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false);
 
-      // --- Inicio de la Lógica de Animación Corregida ---
+      // Establecer el estado inicial del toggle según factura.estado
+      if (factura.estado === 'completado') {
+        document.getElementById('stateCompleted').checked = true;
+        invoiceStateText.textContent = 'Productos entregados';
+      } else if (factura.estado === 'denegado') {
+        document.getElementById('stateDenied').checked = true;
+        invoiceStateText.textContent = 'Factura denegada: productos devueltos';
+      } else {
+        document.getElementById('statePending').checked = true;
+        invoiceStateText.textContent = 'Factura pendiente de productos (aún no entregados)';
+      }
 
-      // 1. Hacer el modal parte del layout (eliminar display: none)
+      // Dentro de mostrarFactura, después de establecer el estado inicial y antes de agregar listeners:
+      const oldEstado = factura.estado; // Almacena el estado previo
+
+      // Evitar listeners duplicados (como se mostró anteriormente)
+      const stateRadios = document.querySelectorAll('input[name="invoiceState"]');
+      stateRadios.forEach(radio => {
+        const newRadio = radio.cloneNode(true);
+        radio.parentNode.replaceChild(newRadio, radio);
+      });
+      const nuevosStateRadios = document.querySelectorAll('input[name="invoiceState"]');
+
+      nuevosStateRadios.forEach(radio => {
+        radio.addEventListener('change', async (e) => {
+          const nuevoEstado = e.target.value;
+          // Actualizar el texto descriptivo según el nuevo estado
+          if (nuevoEstado === 'completado') {
+            invoiceStateText.textContent = 'Productos entregados';
+          } else if (nuevoEstado === 'denegado') {
+            invoiceStateText.textContent = 'Factura denegada: productos devueltos';
+          } else {
+            invoiceStateText.textContent = 'Factura pendiente de productos (aún no entregados)';
+          }
+
+          // Llamar a actualizarFactura
+          const resultado = await this.facturaService.actualizarFactura(factura.id, { estado: nuevoEstado });
+          if (resultado !== null) {
+            console.info(`Factura con ID ${factura.id} actualizada a estado: ${nuevoEstado}`);
+
+            // Actualizar el icono en la tabla para esta factura
+            const estadoCell = document.querySelector(`.estado-cell[data-factura-id="${factura.id}"]`);
+            if (estadoCell) {
+              let nuevoIcon = '';
+              if (nuevoEstado === 'pendiente') {
+                nuevoIcon = '<i class="fa-solid fa-hourglass fa-lg" style="color: #ffc107;" title="Pendiente"></i>';
+              } else if (nuevoEstado === 'completado') {
+                nuevoIcon = '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Completado"></i>';
+              } else if (nuevoEstado === 'denegado') {
+                nuevoIcon = '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Denegado"></i>';
+              }
+              estadoCell.innerHTML = nuevoIcon;
+            }
+
+            // Actualizar el stock según el cambio de estado:
+            // Si el nuevo estado es "denegado" y antes no lo era, se suma el stock.
+            // Si el antiguo estado era "denegado" y se pasa a "pendiente" o "completado", se resta el stock.
+            if (oldEstado !== 'denegado' && nuevoEstado === 'denegado') {
+              // Se devuelve el stock: se suma la cantidad de cada detalle.
+              for (const detalle of factura.detalles) {
+                try {
+                  await this.productoService.actualizarStock(detalle.productoId, detalle.cantidad);
+                } catch (stockError) {
+                  console.error(`Error al devolver stock para producto ${detalle.productoId}:`, stockError);
+                }
+              }
+            } else if (oldEstado === 'denegado' && (nuevoEstado === 'pendiente' || nuevoEstado === 'completado')) {
+              // Se descuenta el stock nuevamente, ya que en "denegado" se había devuelto.
+              for (const detalle of factura.detalles) {
+                try {
+                  await this.productoService.actualizarStock(detalle.productoId, -detalle.cantidad);
+                } catch (stockError) {
+                  console.error(`Error al descontar stock para producto ${detalle.productoId}:`, stockError);
+                }
+              }
+            }
+            // Actualiza el valor de oldEstado para futuros cambios
+            factura.estado = nuevoEstado;
+          } else {
+            alert('Error al actualizar el estado de la factura.');
+          }
+        });
+      });
+
+
+      // Mostrar el modal con la animación
       invoiceModal.classList.remove('hidden');
-
-      // 2. Bloquear el scroll del body
       document.body.classList.add('modal-open');
-
-      // 3. Usar requestAnimationFrame para aplicar la clase 'show' en el siguiente ciclo de pintura.
-      //    Esto permite que el navegador registre el estado inicial (opacity: 0, scale: 0.95)
-      //    antes de aplicar el estado final (opacity: 1, scale: 1), habilitando la transición CSS.
       requestAnimationFrame(() => {
         invoiceModal.classList.add('show');
       });
-
-      // --- Fin de la Lógica de Animación Corregida ---
-
     } catch (error) {
-      console.error('Error detallado al mostrar factura:', error);
-      // Mostrar un mensaje más útil al usuario si es apropiado
+      console.error('Error al mostrar factura:', error);
       alert(`Error al intentar mostrar la factura: ${error.message}. Revise la consola para más detalles.`);
     }
   }
 
-  // El resto de tu código (setupVentasListeners, etc.) permanece igual
+  
+
+
   setupVentasListeners() {
     const tabla = document.getElementById('tablaVentas');
     if (!tabla) {
@@ -1657,8 +1739,6 @@ class AdminController {
     });
   }
 
-  // Asegúrate de tener también la función para cerrar el modal de factura (parece que ya la tienes en CheckoutController, podría ser reutilizada o copiada si AdminController es una clase separada)
-  // Ejemplo (si es necesario duplicarla o refactorizarla a una clase Utils/UI):
   cerrarFactura() {
     const invoiceModal = document.getElementById('invoiceModal');
     if (!invoiceModal) return; // Seguridad

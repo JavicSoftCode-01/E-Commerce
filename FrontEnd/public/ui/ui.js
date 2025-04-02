@@ -1,7 +1,7 @@
 //FrontEnd/public/ui/ui.js
-import {app} from './AppFactory.js';
-import {appService} from './services/UшымтаService.js';
-import {adminController} from './controllers/AdminController.js';
+import { app } from './AppFactory.js';
+import { appService } from './services/UшымтаService.js';
+import { adminController } from './controllers/AdminController.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -56,8 +56,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       adminController.closeModalDetailsProveedor();
     });
 
-
-
+    document.getElementById('btnCloseModalDetailsHistorial').addEventListener('click', () => {
+      adminController.closeModalDetailsHistorial();
+    });
 
     // Load store components after event listeners
     await app.tiendaController.cargarProductos();

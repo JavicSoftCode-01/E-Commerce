@@ -84,7 +84,7 @@ class FacturaService extends IndexedDB {
                 subtotal: carrito.calcularTotalCarrito(),
                 envio: 0,
                 total: carrito.calcularTotalCarrito(),
-                estado: 'completada'
+                estado: 'pendiente'
             };
     
             await super.add(factura);
@@ -114,6 +114,39 @@ class FacturaService extends IndexedDB {
             return []; // Devuelve un array vacío en caso de error.
         }
     }
+
+    async actualizarFactura(id, datosActualizados) {
+        try {
+          // 1. Obtener la factura existente desde la base de datos
+          const facturaExistente = await this.obtenerFacturaPorId(id);
+          if (!facturaExistente) {
+            console.warn(`No se encontró factura con ID ${id}`);
+            return null;
+          }
+      
+          // 2. Comparar y actualizar solo el campo "estado" si se envió
+          let huboCambios = false;
+          if (datosActualizados.estado !== undefined && facturaExistente.estado !== datosActualizados.estado) {
+            facturaExistente.estado = datosActualizados.estado;
+            huboCambios = true;
+          }
+      
+          // 3. Si no hubo cambios, retorna el ID sin modificar
+          if (!huboCambios) {
+            console.info(`Factura con ID ${id} no tuvo cambios detectados.`);
+            return id;
+          }
+      
+          // 4. Actualizar la factura en la base de datos
+          const updatedId = await super.update(id, facturaExistente);
+          console.info(`Factura con ID ${id} actualizada correctamente a estado: ${facturaExistente.estado}`);
+          return updatedId;
+        } catch (error) {
+          console.error(`Error al actualizar factura con ID ${id}:`, error);
+          return null;
+        }
+      }
+      
 
     /**
      * Obtiene una factura por su ID.

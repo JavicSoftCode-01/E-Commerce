@@ -1972,3 +1972,79 @@ body.modal-open {
     color: #830203;
     /* Color rojo oscuro para el botón de eliminar */
 }
+
+
+/* Contenedor principal del toggle triple */
+.triple-toggle-container {
+    position: relative;
+    width: 300px;
+    height: 50px;
+    margin: 20px auto;
+    background-color: #e0e0e0;
+    border-radius: 25px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+  }
+  
+  /* Ocultar los radio inputs */
+  .triple-toggle-container input[type="radio"] {
+    display: none;
+  }
+  
+  /* La esfera que se mueve */
+  .toggle-slider {
+    position: absolute;
+    top: 5px;
+    left: calc(50% - 20px); /* posición central por defecto */
+    width: 40px;
+    height: 40px;
+    background-color: #ffc107; /* amarillo para pendiente */
+    border-radius: 50%;
+    transition: left 0.3s, background-color 0.3s;
+    z-index: 2;
+  }
+  
+  /* Etiquetas para cada estado */
+  .toggle-labels {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    z-index: 1;
+  }
+  
+  .toggle-labels label {
+    font-size: 1.5em;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  /* Estilos específicos para cada estado */
+  .denied-label { color: #dc3545; }      /* Rojo para denegado */
+  .pending-label { color: #ffc107; }     /* Amarillo para pendiente */
+  .completed-label { color: #28a745; }   /* Verde para completado */
+  
+  /* Posicionamiento del slider según el radio seleccionado */
+  #stateDenied:checked ~ .toggle-slider {
+    left: 5px;
+    background-color: #dc3545;
+  }
+  #statePending:checked ~ .toggle-slider {
+    left: calc(50% - 20px);
+    background-color: #ffc107;
+  }
+  #stateCompleted:checked ~ .toggle-slider {
+    left: calc(100% - 45px);
+    background-color: #28a745;
+  }
+  
+  /* Opcional: estilo para el texto que describe el estado */
+  .invoice-state-text {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
