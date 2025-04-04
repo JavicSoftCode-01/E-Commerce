@@ -21,13 +21,13 @@ class ProveedorService extends IndexedDB {
   async agregarProveedor(proveedor) {
       try {
           // 1. Validación
-          const nombreValidado = await Validar.nombreBP(proveedor.nombre);
+          const nombreValidado = Validar.nombreBP(proveedor.nombre);
           const direccionValidada = Validar.direccionBP(proveedor.direccion);
-          const telefonoValidado = await Validar.telefonoBP(proveedor.telefono, this);
+          const telefonoValidado = await Validar.telefonoBPT(proveedor.telefono, this);
           if (!nombreValidado || !direccionValidada || !telefonoValidado) {
               return null; // Los errores de validación se manejan en los métodos de Validar.
           }
-  
+
           // 2. Obtener el último ID y generar el siguiente
           const lastId = await this.getAll()
               .then(proveedores => {
@@ -35,16 +35,16 @@ class ProveedorService extends IndexedDB {
                   return Math.max(...proveedores.map(p => p.id));
               });
           const nextId = lastId + 1;
-  
+
           // 3. Crear instancia de Proveedor con ID
           const nuevoProveedor = new Proveedor(nombreValidado, telefonoValidado, direccionValidada);
           nuevoProveedor.id = nextId; // Asignar el ID antes de guardar
-  
+
           // 4. Agregar a IndexedDB
           await super.add(nuevoProveedor);
           console.info(`Proveedor agregado con ID: ${nextId}`);
           return nextId;
-  
+
       } catch (error) {
           console.error('Error al agregar proveedor:', error);
           return null;
@@ -65,7 +65,7 @@ class ProveedorService extends IndexedDB {
         console.warn(`No se encontró proveedor con ID ${id}`);
         return null;
       }
-  
+
       // 2. Validar cada campo solo si se proporcionó un nuevo valor,
       //    y en caso contrario, usar el valor existente.
       let nombreValidado = proveedorActualizado.nombre !== undefined
@@ -75,16 +75,16 @@ class ProveedorService extends IndexedDB {
         ? Validar.direccionBP(proveedorActualizado.direccion)
         : proveedorExistente.direccion;
       let telefonoValidado = proveedorActualizado.telefono !== undefined
-        ? await Validar.telefonoBP(proveedorActualizado.telefono, this, id)
+        ? await Validar.telefonoBPT(proveedorActualizado.telefono, this, id)
         : proveedorExistente.telefono;
-  
+
       // Si se pasó un campo para actualizar y falla la validación, se retorna null.
       if ((proveedorActualizado.nombre !== undefined && !nombreValidado) ||
           (proveedorActualizado.direccion !== undefined && !direccionValidada) ||
           (proveedorActualizado.telefono !== undefined && !telefonoValidado)) {
         return null;
       }
-  
+
       // 3. Comparar si hubo cambios reales
       let huboCambios = false;
       if (proveedorExistente.nombre !== nombreValidado) {
@@ -105,13 +105,13 @@ class ProveedorService extends IndexedDB {
         proveedorExistente.estado = proveedorActualizado.estado;
         huboCambios = true;
       }
-  
+
       // 4. Si no hubo cambios, retornamos el ID sin actualizar
       if (!huboCambios) {
         console.info(`Proveedor con ID ${id} no tuvo cambios detectados.`);
         return id;
       }
-  
+
       // 5. Si hubo cambios, actualizar el timestamp y guardar en la BD
       proveedorExistente.prepareForUpdate();
       const updatedId = await super.update(id, proveedorExistente);
@@ -122,7 +122,7 @@ class ProveedorService extends IndexedDB {
       return null;
     }
   }
-  
+
 
   /**
    * Obtiene todos los proveedores.
@@ -179,25 +179,25 @@ class ProveedorService extends IndexedDB {
       // Verificar dependencias con productos
       const productoService = new ProductoService(null, null, this);
       const dependencias = await productoService.verificarDependencias('proveedor', id);
-      
+
       if (dependencias && dependencias.hasDependencies) {
         alert(`No se puede eliminar el proveedor porque está siendo utilizado por ${dependencias.count} producto(s).`);
         console.warn(`Imposible eliminar: El proveedor con ID ${id} está siendo utilizado por ${dependencias.count} producto(s).`);
         return false;
       }
-      
+
       // Si no hay dependencias, proceder con la eliminación
       await super.delete(id);
       alert(`Proveedor con ID ${id} eliminado correctamente.`);
       console.info(`Proveedor con ID ${id} eliminado correctamente.`);
       return true;
-      
+
     } catch (error) {
       console.error(`Error al eliminar proveedor con ID ${id}:`, error);
       return null;
     }
   }
-  
+
 }
 
 export {ProveedorService};

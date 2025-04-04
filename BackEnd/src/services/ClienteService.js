@@ -1,176 +1,175 @@
-// BackEnd/src/services/ClienteService.js
 import { IndexedDB } from '../database/indexdDB.js';
 import { Validar } from '../utils/validar.js';
 import { Cliente } from '../models/Cliente.js';
 
 class ClienteService extends IndexedDB {
-    constructor(idGeneratorService) { //  Inyecta IdGenerator
-        super('mydb', 'clientes');
-        this.idGeneratorService = idGeneratorService; //  Guarda la referencia
+  constructor(idGeneratorService) {
+    super('mydb', 'clientes');
+    this.idGeneratorService = idGeneratorService;
+  }
+
+  async agregarCliente(clienteData) {
+    try {
+      const nombre = Validar.nombreBP(clienteData.nombre);
+      const telefono = await Validar.telefonoBP(clienteData.telefono, this);
+      const direccion = Validar.direccionBP(clienteData.direccion);
+
+      if (!nombre || !telefono || !direccion) {
+        console.error('Validation failed for cliente data');
+        return null;
+      }
+
+      // Verificar si el teléfono ya existe
+      const clienteExistente = await this.obtenerClientePorTelefono(telefono);
+      if (clienteExistente) {
+        console.error('Error: El número de teléfono ya está registrado.');
+        return null; // No permitir duplicados en registro manual
+      }
+
+      const nuevoCliente = new Cliente(nombre, telefono, direccion);
+      const clientes = await this.obtenerTodosLosClientes();
+      const lastId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) : 0;
+      const nextId = lastId + 1;
+
+      nuevoCliente.id = nextId;
+      await super.add(nuevoCliente);
+
+      if (this.idGeneratorService) {
+        await this.idGeneratorService.setLastId('clientes', nextId);
+      }
+
+      console.log('Cliente agregado exitosamente:', nuevoCliente);
+      return nuevoCliente;
+    } catch (error) {
+      console.error('Error al agregar cliente:', error);
+      return null;
     }
+  }
 
+  async actualizarCliente(id, clienteActualizado) {
+    try {
+      const nombreValidado = Validar.nombreBP(clienteActualizado.nombre);
+      const direccionValidada = Validar.direccionBP(clienteActualizado.direccion);
+      const telefonoValidado = await Validar.telefonoBP(clienteActualizado.telefono, this, id);
 
-    async agregarCliente(clienteData) {
-        try {
-            // Validate data
-            const nombre = await Validar.nombreBP(clienteData.nombre);
-            const telefono = await Validar.telefonoBP(clienteData.telefono, this);
-            const direccion = Validar.direccionBP(clienteData.direccion);
+      if (!nombreValidado || !direccionValidada || !telefonoValidado) {
+        return null;
+      }
 
-            if (!nombre || !telefono || !direccion) {
-                console.error('Validation failed for cliente data');
-                return null;
-            }
+      const clienteExistente = await this.obtenerClientePorId(id);
+      if (!clienteExistente) {
+        return null;
+      }
 
-            // Create a Cliente instance first
-            const nuevoCliente = new Cliente(nombre, telefono, direccion);
+      // Verificar si el teléfono ya está en uso por otro cliente
+      const otroCliente = await this.obtenerClientePorTelefono(telefonoValidado);
+      if (otroCliente && otroCliente.id !== id) {
+        console.error('Error: El número de teléfono ya está registrado por otro cliente.');
+        return null;
+      }
 
-            // Obtener todos los clientes existentes para encontrar el ID más alto
-            const clientes = await this.obtenerTodosLosClientes();
-            const lastId = clientes.length > 0
-                ? Math.max(...clientes.map(c => c.id))
-                : 0;
-            const nextId = lastId + 1;
+      let huboCambios = false;
+      if (clienteExistente.nombre !== nombreValidado) {
+        clienteExistente.nombre = nombreValidado;
+        huboCambios = true;
+      }
+      if (clienteExistente.direccion !== direccionValidada) {
+        clienteExistente.direccion = direccionValidada;
+        huboCambios = true;
+      }
+      if (clienteExistente.telefono !== telefonoValidado) {
+        clienteExistente.telefono = telefonoValidado;
+        huboCambios = true;
+      }
 
-            // Asignar el nuevo ID
-            nuevoCliente.id = nextId;
-
-            // Guardar el cliente
-            await super.add(nuevoCliente);
-
-            // Actualizar el último ID usado
-            if (this.idGeneratorService) {
-                await this.idGeneratorService.setLastId('clientes', nextId);
-            }
-
-            console.log('Cliente agregado exitosamente:', nuevoCliente);
-            return nuevoCliente;
-
-        } catch (error) {
-            console.error('Error al agregar cliente:', error);
-            return null;
-        }
+      if (huboCambios) {
+        clienteExistente.prepareForUpdate();
+        const updatedId = await super.update(id, clienteExistente);
+        console.info(`Cliente con ID ${id} actualizado correctamente porque hubo cambios.`);
+        return updatedId;
+      } else {
+        console.info(`Cliente con ID ${id} no tuvo cambios.`);
+        return id;
+      }
+    } catch (error) {
+      console.error(`Error al actualizar cliente con ID ${id}:`, error);
+      return null;
     }
+  }
 
-
-    async actualizarCliente(id, clienteActualizado) {
-        try {
-            const nombreValidado = await Validar.nombreBP(clienteActualizado.nombre);
-            const direccionValidada = Validar.direccionBP(clienteActualizado.direccion);
-            const telefonoValidado = await Validar.telefonoBP(clienteActualizado.telefono, this, id);
-            if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-                return null; // Los errores de validación ya se registran en los métodos de Validar
-            }
-            // Obtener el cliente existente como instancia.
-            const clienteExistente = await this.obtenerClientePorId(id);
-            if (!clienteExistente) {
-                return null;
-            }
-
-            // Comparar si hubo cambios reales
-            let huboCambios = false;
-            if (clienteExistente.nombre !== nombreValidado) {
-                clienteExistente.nombre = nombreValidado; // Actualiza el nombre en la instancia
-                huboCambios = true;
-            }
-            if (clienteExistente.direccion !== direccionValidada) {
-                clienteExistente.direccion = direccionValidada; // Actualiza la dirección en la instancia
-                huboCambios = true;
-            }
-            if (clienteExistente.telefono !== telefonoValidado) {
-                clienteExistente.telefono = telefonoValidado; // Actualiza el teléfono en la instancia
-                huboCambios = true;
-            }
-
-            // Si no hubo cambios, no es necesario actualizar
-            if (!huboCambios) {
-
-
-            // Actualizar los datos.
-            clienteExistente.nombre = nombreValidado;
-            clienteExistente.direccion = direccionValidada;
-            clienteExistente.telefono = telefonoValidado;
-            const updatedId = await super.update(id, clienteExistente);  // Guardar instancia.
-            console.info(`Cliente con ID ${id} actualizado correctamente.`);
-            return updatedId;
-            // Si hubo cambios, actualizar timestamp y guardar en BD
-            } else {
-                clienteExistente.prepareForUpdate(); // Llamar aquí para actualizar fechaActualizacion
-                const updatedId = await super.update(id, clienteExistente); // Guarda el objeto COMPLETO
-                console.info(`Cliente con ID ${id} actualizado correctamente porque hubo cambios.`);
-                return updatedId;
-            }
-        } catch (error) {
-            console.error(`Error al actualizar cliente con ID ${id}:`, error);
-            return null;
-        }
+  async obtenerTodosLosClientes() {
+    try {
+      const clientes = await super.getAll();
+      return clientes.map(cliente => {
+        const nuevoCliente = new Cliente(cliente.nombre, cliente.telefono, cliente.direccion, cliente.estado, cliente.fechaCreacion, cliente.fechaActualizacion, cliente.contador);
+        nuevoCliente.id = cliente.id;
+        return nuevoCliente;
+      });
+    } catch (error) {
+      console.error('Error al obtener todos los clientes:', error);
+      return [];
     }
+  }
 
-    /**
-     * Obtiene todos los clientes.
-     * @returns {Promise<Array<Cliente>>} - Un array con todos los clientes o un array vacío en caso de error.
-     */
-    async obtenerTodosLosClientes() {
-        try {
-            const clientes = await super.getAll();
-            // Convertir a instancias de Cliente
-            const clientesInstancias = clientes.map(cliente => {
-                const nuevoCliente = new Cliente(cliente.nombre, cliente.telefono, cliente.direccion, cliente.estado, cliente.fechaCreacion, cliente.fechaActualizacion);
-                nuevoCliente.id = cliente.id;
-                return nuevoCliente;
-            });
-            console.info('Clientes obtenidos:', clientesInstancias);
-            return clientesInstancias;
-        } catch (error) {
-            console.error('Error al obtener todos los clientes:', error);
-            return []; // Devuelve un array vacío en caso de error
-        }
+  async obtenerClientePorId(id) {
+    try {
+      const clienteData = await super.getById(id);
+      if (clienteData) {
+        const instanciaCliente = new Cliente(
+          clienteData.nombre,
+          clienteData.telefono,
+          clienteData.direccion,
+          clienteData.estado,
+          clienteData.fechaCreacion,
+          clienteData.fechaActualizacion,
+          clienteData.contador
+        );
+        instanciaCliente.id = clienteData.id;
+        return instanciaCliente;
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error al obtener cliente con ID ${id}:`, error);
+      return null;
     }
+  }
 
-    /**
-     * Obtiene un cliente por su ID.
-     * @param {number} id - ID del cliente a obtener.
-     * @returns {Promise<Cliente|null>} - El cliente encontrado o null si no se encuentra.
-     */
-    async obtenerClientePorId(id) {
-        try {
-            const clienteData = await super.getById(id); // Obtiene datos crudos
-            if (clienteData) {
-                // Crear instancia pasando TODOS los datos relevantes
-                const instanciaCliente = new Cliente(
-                    clienteData.nombre,
-                    clienteData.telefono, // Pasa el teléfono guardado
-                    clienteData.direccion, // Pasa la dirección guardada
-                    clienteData.estado, // Pasa el estado guardado
-                    clienteData.fechaCreacion, // Pasa la fecha de creación guardada
-                    clienteData.fechaActualizacion // Pasa la fecha de actualización guardada
-                );
-                instanciaCliente.id = clienteData.id; // Asigna el ID después
-                return instanciaCliente; // Retornar la instancia completa
-            } else {
-                console.warn(`No se encontró ningun cliente con ID ${id}.`);
-                return null; // Retorna null si no se encuentra
-            }
-        } catch (error) {
-            console.error(`Error al obtener cliente con ID ${id}:`, error);
-            return null; // Retorna null en caso de error
-        }
+  async obtenerClientePorTelefono(telefono) {
+    try {
+      const clientes = await this.obtenerTodosLosClientes();
+      return clientes.find(cliente => cliente.telefono === telefono) || null;
+    } catch (error) {
+      console.error(`Error al buscar cliente por teléfono ${telefono}:`, error);
+      return null;
     }
+  }
 
-    /**
-   * Elimina un cliente por su ID.
-   * @param {number} id - ID del cliente a eliminar.
-   * @returns {Promise<void|null>} - Devuelve void si fue eliminado con exito, o null en caso de error.
-   */
-    async eliminarCliente(id) {
-        try {
-            await super.delete(id);
-            console.info(`Cliente con ID ${id} eliminado correctamente.`);
-        } catch (error) {
-            console.error(`Error al eliminar cliente con ID ${id}:`, error);
-            return null
-        }
+  async incrementarContadorCliente(id) {
+    try {
+      const cliente = await this.obtenerClientePorId(id);
+      if (!cliente) {
+        console.error(`Cliente con ID ${id} no encontrado`);
+        return null;
+      }
+      cliente.incrementarContador();
+      const updatedId = await super.update(id, cliente);
+      console.info(`Contador incrementado para cliente con ID ${id}. Nuevo valor: ${cliente.contador}`);
+      return updatedId;
+    } catch (error) {
+      console.error(`Error al incrementar contador para cliente con ID ${id}:`, error);
+      return null;
     }
+  }
+
+  async eliminarCliente(id) {
+    try {
+      await super.delete(id);
+      console.info(`Cliente con ID ${id} eliminado correctamente.`);
+    } catch (error) {
+      console.error(`Error al eliminar cliente con ID ${id}:`, error);
+      return null;
+    }
+  }
 }
 
 export { ClienteService };

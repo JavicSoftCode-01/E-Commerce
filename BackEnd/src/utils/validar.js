@@ -181,6 +181,108 @@ class Validar {
     }
 
     // Verificar duplicados *excluyendo* el elemento actual que se está editando (si lo hay)
+    // try {
+    //   const allItems = await service.getAll();
+    //   const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
+    //   if (isDuplicate) {
+    //     console.error("Error: El número de teléfono ya está registrado.");
+    //     return false;
+    //   }
+    // } catch (error) {
+    //   console.error(`Error al validar teléfono ${telefono}:`, error);
+    //   return false; // Falso en caso de error de DB.
+    // }
+
+    console.info(`Teléfono validado y formateado: ${formatoFinal}`);
+    return formatoFinal;
+  }
+
+  static async telefonoBPT(telefono, service, id = null) {
+    if (!telefono || telefono.trim() === '') {
+      console.error("Error: El número de teléfono no puede estar vacío.");
+      return false;
+    }
+    let telefonoLimpio = telefono.trim().replace(/[^0-9+]/g, ''); // Elimina caracteres no numéricos excepto '+'
+    let formatoFinal = '';
+
+    if (telefonoLimpio.startsWith('+593')) { // Formato Internacional
+      telefonoLimpio = telefonoLimpio.slice(4); // Elimina '+593' al inicio
+      if (telefonoLimpio.length === 9 && telefonoLimpio.startsWith('9')) {
+        // Celular internacional: agrupar 2-3-4 dígitos
+        formatoFinal = `+593 ${telefonoLimpio.substring(0, 2)} ${telefonoLimpio.substring(2, 5)} ${telefonoLimpio.substring(5, 9)}`;
+      } else if (telefonoLimpio.length === 9 && !telefonoLimpio.startsWith('9')) {
+        // Convencional internacional de 9 dígitos
+        const codigoProvincia = telefonoLimpio.substring(0, 1);
+        if (['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
+          formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5, 9)}`;
+        } else {
+          console.error("Error: Formato de número convencional incorrecto.");
+          return false;
+        }
+      } else if (telefonoLimpio.length === 8 && !telefonoLimpio.startsWith('9')) {
+        // Convencional internacional de 8 dígitos
+        let codigoProvincia = telefonoLimpio.substring(0, 1);
+        formatoFinal = `(0${codigoProvincia})${telefonoLimpio.substring(1, 2)}-${telefonoLimpio.substring(2, 4)}-${telefonoLimpio.substring(4, 8)}`;
+      } else {
+        console.error("Error: Formato de número internacional incorrecto.");
+        return false;
+      }
+    } else if (telefonoLimpio.startsWith('09')) { // Formato celular local (con 09)
+      if (telefonoLimpio.length !== 10) {
+        console.error("Error: El número de celular debe tener 10 dígitos (incluyendo el 0 inicial).");
+        return false;
+      }
+      formatoFinal = `+593 ${telefonoLimpio.substring(1, 3)} ${telefonoLimpio.substring(3, 6)} ${telefonoLimpio.substring(6)}`;
+    } else if (telefonoLimpio.startsWith('0')) {  // Formato convencional con 0 inicial
+      const codigoProvincia = telefonoLimpio.substring(1, 2);
+      if (!['2', '3', '4', '5', '6', '7'].includes(codigoProvincia)) {
+        console.error("Error: Código de provincia inválido.");
+        return false;
+      }
+      if (telefonoLimpio.length === 8) { // Convencional de 8 dígitos
+        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
+      } else if (telefonoLimpio.length === 9) { // Convencional de 9 dígitos
+        formatoFinal = `(0${codigoProvincia}) ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 6)} - ${telefonoLimpio.substring(6)}`;
+      } else if (telefonoLimpio.length === 7) { // Formato local
+        formatoFinal = `(${telefonoLimpio.substring(0, 1)})${telefonoLimpio.substring(1, 3)}-${telefonoLimpio.substring(3, 5)}-${telefonoLimpio.substring(5, 7)}`;
+      } else {
+        console.error("Error: El número convencional tiene que tener un formato correcto (ej: (02) xx-xx-xx o (02) xxx-xxxx ).");
+        return false;
+      }
+    } else if (telefonoLimpio.length >= 7 && telefonoLimpio.length <= 10) {
+      // Podría ser un celular sin '09' o convencional
+      if (/^09\d{8}$/.test(telefonoLimpio)) { // Es celular sin '09'
+        formatoFinal = '+593 ' + telefonoLimpio.substring(0, 1) + " " + telefonoLimpio.substring(1, 5) + " " + telefonoLimpio.substring(5, 9);
+      } else { // Verificar convencional sin 0
+        const posiblesCodigos = ['2', '3', '4', '5', '6', '7'];
+        let codigoEncontrado = false;
+        for (const cod of posiblesCodigos) {
+          if (telefonoLimpio.startsWith(cod)) {
+            if (telefonoLimpio.length === 8) {
+              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4, 8)}`;
+              codigoEncontrado = true;
+              break;
+            } else if (telefonoLimpio.length === 7) {
+              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 3)} - ${telefonoLimpio.substring(3, 5)} - ${telefonoLimpio.substring(5)}`;
+              codigoEncontrado = true;
+            } else if (telefonoLimpio.length === 6) {
+              formatoFinal = `(0${cod}) ${telefonoLimpio.substring(1, 2)} - ${telefonoLimpio.substring(2, 4)} - ${telefonoLimpio.substring(4)}`;
+              codigoEncontrado = true;
+            }
+            break;
+          }
+        }
+      }
+    } else { // Si no inicia por nada conocido.
+      console.error("Error, formato desconocido");
+      return false;
+    }
+
+    if (!formatoFinal) {
+      return false;
+    }
+
+    // Verificar duplicados *excluyendo* el elemento actual que se está editando (si lo hay)
     try {
       const allItems = await service.getAll();
       const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
@@ -230,40 +332,40 @@ class Validar {
    * 🔰 Método estático que valida y formatea un valor numérico o cadena a precio con dos decimales; devuelve false en caso de error. 🔰
    */
   static precio(valor) {
-      let valorNumerico;
-      
-      // Si es string, limpiamos y convertimos
-      if (typeof valor === 'string') {
-          // Eliminar caracteres no permitidos excepto números, punto y coma
-          valorNumerico = valor.trim().replace(/[^0-9.,]/g, '');
-          // Reemplazar coma por punto para consistencia
-          valorNumerico = valorNumerico.replace(',', '.');
-          // Convertir a número usando parseFloat para mejor precisión
-          valorNumerico = parseFloat(valorNumerico);
-      } else if (typeof valor === 'number') {
-          valorNumerico = parseFloat(valor);
-      } else {
-          console.error("Error: El precio debe ser un número o una cadena.");
-          return false;
-      }
-  
-      // Validar que sea un número válido
-      if (isNaN(valorNumerico)) {
-          console.error("Error: Formato numérico no válido");
-          return false;
-      }
-  
-      // Validar que no sea negativo
-      if (valorNumerico < 0) {
-          console.error("Error: El precio no puede ser negativo.");
-          return false;
-      }
-  
-      // Usar una técnica más precisa para el redondeo a 2 decimales
-      const precioFormateado = Math.round((valorNumerico + Number.EPSILON) * 100) / 100;
-      
-      console.info(`Precio validado: ${precioFormateado}`);
-      return precioFormateado;
+    let valorNumerico;
+
+    // Si es string, limpiamos y convertimos
+    if (typeof valor === 'string') {
+      // Eliminar caracteres no permitidos excepto números, punto y coma
+      valorNumerico = valor.trim().replace(/[^0-9.,]/g, '');
+      // Reemplazar coma por punto para consistencia
+      valorNumerico = valorNumerico.replace(',', '.');
+      // Convertir a número usando parseFloat para mejor precisión
+      valorNumerico = parseFloat(valorNumerico);
+    } else if (typeof valor === 'number') {
+      valorNumerico = parseFloat(valor);
+    } else {
+      console.error("Error: El precio debe ser un número o una cadena.");
+      return false;
+    }
+
+    // Validar que sea un número válido
+    if (isNaN(valorNumerico)) {
+      console.error("Error: Formato numérico no válido");
+      return false;
+    }
+
+    // Validar que no sea negativo
+    if (valorNumerico < 0) {
+      console.error("Error: El precio no puede ser negativo.");
+      return false;
+    }
+
+    // Usar una técnica más precisa para el redondeo a 2 decimales
+    const precioFormateado = Math.round((valorNumerico + Number.EPSILON) * 100) / 100;
+
+    console.info(`Precio validado: ${precioFormateado}`);
+    return precioFormateado;
   }
 
 

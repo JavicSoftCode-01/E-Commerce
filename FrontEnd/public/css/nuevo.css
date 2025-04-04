@@ -1,0 +1,2086 @@
+/* --- Base Variables (Lunaire Palette) --- */
+:root {
+    /* Reds from the image */
+    --primary: #A51A25;
+    /* Rich Red Background */
+    --secondary: #800000;
+    /* Darker Red/Maroon for hover/accents */
+    --accent: #C4A484;
+    /* Gold/Bronze from product caps */
+
+    /* Neutrals */
+    --light: #FFF8F0;
+    /* Warm Off-White/Cream (like tablecloth) */
+    --dark: #333;
+    /* Dark grey for primary text */
+    --medium-gray: #6c757d;
+    /* For less important text */
+    --border: #E0D8D0;
+    /* Subtle border, related to light */
+    --white: #ffffff;
+
+    /* Standard Status Colors */
+    --success: #198754;
+    /* Green */
+    --danger: #dc3545;
+    /* Red */
+    --warning: #ffc107;
+    /* Yellow */
+    --info: #0dcaf0;
+    /* Cyan */
+
+    /* Typography */
+    --font-sans-serif: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-serif: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
+    /* Optional elegant serif */
+
+    /* Spacing */
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+/* --- Global Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+
+/* Oculta la barra de desplazamiento en navegadores WebKit */
+html::-webkit-scrollbar {
+    width: 0;
+}
+
+html {
+    font-size: 16px;
+    /* Base font size */
+}
+
+body {
+    font-family: var(--font-sans-serif);
+    color: var(--dark);
+    background-color: var(--white);
+    /* Cleaner white background */
+    line-height: 1.6;
+    display: flex;
+    /* Flex layout for footer */
+    flex-direction: column;
+    /* Stack body content */
+    min-height: 100vh;
+    /* Ensure footer sticks to bottom */
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    /* Horizontal padding only */
+}
+
+main {
+    flex-grow: 1;
+    /* Allows main content to fill space */
+    padding-top: var(--spacing-lg);
+    padding-bottom: var(--spacing-xl);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* --- Header & Navigation --- */
+header {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: var(--white);
+    padding: var(--spacing-sm) 0;
+    /* Reduced padding */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    /* Ensure it's above other content */
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Allow wrapping on very small screens */
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.logo {
+    font-size: 1.8rem;
+    /* Slightly larger */
+    font-weight: bold;
+    font-family: var(--font-serif);
+    /* Use elegant font */
+    letter-spacing: 1px;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+header button {
+    background: transparent;
+    /* Cleaner look */
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    /* Subtle border */
+    border-radius: 4px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    font-weight: 500;
+    /* Slightly lighter weight */
+    font-size: 0.9rem;
+    display: inline-flex;
+    /* For icon alignment */
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+header button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--white);
+}
+
+.cart-icon {
+    position: relative;
+}
+
+/* --- Hero Section (Optional) --- */
+.hero {
+    width: 100%;
+    max-height: 30rem;
+    /* Limit height */
+    overflow: hidden;
+    margin-bottom: var(--spacing-lg);
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Crop nicely */
+    object-position: center center;
+    display: block;
+}
+
+/* --- Section Titles --- */
+h2 {
+    margin: var(--spacing-lg) 0 var(--spacing-md);
+    color: var(--primary);
+    font-family: var(--font-serif);
+    /* Elegant font */
+    font-size: 2rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: var(--spacing-sm);
+}
+
+h3 {
+    margin: var(--spacing-md) 0;
+    color: var(--secondary);
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+/* --- Store: Search & Filters --- */
+.search-bar {
+    display: flex;
+    margin-bottom: var(--spacing-lg);
+    max-width: 500px;
+    /* Limit width */
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--border);
+    border-right: none;
+    /* Remove right border */
+    border-radius: 4px 0 0 4px;
+    font-size: 1rem;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(165, 26, 37, 0.2);
+}
+
+
+.search-bar button {
+    padding: 10px 15px;
+    background: var(--primary);
+    color: white;
+    border: 1px solid var(--primary);
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s;
+}
+
+.search-bar button:hover {
+    background: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.filters {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.filters select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: white;
+    font-size: 0.95rem;
+}
+
+/* --- Store: Product List --- */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    /* Min size 240px */
+    gap: var(--spacing-lg);
+}
+
+.product {
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    /* Flex column layout */
+    flex-direction: column;
+}
+
+.product:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.product-image-container {
+    /* Optional container for consistent aspect ratio */
+    height: 280px;
+    /* Fixed height */
+    background-color: #f8f8f8;
+    /* Placeholder color */
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    /* Let height control */
+    height: auto;
+    /* Maintain aspect ratio */
+    object-fit: contain;
+    /* Show whole image, may leave space */
+}
+
+.product-info {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    /* Takes remaining space */
+}
+
+.product-title {
+    font-weight: 600;
+    /* Bolder title */
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+    color: var(--dark);
+}
+
+.product-category,
+.product-brand {
+    color: var(--medium-gray);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.product-brand {
+    font-style: italic;
+}
+
+.product-description {
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--medium-gray);
+    flex-grow: 1;
+    /* Pushes price/button down */
+}
+
+
+.product-price {
+    font-weight: bold;
+    color: var(--accent);
+    /* Use accent color for price */
+    margin: var(--spacing-sm) 0 var(--spacing-md) 0;
+    font-size: 1.3rem;
+    text-align: right;
+    /* Align price right */
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-block;
+    font-weight: bold;
+    line-height: 1.5;
+    color: var(--white);
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    /* Standard padding */
+    font-size: 1.3rem;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    text-decoration: none;
+    /* Remove underline */
+}
+
+.btn:hover {
+    text-decoration: none;
+}
+
+.btn:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(165, 26, 37, 0.25);
+    /* Primary color focus ring */
+}
+
+
+/* Button Colors */
+.btn-primary {
+    color: var(--white);
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-secondary {
+    color: var(--white);
+    background-color: var(--medium-gray);
+    border-color: var(--medium-gray);
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-success {
+    color: var(--white);
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+
+.btn-danger {
+    color: var(--white);
+    background-color: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Outline Buttons */
+.btn-outline-danger {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-outline-danger:hover {
+    color: var(--white);
+    background-color: var(--danger);
+    border-color: var(--danger);
+}
+
+/* Button with Icon */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    /* Space between icon and text */
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* --- Cart --- */
+.cart-container {
+    background: white;
+    border-radius: 8px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.cart-empty {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-md);
+    color: var(--medium-gray);
+    font-size: 2rem;
+}
+
+.cartFont {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.cartFont .spanFont {
+    font-size: 18px;
+    color: #676666;
+}
+
+/*.table-responsive-container {*/
+/*    overflow-x: auto; !* Enable horizontal scroll on small screens *!*/
+/*    margin-bottom: var(--spacing-md);*/
+/*}*/
+.table-responsive-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#cartTable {
+    margin: auto;
+    width: 100%;
+    border-collapse: collapse;
+    /*margin-bottom: var(--spacing-lg);*/
+    font-size: 0.95rem;
+}
+
+#cartTable th {
+    background-color: var(--light);
+    font-weight: 600;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid var(--border);
+    /*text-align: center;*/
+    vertical-align: middle;
+    color: var(--secondary);
+    /* Use secondary color */
+}
+
+#cartTable td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    /*vertical-align: middle;*/
+}
+
+#cartTable tr:last-child td {
+    border-bottom: none;
+}
+
+.cart-total {
+    text-align: right;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: var(--spacing-md) 0;
+    color: limegreen;
+}
+
+.cart-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Align buttons vertically */
+    flex-wrap: wrap;
+    /* Allow wrapping */
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
+}
+
+/* --- Checkout Section Styles (Integrated & Adapted) --- */
+
+#checkoutTotal,
+#cartTotal {
+    color: #32CD32;
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-decoration: underline #32CD32 3px;
+}
+
+.checkout-container {
+    /* No container-specific styles needed if using .container class */
+    margin-bottom: var(--spacing-lg);
+}
+
+.checkout-main-title {
+    text-align: center;
+    color: var(--primary);
+    /* Use primary */
+    margin-bottom: var(--spacing-lg);
+    font-size: 2rem;
+    /* Match h2 */
+    font-family: var(--font-serif);
+    border-bottom: none;
+}
+
+
+
+.checkout-subtitle {
+    color: var(--secondary);
+    /* Use secondary */
+    font-size: 1.4rem;
+    /* Match h3 size slightly reduced */
+    font-family: var(--font-serif);
+    border-bottom: 1px solid var(--border);
+}
+
+
+/* Form Styles within Checkout */
+#checkoutClientForm .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+#checkoutClientForm label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--dark);
+}
+
+#checkoutClientForm input[type="text"],
+#checkoutClientForm input[type="tel"] {
+    /* Included tel type */
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#checkoutClientForm input[type="text"]:focus,
+#checkoutClientForm input[type="tel"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(165, 26, 37, 0.2);
+    /* Adjusted primary focus */
+}
+
+#checkoutClientForm .form-row {
+    /* Same grid as admin */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+
+/* Checkout Order Summary Table */
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.95rem;
+}
+
+.checkout-table th {
+    background-color: var(--light);
+    padding: 12px 15px;
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    text-align: left;
+    color: var(--secondary);
+    /* Use secondary */
+}
+
+.checkout-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--dark);
+}
+
+.checkout-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.checkout-table .text-center {
+    text-align: center;
+}
+
+.checkout-table .text-right {
+    text-align: right;
+}
+
+/* Checkout Totals Summary */
+.checkout-summary {
+    max-width: 400px;
+    margin-left: auto;
+    /* Align right */
+    margin-top: var(--spacing-md);
+    font-size: 1.05rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    color: var(--dark);
+}
+
+.summary-item span:first-child {
+    color: black;
+    font-weight: bold;
+}
+
+.summary-item span:last-child {
+    font-weight: bold;
+}
+
+.summary-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: var(--spacing-sm) 0;
+}
+
+.summary-item.total-item span {
+    font-weight: bold;
+    font-size: 2rem;
+    /* Larger total */
+    color: var(--primary);
+    /* Primary color for final total */
+}
+
+
+
+/* Checkout Actions */
+.checkout-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    /* Allow wrapping */
+    gap: var(--spacing-md);
+}
+
+
+/* --- Invoice --- */
+.invoice {
+    background: white;
+    border-radius: 8px;
+    padding: var(--spacing-xl);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-top: var(--spacing-lg);
+    position: relative;
+    border: 1px solid var(--border);
+}
+
+/* Styles for actual invoice content generated by JS would go here */
+/* E.g., .invoice-header, .invoice-client-details, .invoice-table etc. */
+
+.invoice-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: var(--medium-gray);
+    line-height: 1;
+    padding: 0 5px;
+}
+
+.invoice-close:hover {
+    color: var(--dark);
+}
+
+/* --- Admin Panel --- */
+.admin-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+    /* Allow tabs to wrap */
+    gap: var(--spacing-sm);
+    /* Gap between tabs */
+}
+
+.admin-tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-right: 10px;
+    font-weight: 600;
+    color: var(--medium-gray);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-tab:hover {
+    color: var(--dark);
+}
+
+.admin-tab.active {
+    border-bottom-color: var(--primary);
+    color: var(--primary);
+}
+
+.admin-panel {
+    background: var(--light);
+    /* Light background for panel */
+    border-radius: 8px;
+    padding: var(--spacing-lg);
+    /* box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); */
+    border: 1px solid var(--border);
+}
+
+.admin-section {
+    margin-bottom: var(--spacing-xl);
+
+}
+
+.admin-section h3 {
+    display: inline-flex;
+    /* Align icon and text */
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 1.4rem;
+    /* Slightly smaller than checkout */
+    margin-bottom: var(--spacing-lg);
+}
+
+.invoice-header {
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.client-info .inputFac {
+    border: none;
+    border-bottom: 2px solid var(--border);
+    outline: none;
+    padding: 5px 0;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+.client-info .inputFac:focus {
+    border: none;
+    border-bottom: 2px solid var(--primary);
+    outline: none;
+}
+
+.client-info {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 15px;
+}
+
+
+.invoice-header-content {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+}
+
+.company-logo {
+    text-align: left;
+}
+
+.logo-text {
+    font-size: 2.5rem;
+    color: var(--primary);
+    font-weight: bold;
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+}
+
+.logo-tagline {
+    font-size: 0.9rem;
+    color: var(--secondary);
+    font-style: italic;
+    margin: 5px 0 0;
+}
+
+.invoice-info {
+    text-align: right;
+}
+
+.invoice-info h2 {
+    color: var(--secondary);
+    font-size: 1.5rem;
+    margin: 0 0 10px;
+    border: none;
+}
+
+.invoice-details p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+
+.info-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-group label {
+    font-weight: bold;
+    min-width: 80px;
+}
+
+.info-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+
+
+/* Admin Forms */
+form {
+    /* display: grid; -- Using form-groups instead */
+    gap: var(--spacing-md);
+    max-width: 800px;
+    /* Wider forms in admin */
+    margin-bottom: var(--spacing-lg);
+    background: var(--white);
+    /* White background for forms */
+    padding: var(--spacing-lg);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+    /* Spacing below each group */
+}
+
+
+form label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    font-size: 0.9rem;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    background-color: var(--white);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(165, 26, 37, 0.2);
+}
+
+
+form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    /* Consistent gap */
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    /* Align buttons right */
+    gap: var(--spacing-md);
+    /* Gap between buttons */
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
+}
+
+/* Basic Form Validation Feedback Styles */
+.needs-validation .invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: .875em;
+    color: var(--danger);
+}
+
+
+
+.was-validated :invalid~.invalid-feedback,
+.was-validated :invalid~.valid-feedback {
+    display: block;
+}
+
+.was-validated input:invalid,
+.was-validated select:invalid,
+.was-validated textarea:invalid {
+    border-color: var(--danger);
+}
+
+.was-validated input:invalid:focus,
+.was-validated select:invalid:focus,
+.was-validated textarea:invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+
+/* Admin Tables */
+.table-admin {
+    /* Specific class */
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+    /* Slightly smaller font */
+}
+
+.table-admin th {
+    background-color: var(--light);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--border);
+    color: var(--secondary);
+}
+
+.table-admin td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    /* Align content vertically */
+}
+
+.table-admin tbody tr:hover {
+    background-color: #f8f9fa;
+    /* Subtle hover */
+}
+
+.table-admin td:last-child {
+    white-space: nowrap;
+}
+
+/* Prevent action buttons from wrapping */
+
+/* Admin Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    /* Centra horizontalmente */
+    align-items: center;
+    /* Centra verticalmente */
+    gap: 10px;
+    /* Espacio entre botones */
+    height: 100%;
+}
+
+
+
+.action-button {
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    font-size: 0.85rem;
+    color: white;
+    line-height: 1;
+    /* Prevent weird heights */
+    transition: opacity 0.2s;
+}
+
+.action-button:hover {
+    opacity: 0.85;
+}
+
+/*.edit-button,*/
+/*.delete-button,*/
+.print-btn {
+background: none;
+    border: none;
+}
+
+.fa-print{
+    color: var(--secondary);
+    cursor: pointer;
+    font-size: 22px;
+}
+
+
+
+
+
+/* View Button Style */
+
+/* Table Product Image */
+.table-product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background-color: #f8f8f8;
+}
+
+
+/* --- Footer --- */
+footer {
+    background: var(--dark);
+    /* Dark footer */
+    color: var(--light);
+    padding: 5px;
+    margin-top: auto;
+    /* Pushes footer down */
+    font-size: 0.9rem;
+    text-align: center;
+    background-color: #8F0B0F;
+}
+
+footer p {
+    margin: 0;
+    color: white;
+    /* Slightly transparent light color */
+}
+
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* --- Print Styles --- */
+@media print {
+    body {
+        background-color: white;
+        color: black;
+    }
+
+    header,
+    footer,
+    .admin-tabs,
+    .form-actions button:not(.btn-success),
+    .cart-actions button:not(.btn-success),
+    .search-bar,
+    .filters,
+    .hero,
+    .no-print {
+        display: none !important;
+    }
+
+    .container,
+    .checkout-container,
+    .admin-panel,
+    .cart-container {
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .table-responsive-container {
+        overflow: visible;
+    }
+
+    table,
+    .table-admin,
+    #cartTable,
+    .checkout-table {
+        font-size: 10pt;
+        width: 100%;
+        border: 1px solid #ccc;
+    }
+
+    th,
+    td {
+        border: 1px solid #ccc;
+        padding: 4px;
+    }
+
+    .invoice {
+        box-shadow: none;
+        border: none;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+
+/* --- Responsive Adjustments --- */
+
+/* Tablets and larger */
+@media (min-width: 768px) {
+    /* Example: Could add styles for larger layouts here if needed */
+}
+
+/* Tablets (portrait) and large phones */
+@media (max-width: 991.98px) {
+    .products {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        /* Slightly smaller min */
+    }
+
+    form {
+        max-width: 100%;
+    }
+
+    /* Allow form full width */
+}
+
+
+/* Small devices (landscape phones, etc.) */
+@media (max-width: 767.98px) {
+
+    h2,
+    .checkout-main-title {
+        font-size: 1.8rem;
+    }
+
+    h3,
+    .checkout-subtitle {
+        font-size: 1.4rem;
+    }
+
+    .detalle {
+        margin-top: -2.5rem;
+    }
+
+    .nav-container {
+        justify-content: center;
+    }
+
+    /* Center nav items */
+    .logo {
+        flex-basis: 100%;
+        text-align: center;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Logo full width */
+    .products {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    /* Stack form rows */
+    .form-row,
+    #checkoutClientForm .form-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        /* Reduce gap when stacked */
+    }
+
+    .form-actions,
+    .cart-actions,
+    .checkout-actions {
+        justify-content: center;
+        /* Center actions */
+        flex-direction: column-reverse;
+        /* Stack buttons vertically */
+        align-items: stretch;
+        /* Full width buttons */
+    }
+
+    .form-actions .btn,
+    .cart-actions .btn,
+    .checkout-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+
+    /* Simplify tables - Consider hiding less important columns or using data-labels */
+    /* Example: Hiding columns in Cart - adjust as needed */
+    #cartTable th:nth-child(4),
+    /* Subtotal */
+    #cartTable td:nth-child(4) {
+        /* display: none; */
+        /* Uncomment if you want to hide */
+    }
+
+    /* Admin tables */
+    .table-admin th:nth-child(n+5):not(:last-child),
+    /* Hide cols 5+ except last */
+    .table-admin td:nth-child(n+5):not(:last-child) {
+        /* display: none; */
+    }
+
+    .admin-tabs {
+        /* Tabs might scroll horizontally if too many */
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .admin-tab {
+        white-space: nowrap;
+    }
+
+    /* Prevent tab text wrap */
+    .checkout-summary {
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    /* Full width summary */
+
+}
+
+/* Extra small devices (portrait phones) */
+@media (max-width: 575.98px) {
+    html {
+        font-size: 15px;
+    }
+
+    /* Slightly smaller base font */
+    h2,
+    .checkout-main-title {
+        font-size: 1.6rem;
+    }
+
+    h3,
+    .checkout-subtitle {
+        font-size: 2rem;
+    }
+
+    .products {
+        grid-template-columns: 1fr;
+        /* Single column product list */
+    }
+
+    .product-image-container {
+        height: 300px;
+    }
+
+    /* Allow more height in single column */
+    .search-bar {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    /* Stack search */
+    .search-bar input {
+        border-radius: 4px 4px 0 0;
+        border-right: 1px solid var(--border);
+    }
+
+    .search-bar button {
+        border-radius: 0 0 4px 4px;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .filters select {
+        width: 100%;
+    }
+
+    /* Further table simplifications if needed */
+    #cartTable th:nth-child(3),
+    /* Unit Price */
+    #cartTable td:nth-child(3) {
+        /* display: none; */
+    }
+
+    .table-admin,
+    #cartTable,
+    .checkout-table {
+        font-size: 0.85rem;
+    }
+
+    .table-admin th,
+    .table-admin td,
+    #cartTable th,
+    #cartTable td,
+    .checkout-table th,
+    .checkout-table td {
+        padding: 8px;
+    }
+}
+
+/* --- Modal Styles Mejorados --- */
+/* Evitar scroll en el body cuando el modal está abierto */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Contenedor del modal */
+.modal {
+    position: fixed;
+    top: 0;
+    margin-top: -2.5rem;
+    left: 0;
+    width: 100%;
+    height: 110%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Opcional: prevenir scroll accidental en el contenedor */
+    overflow: hidden;
+}
+
+.modal-title {
+    font-weight: bold;
+    font-size: 35px;
+}
+
+/* Ocultar modal por defecto */
+.modal.hidden {
+    display: none !important;
+}
+
+/* Overlay con transición de opacidad */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    /* Dark reddish overlay */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+/* Cuando el modal está visible, se activa la opacidad del overlay */
+.modal.show .modal-overlay {
+    opacity: 1;
+}
+
+/* Contenido del modal con animación sutil */
+.modal-content {
+    background: var(--white);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    border-radius: 8px;
+    position: relative;
+    z-index: 1001;
+    padding: 20px;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Estado activo: contenido visible y en tamaño normal */
+.modal.show .modal-content {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Cabecera del modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Botón de cerrar */
+.modal-close {
+    background: red;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    color: white;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.remove-item{
+    color: red;
+}
+
+/* Cuerpo del modal */
+.modal-body {
+    padding: 20px 0;
+}
+
+/* Pie del modal */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+
+
+/* Botones (se mantienen igual, se puede ajustar si se desea) */
+
+
+.btn-outline-danger {
+    background: none;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7em;
+    font-weight: bold;
+    border: 1px solid white;
+}
+
+/* ...existing code... */
+
+/* Agrega estas nuevas reglas al final para que la cabecera y el pie del modal se mantengan fijos */
+#cartTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#cartTable thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#cartTable tbody {
+    display: block;
+    max-height: 300px;
+    /* Ajusta el alto máximo según la altura aproximada de 6 filas */
+    overflow-y: auto;
+    width: 100%;
+}
+
+#cartTable tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+
+.cart-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    background-color: var(--light);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cart-card-image {
+    width: 100px;
+    height: 105px;
+    border: 2px solid var(--secondary);
+    border-radius: 8px;
+    margin-right: 2rem;
+}
+
+.imgFactura {
+    text-align: center;
+    border: 2px solid var(--secondary);
+    border-radius: 8px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.cart-card-details {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.cart-card-product {
+    text-transform: uppercase;
+    /* Convierte el texto a mayúsculas */
+    text-decoration: underline;
+    /* Subraya el texto */
+    color: rgb(200, 50, 50);
+    /* Un tono rojizo */
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.cart-card-info {
+    margin-bottom: 4px;
+}
+
+/* Contenedor con scroll para items del carrito (visible 3 tarjetas aprox.) */
+.cart-items-wrapper {
+    max-height: 500px;
+    /* Ajusta este valor según la altura aproximada de 3 tarjetas */
+    overflow-y: auto;
+    padding-right: 10px;
+    /* Para evitar que la barra de scroll encime el contenido */
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.7s ease-out;
+}
+
+.checkout-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1100;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.checkout-container.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Opcional: un overlay para el checkout */
+.checkout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1090;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.checkout-overlay.show {
+    opacity: 1;
+}
+
+/* Checkout Modal Estilizado */
+#checkoutOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1090;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#checkoutOverlay.show {
+    opacity: 1;
+}
+
+#checkoutSection {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+    padding: var(--spacing-lg);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#checkoutSection.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.checkout-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+
+
+/* Responsividad: en pantallas grandes, mostrar en columnas */
+@media (min-width: 768px) {
+    .checkout-content {
+        flex-direction: row;
+    }
+
+    .client-data-section,
+    .order-summary-section {
+        flex: 1;
+    }
+}
+
+/* Ajusta la tabla para mayor legibilidad */
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.checkout-table th,
+.checkout-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.checkout-summary {
+    margin-top: var(--spacing-md);
+}
+
+/* Estilos para la factura */
+.invoice {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.invoice-table th,
+.invoice-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.producto-mini-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.producto-info {
+    display: flex;
+    align-items: center;
+}
+
+.invoice-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .invoice {
+        box-shadow: none;
+        padding: 0;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.invoice-table th,
+.invoice-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.invoice-table th {
+    background-color: #f5f5f5;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.invoice-content {
+    padding: 20px;
+}
+
+
+
+.invoice-client {
+    margin-bottom: 30px;
+}
+
+.invoice-details {
+    margin-bottom: 30px;
+}
+
+/* Estilos para impresión */
+@media print {
+
+    .modal-header,
+    .modal-footer,
+    .no-print {
+        display: none !important;
+    }
+
+    .modal {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .modal-content {
+        box-shadow: none !important;
+    }
+}
+
+/** estilos de icon de los btn edit y delete*/
+
+.edit {
+    font-weight: bold;
+    color: white;
+}
+
+.delete {
+    font-weight: bold;
+    color: white;
+}
+
+/** icono de WS */
+.fa-whatsapp {
+    color: forestgreen;
+}
+
+/* --- Toggle Switch Styles --- */
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-input {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+.toggle-label {
+    cursor: pointer;
+    width: 60px;
+    height: 30px;
+    background: #dc3545;
+    display: block;
+    border-radius: 100px;
+    position: relative;
+    margin-right: 10px;
+}
+
+.toggle-label:after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 90px;
+    transition: 0.3s;
+}
+
+.toggle-input:checked+.toggle-label {
+    background: #28a745;
+}
+
+.toggle-input:checked+.toggle-label:after {
+    left: calc(100% - 5px);
+    transform: translateX(-100%);
+}
+
+.estado-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.estado-indicator {
+    display: inline-block;
+    width: 24px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.edit-button i {
+    color: #830203;
+    /* Color rojo oscuro para el botón de editar */
+}
+
+.delete-button i {
+    color: #830203;
+    /* Color rojo oscuro para el botón de eliminar */
+}
+
+
+/* Contenedor principal del toggle triple */
+.triple-toggle-container {
+    position: relative;
+    width: 300px;
+    height: 50px;
+    margin: 20px auto;
+    background-color: #e0e0e0;
+    border-radius: 25px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+  }
+
+  /* Ocultar los radio inputs */
+  .triple-toggle-container input[type="radio"] {
+    display: none;
+  }
+
+  /* La esfera que se mueve */
+  .toggle-slider {
+    position: absolute;
+    top: 5px;
+    left: calc(50% - 20px); /* posición central por defecto */
+    width: 40px;
+    height: 40px;
+    background-color: #ffc107; /* amarillo para pendiente */
+    border-radius: 50%;
+    transition: left 0.3s, background-color 0.3s;
+    z-index: 2;
+  }
+
+  /* Etiquetas para cada estado */
+  .toggle-labels {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    z-index: 1;
+  }
+
+  .toggle-labels label {
+    font-size: 1.5em;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Estilos específicos para cada estado */
+  .denied-label { color: #dc3545; }      /* Rojo para denegado */
+  .pending-label { color: #ffc107; }     /* Amarillo para pendiente */
+  .completed-label { color: #28a745; }   /* Verde para completado */
+
+  /* Posicionamiento del slider según el radio seleccionado */
+  #stateDenied:checked ~ .toggle-slider {
+    left: 5px;
+    background-color: #dc3545;
+  }
+  #statePending:checked ~ .toggle-slider {
+    left: calc(50% - 20px);
+    background-color: #ffc107;
+  }
+  #stateCompleted:checked ~ .toggle-slider {
+    left: calc(100% - 45px);
+    background-color: #28a745;
+  }
+
+  /* Opcional: estilo para el texto que describe el estado */
+  .invoice-state-text {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+
+  .cart-card-quantity {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px 0;
+}
+
+.quantity-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.quantity-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.quantity-value {
+  min-width: 20px;
+  text-align: center;
+}

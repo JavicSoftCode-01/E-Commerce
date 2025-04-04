@@ -63,7 +63,7 @@ class AdminController {
     this.estadoProveedorTextoSpan = document.getElementById('estadoProveedorTexto');
     this.tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
 
-    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)  
+    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
     this.proveedorEstadoInput.addEventListener('change', () => {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
@@ -200,7 +200,7 @@ class AdminController {
         tr.innerHTML = `
         <td class="text-center">${categoria.nombre}</td>
         <td class="text-center">
-          <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetails" data-id="${categoria.id}"></i>
+          <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer;" id="btnOpenModalDetails" data-id="${categoria.id}"></i>
         </td>
         <td class="text-center">
           <div class="estado-cell">
@@ -705,7 +705,7 @@ class AdminController {
                 </a>
               </td>
 
-                <td class="text-center">${proveedor.direccion}</td>
+             <!--   <td class="text-center">${proveedor.direccion}</td>-->
                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProveedor" data-id="${proveedor.id}"></i></td>
                 
                  <td class="text-center">
@@ -949,7 +949,7 @@ class AdminController {
                 </a>
               </td>
 
-                <td class="text-center">${cliente.direccion}</td>
+               <!-- <td class="text-center">${cliente.direccion}</td> -->
                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsCliente" data-id="${cliente.id}"></i></td>
                
                   <td class="text-center">
@@ -996,6 +996,7 @@ class AdminController {
     document.getElementById('modalNombreCliente').textContent = cliente.nombre;
     document.getElementById('modalTelefonoCliente').textContent = cliente.telefono;
     document.getElementById('modalDireccionCliente').textContent = cliente.direccion;
+    document.getElementById('modalContadorCliente').textContent = cliente.contador + ' veces';
     document.getElementById('modalEstadoCliente').innerHTML = cliente.iconTrueFalse();
     document.getElementById('modalFechaCreacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaCreacion);
     document.getElementById('modalFechaActualizacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaActualizacion);
@@ -1497,181 +1498,194 @@ class AdminController {
   //-------------------------
   //Ventas (Historial)
   //-------------------------
-  async cargarVentas() {
-    try {
-      const tablaVentas = document.querySelector('#tablaVentas tbody');
-      if (!tablaVentas) throw new Error('Tabla de ventas no encontrada');
 
-      const facturas = await this.facturaService.obtenerFacturas();
-      tablaVentas.innerHTML = '';
+async cargarVentas() {
+  try {
+    const tablaVentas = document.querySelector('#tablaVentas tbody');
+    if (!tablaVentas) throw new Error('Tabla de ventas no encontrada');
 
-      for (const factura of facturas) {
-        if (!factura?.clienteId) {
-          console.warn('Factura inválida:', factura);
-          continue;
-        }
+    const facturas = await this.facturaService.obtenerFacturas();
+    tablaVentas.innerHTML = '';
 
-        const estadoIcon = {
-          'pendiente': '<i class="fa-solid fa-hourglass fa-lg" style="color: #ffc107;" title="Pendiente"></i>',
-          'completado': '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Completado"></i>',
-          'denegado': '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Denegado"></i>'
-        }[factura.estado] || '';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="text-center">${factura.numeroFactura || 'N/A'}</td>
-          <td class="text-center">${factura.clienteNombre || 'Cliente desconocido'}</td>
-          <td class="text-center">$${factura.total.toFixed(2)}</td>
-          <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer;" data-factura-id="${factura.id}" data-action="ver-detalles"></i></td>
-          <td class="text-center estado-celll" data-factura-id="${factura.id}">${estadoIcon}</td>
-          <td class="text-center">
-            <div class="action-button">
-              <button class="view-button ver-factura print-btn" data-factura-id="${factura.id}" data-cliente-id="${factura.clienteId}">
-                <i class="fa-solid fa-print fa-lg"></i>
-              </button>
-            </div>
-          </td>
-        `;
-        tablaVentas.appendChild(tr);
+    for (const factura of facturas) {
+      if (!factura?.clienteId) {
+        console.warn('Factura inválida:', factura);
+        continue;
       }
 
-      this.setupVentasListeners();
-    } catch (error) {
-      console.error('Error al cargar ventas:', error);
+      const estadoIcon = {
+        'pendiente': '<i class="fa-solid fa-hourglass fa-lg" style="color: #ffc107;" title="Pendiente"></i>',
+        'completado': '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Completado"></i>',
+        'denegado': '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Denegado"></i>'
+      }[factura.estado] || '';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center">${factura.numeroFactura || 'N/A'}</td>
+        <td class="text-center">${factura.clienteNombre || 'Cliente desconocido'}</td>
+        <td class="text-center">$${factura.total.toFixed(2)}</td>
+        <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer;" data-factura-id="${factura.id}" data-action="ver-detalles"></i></td>
+        <td class="text-center estado-celll" data-factura-id="${factura.id}">${estadoIcon}</td>
+        <td class="text-center">
+          <div class="action-button">
+            <button class="view-button ver-factura print-btn" data-factura-id="${factura.id}" data-cliente-id="${factura.clienteId}">
+              <i class="fa-solid fa-print fa-lg"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      tablaVentas.appendChild(tr);
     }
+
+    this.setupVentasListeners();
+  } catch (error) {
+    console.error('Error al cargar ventas:', error);
   }
+}
 
-  async mostrarFactura(factura) {
-    try {
-      const invoiceModal = document.getElementById('invoiceModal');
-      const invoiceDetails = document.getElementById('invoiceDetails');
-      if (!invoiceModal || !invoiceDetails) throw new Error('Modal de factura no encontrado');
-
-      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false);
-      invoiceModal.classList.remove('hidden');
-      document.body.classList.add('modal-open');
-      requestAnimationFrame(() => invoiceModal.classList.add('show'));
-
-      document.getElementById('btnCloseInvoice').addEventListener('click', () => this.cerrarFactura(), { once: true });
-    } catch (error) {
-      console.error('Error al mostrar factura:', error);
-      alert(`Error: ${error.message}`);
-    }
-  }
-
-  async mostrarDetallesFactura(factura) {
-    try {
-      const modal = document.getElementById('historialModal');
-      if (!modal) throw new Error('Modal de detalles no encontrado');
-
-      // Llenar datos
-      document.getElementById('modalHistorialNumber').textContent = factura.numeroFactura || 'N/A';
-      document.getElementById('modalHistorialCliente').textContent = factura.clienteNombre || 'N/A';
-      document.getElementById('modalHistorialTelefono').textContent = factura.clienteTelefono || 'N/A';
-      document.getElementById('modalHistorialDireccion').textContent = factura.clienteDireccion || 'N/A';
-      document.getElementById('modalHistorialTotal').textContent = `$${factura.total.toFixed(2)}`;
-      document.getElementById('modalHistorialFechaCreacion').textContent = Factura.formatEcuadorDateTime(factura.fecha);
-      document.getElementById('modalHistoralFechaActualizacion').textContent = Factura.formatEcuadorDateTime(factura.fechaActualizacion);
-
-      // Configurar toggle
-      const stateRadios = document.querySelectorAll('#historialModal input[name="invoiceState"]');
-      stateRadios.forEach(radio => {
-        radio.checked = radio.value === factura.estado;
-        radio.addEventListener('change', async (e) => {
-          const nuevoEstado = e.target.value;
-          document.getElementById('invoiceStateText').textContent = {
-            'pendiente': 'Factura pendiente de productos (aún no entregados)',
-            'completado': 'Productos entregados',
-            'denegado': 'Factura denegada: productos devueltos'
-          }[nuevoEstado];
-
-          const resultado = await this.facturaService.actualizarFactura(factura.id, { estado: nuevoEstado });
-          if (resultado) {
-            const estadoCell = document.querySelector(`.estado-celll[data-factura-id="${factura.id}"]`);
-            if (estadoCell) {
-              estadoCell.innerHTML = {
-                'pendiente': '<i class="fa-solid fa-hourglass fa-lg" style="color: #ffc107;" title="Pendiente"></i>',
-                'completado': '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Completado"></i>',
-                'denegado': '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Denegado"></i>'
-              }[nuevoEstado];
-            }
-            factura.estado = nuevoEstado;
-          } else {
-            alert('Error al actualizar estado');
-          }
-        }, { once: true });
-      });
-
-      document.getElementById('invoiceStateText').textContent = {
-        'pendiente': 'Factura pendiente de productos (aún no entregados)',
-        'completado': 'Productos entregados',
-        'denegado': 'Factura denegada: productos devueltos'
-      }[factura.estado];
-
-      modal.classList.remove('hidden');
-      document.body.classList.add('modal-open');
-      requestAnimationFrame(() => modal.classList.add('show'));
-
-      document.getElementById('btnCloseModalDetailsHistorial').addEventListener('click', () => this.cerrarDetallesFactura(), { once: true });
-    } catch (error) {
-      console.error('Error al mostrar detalles:', error);
-      alert(`Error: ${error.message}`);
-    }
-  }
-
-  setupVentasListeners() {
-    const tabla = document.getElementById('tablaVentas');
-    if (!tabla) return;
-
-    tabla.addEventListener('click', async (e) => {
-      const target = e.target;
-
-      if (target.tagName === 'I' && target.dataset.action === 'ver-detalles') {
-        const facturaId = parseInt(target.dataset.facturaId, 10);
-        if (isNaN(facturaId)) return alert('ID de factura inválido');
-        const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
-        if (factura) await this.mostrarDetallesFactura(factura);
-        else alert('Factura no encontrada');
-      }
-
-      const button = target.closest('.ver-factura');
-      if (button) {
-        button.disabled = true;
-        button.textContent = 'Cargando...';
-        try {
-          const facturaId = parseInt(button.dataset.facturaId, 10);
-          const clienteId = parseInt(button.dataset.clienteId, 10);
-          if (isNaN(facturaId) || isNaN(clienteId)) throw new Error('IDs inválidos');
-
-          const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
-          if (!factura) throw new Error('Factura no encontrada');
-          await this.mostrarFactura(factura);
-        } catch (error) {
-          console.error('Error al cargar factura:', error);
-          alert(`Error: ${error.message}`);
-        } finally {
-          button.disabled = false;
-          button.innerHTML = '<i class="fa-solid fa-print fa-lg"></i>';
-        }
-      }
-    });
-  }
-
-  cerrarFactura() {
+async mostrarFactura(factura) {
+  try {
     const invoiceModal = document.getElementById('invoiceModal');
-    if (!invoiceModal) return;
-    invoiceModal.classList.remove('show');
-    document.body.classList.remove('modal-open');
-    setTimeout(() => invoiceModal.classList.add('hidden'), 300);
-  }
+    const invoiceDetails = document.getElementById('invoiceDetails');
+    if (!invoiceModal || !invoiceDetails) throw new Error('Modal de factura no encontrado');
 
-  cerrarDetallesFactura() {
-    const modal = document.getElementById('historialModal');
-    if (!modal) return;
-    modal.classList.remove('show');
-    document.body.classList.remove('modal-open');
-    setTimeout(() => modal.classList.add('hidden'), 300);
+    invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false);
+    invoiceModal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => invoiceModal.classList.add('show'));
+
+    document.getElementById('btnCloseInvoice').addEventListener('click', () => this.cerrarFactura(), { once: true });
+  } catch (error) {
+    console.error('Error al mostrar factura:', error);
+    alert(`Error: ${error.message}`);
   }
+}
+
+async mostrarDetallesFactura(factura) {
+  try {
+    const modal = document.getElementById('historialModal');
+    if (!modal) throw new Error('Modal de detalles no encontrado');
+
+    // Llenar datos
+    document.getElementById('modalHistorialNumber').textContent = factura.numeroFactura || 'N/A';
+    document.getElementById('modalHistorialCliente').textContent = factura.clienteNombre || 'N/A';
+    document.getElementById('modalHistorialTelefono').textContent = factura.clienteTelefono || 'N/A';
+    document.getElementById('modalHistorialDireccion').textContent = factura.clienteDireccion || 'N/A';
+    document.getElementById('modalHistorialTotal').textContent = `$${factura.total.toFixed(2)}`;
+    document.getElementById('modalHistorialFechaCreacion').textContent = Factura.formatEcuadorDateTime(factura.fecha);
+    document.getElementById('modalHistoralFechaActualizacion').textContent = Factura.formatEcuadorDateTime(factura.fechaActualizacion);
+
+    // Configurar toggle de estado
+    const stateRadios = document.querySelectorAll('#historialModal input[name="invoiceState"]');
+
+    // Limpiar listeners previos para evitar acumulación
+    stateRadios.forEach(radio => {
+      const newRadio = radio.cloneNode(true); // Clonar para eliminar listeners
+      radio.parentNode.replaceChild(newRadio, radio);
+    });
+
+    // Re-seleccionar los nuevos radios sin listeners
+    const newStateRadios = document.querySelectorAll('#historialModal input[name="invoiceState"]');
+    newStateRadios.forEach(radio => {
+      radio.checked = radio.value === factura.estado;
+      radio.addEventListener('change', async (e) => {
+        const nuevoEstado = e.target.value;
+        document.getElementById('invoiceStateText').textContent = {
+          'pendiente': 'Factura pendiente de productos (aún no entregados)',
+          'completado': 'Productos entregados',
+          'denegado': 'Factura denegada: productos devueltos'
+        }[nuevoEstado];
+
+        const resultado = await this.facturaService.actualizarFactura(factura.id, { estado: nuevoEstado });
+        if (resultado) {
+          const estadoCell = document.querySelector(`.estado-celll[data-factura-id="${factura.id}"]`);
+          if (estadoCell) {
+            estadoCell.innerHTML = {
+              'pendiente': '<i class="fa-solid fa-hourglass fa-lg" style="color: #ffc107;" title="Pendiente"></i>',
+              'completado': '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Completado"></i>',
+              'denegado': '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Denegado"></i>'
+            }[nuevoEstado];
+          }
+          factura.estado = nuevoEstado; // Actualizar el objeto factura en memoria
+        } else {
+          alert('Error al actualizar estado');
+          // Restaurar el estado anterior en el radio si falla
+          newStateRadios.forEach(r => r.checked = r.value === factura.estado);
+        }
+      });
+    });
+
+    document.getElementById('invoiceStateText').textContent = {
+      'pendiente': 'Factura pendiente de productos (aún no entregados)',
+      'completado': 'Productos entregados',
+      'denegado': 'Factura denegada: productos devueltos'
+    }[factura.estado];
+
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => modal.classList.add('show'));
+
+    document.getElementById('btnCloseModalDetailsHistorial').addEventListener('click', () => this.cerrarDetallesFactura(), { once: true });
+  } catch (error) {
+    console.error('Error al mostrar detalles:', error);
+    alert(`Error: ${error.message}`);
+  }
+}
+
+setupVentasListeners() {
+  const tabla = document.getElementById('tablaVentas');
+  if (!tabla) return;
+
+  tabla.addEventListener('click', async (e) => {
+    const target = e.target;
+
+    if (target.tagName === 'I' && target.dataset.action === 'ver-detalles') {
+      const facturaId = parseInt(target.dataset.facturaId, 10);
+      if (isNaN(facturaId)) return alert('ID de factura inválido');
+      const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
+      if (factura) await this.mostrarDetallesFactura(factura);
+      else alert('Factura no encontrada');
+    }
+
+    const button = target.closest('.ver-factura');
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Cargando...';
+      try {
+        const facturaId = parseInt(button.dataset.facturaId, 10);
+        const clienteId = parseInt(button.dataset.clienteId, 10);
+        if (isNaN(facturaId) || isNaN(clienteId)) throw new Error('IDs inválidos');
+
+        const factura = await this.facturaService.obtenerFacturaPorId(facturaId);
+        if (!factura) throw new Error('Factura no encontrada');
+        await this.mostrarFactura(factura);
+      } catch (error) {
+        console.error('Error al cargar factura:', error);
+        alert(`Error: ${error.message}`);
+      } finally {
+        button.disabled = false;
+        button.innerHTML = '<i class="fa-solid fa-print fa-lg"></i>';
+      }
+    }
+  });
+}
+
+cerrarFactura() {
+  const invoiceModal = document.getElementById('invoiceModal');
+  if (!invoiceModal) return;
+  invoiceModal.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  setTimeout(() => invoiceModal.classList.add('hidden'), 300);
+}
+
+cerrarDetallesFactura() {
+  const modal = document.getElementById('historialModal');
+  if (!modal) return;
+  modal.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.

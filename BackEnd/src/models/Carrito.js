@@ -62,7 +62,7 @@ class Carrito {
               nombre: producto.nombre,
               cantidad: 1,
               precio: producto.pvp, // Usar pvp en lugar de precio
-              subtotal: producto.pvp // Usar pvp
+              subtotal: producto.pvp, // Usar pvp
           });
       }
       this.actualizarLocalStorage();
