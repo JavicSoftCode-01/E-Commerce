@@ -6,702 +6,1064 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lunaire E-Commerce</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link rel="stylesheet" href="./../css/styles.css">
 </head>
 
 <body>
 
-  <!-- Navegación -->
-  <header>
-    <div class="nav-container">
-      <div class="logo">Lunaire</div>
-      <div class="nav-buttons">
-        <button id="btnTienda">Tienda</button>
-        <button id="btnAdmin">Panel Admin</button>
-        <button id="btnCarrito" class="cart-icon">
-          <i class="fas fa-shopping-cart"></i> Carrito
-          <span class="cart-count" id="cartCount">0</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero Section Foto principal -->
-  <section class="hero">
-    <img src="../assets/img/Lunairesinmodelo.jpg" alt="Lunaire luxury cosmetics and accessories" class="hero-image">
-  </section>
-
-  <!-- Sección Tienda -->
-  <div id="tienda" class="container">
-    <h2>Catálogo de Productos</h2>
-
-    <!-- Barra de Búsqueda -->
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Buscar en Lunaire...">
-      <button id="searchButton"><i class="fas fa-search"></i> Buscar</button>
-    </div>
-
-    <!-- Filtros y Ordenamiento -->
-    <div class="filters">
-      <select id="filterCategoria">
-        <option value="">Todas las categorías</option>
-      </select>
-      <select id="filterMarca">
-        <option value="">Todas las marcas</option>
-      </select>
-      <select id="sortBy">
-        <option value="default">Ordenar por</option>
-        <option value="price-asc">Precio: Menor a Mayor</option>
-        <option value="price-desc">Precio: Mayor a Menor</option>
-        <option value="name-asc">Nombre: A-Z</option>
-        <option value="name-desc">Nombre: Z-A</option>
-      </select>
-    </div>
-
-    <!-- Productos -->
-    <div class="products" id="productList">
-      <!-- Productos se cargarán aquí vía JS -->
+<!-- Navegación -->
+<header>
+  <div class="nav-container">
+    <div class="logo">Lunaire</div>
+    <div class="nav-buttons">
+      <button id="btnTienda">Tienda</button>
+      <button id="btnAdmin" style="display: none">Panel Admin</button>
+      <button id="btnCarrito" class="cart-icon">
+        <i class="fas fa-shopping-cart"></i> Carrito
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
     </div>
   </div>
+</header>
 
-  <!-- Cart Section Carrito de compra -->
-  <div id="cartModal" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Carrito <i class="fas fa-shopping-cart fa-lg"></i></h3>
-        <button class="modal-close" id="closeCartModal" aria-label="Cerrar">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="cartSection" class="cart">
-          <div class="table-responsive-container " id="cartTable">
+<!--<style>/* Asegúrate de que el overlay cubra todo y esté detrás del contenido */-->
+<!--#loginModal .modal-overlay {-->
+<!--  position: fixed;-->
+<!--  top: 0;-->
+<!--  left: 0;-->
+<!--  width: 100%;-->
+<!--  height: 100%;-->
+<!--  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparente */-->
+<!--  z-index: 999; /* Detrás del modal, delante del resto */-->
+<!--}-->
 
+<!--/* Estilos básicos para el contenido del modal de login */-->
+<!--#loginModal .modal-content {-->
+<!--  position: fixed;-->
+<!--  top: 50%;-->
+<!--  left: 50%;-->
+<!--  transform: translate(-50%, -50%);-->
+<!--  background-color: white;-->
+<!--  padding: 20px 30px;-->
+<!--  border-radius: 8px;-->
+<!--  z-index: 1000; /* Encima del overlay */-->
+<!--  min-width: 300px; /* Ancho mínimo */-->
+<!--  max-width: 90%; /* Ancho máximo */-->
+<!--  box-shadow: 0 4px 15px rgba(0,0,0,0.2);-->
+<!--  /* Transiciones si usas las clases 'show'/'hidden' */-->
+<!--  opacity: 0;-->
+<!--  visibility: hidden;-->
+<!--  transition: opacity 0.3s ease, visibility 0.3s ease;-->
+<!--}-->
+
+<!--/* Estado visible del modal */-->
+<!--#loginModal.show .modal-content {-->
+<!--    opacity: 1;-->
+<!--    visibility: visible;-->
+<!--}-->
+<!--/* Ocultar modal */-->
+<!--#loginModal.hidden .modal-content {-->
+<!--    opacity: 0;-->
+<!--    visibility: hidden;-->
+<!--}-->
+
+
+<!--#loginModal .modal-header {-->
+<!--  border-bottom: 1px solid #eee;-->
+<!--  padding-bottom: 10px;-->
+<!--  margin-bottom: 15px;-->
+<!--}-->
+
+<!--#loginModal .modal-title {-->
+<!--  margin: 0;-->
+<!--  font-size: 1.5em;-->
+<!--}-->
+
+<!--#loginModal .modal-body .form-group {-->
+<!--  margin-bottom: 15px;-->
+<!--}-->
+<!--#loginModal .modal-body label {-->
+<!--  display: block;-->
+<!--  margin-bottom: 5px;-->
+<!--  font-weight: bold;-->
+<!--}-->
+
+<!--#loginModal .inputFac { /* Reutiliza tu clase de input si es adecuada */-->
+<!--  width: 100%;-->
+<!--  padding: 10px;-->
+<!--  border: 1px solid #ccc;-->
+<!--  border-radius: 4px;-->
+<!--  box-sizing: border-box; /* Importante */-->
+<!--}-->
+
+<!--#loginModal .modal-footer {-->
+<!--  display: flex;-->
+<!--  justify-content: space-between; /* Espacia los botones */-->
+<!--  padding-top: 15px;-->
+<!--  border-top: 1px solid #eee;-->
+<!--  margin-top: 20px;-->
+<!--}-->
+
+<!--/* Estilos para el body cuando un modal está abierto */-->
+<!--body.modal-open {-->
+<!--  overflow: hidden; /* Evita scroll del fondo */-->
+<!--}-->
+<!--</style>-->
+<style>
+  /* --- Estilos Generales del Modal de Login (Mejorados) --- */
+
+/* Overlay (sin cambios significativos) */
+#loginModal .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Un poco más oscuro quizás */
+  z-index: 999;
+  opacity: 0; /* Para transición */
+  visibility: hidden; /* Para transición */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Contenido Principal del Modal */
+#loginModal .modal-content.login-modal-appearance {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: transparent; /* Hacemos transparente el contenedor exterior */
+  padding: 0; /* Sin padding aquí, lo maneja el inner-content */
+  border-radius: 12px; /* Bordes redondeados más pronunciados */
+  z-index: 1000;
+  min-width: 320px;
+  max-width: 450px; /* Ajusta según tu preferencia */
+  width: 90%;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  overflow: hidden; /* Para que el inner-content respete el border-radius */
+}
+
+/* Contenedor Interno con la Imagen de Fondo */
+#loginModal .login-modal-inner-content {
+  position: relative; /* Necesario para posicionar el botón 'X' absoluto */
+  background-image: url('../assets/img/Auth.jpg'); /* <-- ¡¡CAMBIA ESTO!! */
+  background-size: cover; /* Cubre todo el área */
+  background-position: center center; /* Centra la imagen */
+  padding: 30px 40px; /* Padding interno */
+  border-radius: inherit; /* Hereda el redondeo */
+  color: white; /* Color de texto por defecto para contraste */
+  /* Añade una capa oscura semi-transparente encima de la imagen para legibilidad */
+  background-color: rgba(0, 0, 0, 0.5); /* Ajusta la opacidad (0.5 = 50%) */
+  background-blend-mode: overlay; /* Mezcla el color con la imagen */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra contenido horizontalmente */
+  text-align: center; /* Centra texto */
+}
+
+
+/* Estado Visible del Modal */
+#loginModal.show .modal-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+#loginModal.show .modal-content.login-modal-appearance {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1); /* Animación de escala opcional */
+}
+#loginModal.hidden .modal-content.login-modal-appearance {
+   /* La transición se define en el estado base */
+}
+
+
+/* Estilo Botón Cerrar 'X' */
+#loginModal .modal-closeAuth {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 2rem; /* Más grande */
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8); /* Blanco semi-transparente */
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 10; /* Encima de otros elementos internos */
+  transition: color 0.2s ease;
+}
+#loginModal .modal-closeAuth:hover {
+  color: white; /* Blanco sólido al pasar el mouse */
+}
+
+/* Encabezado del Modal */
+#loginModal .modal-header {
+  border-bottom: none; /* Quitamos borde inferior */
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+#loginModal .modal-title {
+  margin: 0;
+  font-size: 1.8em; /* Tamaño del título */
+  font-weight: bold;
+  color: #fff; /* Asegurar color blanco */
+   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Cuerpo del Modal */
+#loginModal .modal-body {
+    width: 100%; /* Ocupa todo el ancho disponible */
+}
+
+#loginModal .login-intro-text {
+    font-size: 1.4em; /* Más grande */
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-align: justify;
+    font-family: "Times New Roman",fantasy;
+}
+
+#loginModal .login-quality-text {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    opacity: 0.9;
+}
+
+
+/* Grupo de Formulario */
+#loginModal .login-form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+#loginModal .login-prompt-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
+/* Input */
+#loginModal .inputFac.login-input {
+  width: 100%;
+  padding: 12px 15px; /* Más padding */
+  border: 1px solid rgba(255, 255, 255, 0); /* Borde blanco translúcido */
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0); /* Fondo muy sutil */
+  color: rgba(255, 255, 255, 0.5); /* Texto blanco */
+  font-size: 0.8em;
+  text-align: center; /* Texto centrado en input */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+#loginModal .inputFac.login-input::placeholder {
+  color: rgba(255, 255, 255, 0); /* Color del placeholder */
+  text-align: center;
+}
+
+#loginModal .inputFac.login-input:focus {
+  background-color: none;
+  border-color: rgba(255, 255, 255, 0);
+  outline: none; /* Quitar borde de focus por defecto */
+}
+
+/* Mensaje de Error */
+#loginModal .login-error-message {
+  color: #ffdddd; /* Rojo claro para contraste */
+  background-color: rgba(220, 53, 69, 0.7); /* Fondo rojo translúcido */
+  margin-top: 10px;
+  font-size: 0.9em;
+  display: none; /* Empieza oculto */
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+
+
+/* Pie de página del Modal */
+#loginModal .login-modal-footer {
+  display: flex;
+  justify-content: center; /* Centra el botón */
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2); /* Borde superior sutil */
+  margin-top: 20px;
+   width: 100%;
+}
+
+/* Botón Saltar */
+#loginModal .login-skip-button {
+  /* Reutiliza tu clase .btn y .btn-secondary si las tienes bien definidas */
+  /* O añade estilos específicos aquí */
+  padding: 10px 30px; /* Más padding horizontal */
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 20px; /* Botón redondeado */
+  background-color: rgba(255, 255, 255, 0.8); /* Blanco translúcido */
+  color: #5D0207; /* Texto oscuro */
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#loginModal .login-skip-button:hover {
+  background-color: rgba(255, 255, 255, 1); /* Blanco sólido */
+  transform: scale(1.05); /* Ligero aumento */
+}
+
+/* Evita scroll del body cuando el modal está abierto */
+body.modal-open {
+  overflow: hidden;
+}
+</style>
+
+<!-- Modal de Identificación de Usuario -->
+<!-- Modal de Identificación de Usuario (Con Diseño Mejorado) -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-overlay" id="loginModalOverlay"></div>
+  <div class="modal-content login-modal-appearance"> <!-- Clase específica para estilo -->
+    <!-- Contenedor INTERNO para el fondo y contenido -->
+    <div class="login-modal-inner-content">
+        <!-- Botón Cerrar 'X' va aquí, encima del contenido interno -->
+        <button class="modal-close modal-closeAuth" id="closetModalAuth" aria-label="Cerrar">×</button>
+
+        <!-- Encabezado dentro del contenido -->
+        <div class="modal-header">
+<!--          <h3 class="modal-title">Lunaire</h3> &lt;!&ndash; Título más limpio quizás &ndash;&gt;-->
+        </div>
+
+        <!-- Cuerpo dentro del contenido -->
+        <div class="modal-body">
+<!--          <p class="login-intro-text">✨ El Placer de Comprar ✨</p>-->
+<!--          <p class="login-quality-text">Productos de la mejor Calidad.</p>-->
+<!--          <p class="login-intro-text">✨ El Placer de Comprar ✨</p>-->
+
+          <div class="form-group login-form-group" style="margin-top: 7rem">
+<!--            <label for="loginIdentifierInput" class="login-prompt-label">Hola, ¿qué tal?</label>-->
+          <p class="login-intro-text">💄¡Bienvenidas a Lunaire un espacio donde cada mujer brilla con luz propia y su belleza!❤️✨</p>
+
+            <input type="text" id="loginIdentifierInput" placeholder="Atenderla todo un placer." class="inputFac login-input">
+            <div id="loginErrorMsg" class="login-error-message"></div> <!-- Clase específica -->
           </div>
         </div>
-      </div>
-      <div class="summary-item total-item">
-        <span>Total:</span>
-        <span id="cartTotal" class="checkoutTotal">$0.00</span>
-      </div>
 
-      <div class="modal-footer" id="cartActions">
-        <button id="btnEmptyCart" class="btn btn-outline-danger btn-icon">
-          Carrito <i class="fas fa-trash-alt fa-lg"></i>
-        </button>
-        <button id="btnCheckout" class="btn btn-success btn-icon">
-          Pagar <i class="fas fa-credit-card fa-lg"></i>
-        </button>
-      </div>
-    </div>
+        <!-- Pie de página dentro del contenido -->
+        <div class="modal-footer login-modal-footer">
+          <button id="btnSkipLogin" class="btn btn-secondary login-skip-button">✨ Bienvenida ✨</button>
+        </div>
+    </div><!-- Fin de login-modal-inner-content -->
+  </div><!-- Fin de modal-content -->
+</div>
+<!--<div id="loginModal" class="modal hidden"> &lt;!&ndash; Empieza oculto &ndash;&gt;-->
+<!--  <div class="modal-overlay" id="loginModalOverlay"></div> &lt;!&ndash; Overlay semi-transparente &ndash;&gt;-->
+<!--  <div class="modal-content">-->
+<!--    <div class="modal-header">-->
+<!--      <h3 class="modal-title">Lunaire el Placer de Comprar🛍️</h3>-->
+<!--      &lt;!&ndash; ESTE ES EL NUEVO BOTÓN &ndash;&gt;-->
+<!--      <button class="modal-close" id="closetModalAuth" aria-label="Cerrar">×</button>-->
+<!--    </div>-->
+<!--    <div class="modal-body">-->
+<!--      <label style="display: block; margin-bottom: 15px; font-size: 1.1em; text-align: center;">Productos de la mejor Calidad. 🛍️</label>-->
+<!--      <div class="form-group">-->
+<!--        <label for="loginIdentifierInput" style="display: block; margin-bottom: 8px;">Hola, ¿qué tal?</label>-->
+<!--        <input type="text" id="loginIdentifierInput" placeholder="Ej: María" class="inputFac">-->
+<!--        &lt;!&ndash; Mensaje de error (opcional pero útil para admin) &ndash;&gt;-->
+<!--        <div id="loginErrorMsg" style="color: #dc3545; margin-top: 8px; font-size: 0.9em; display: none; text-align: center;"></div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="modal-footer" style="justify-content: center;"> &lt;!&ndash; Centramos el botón Saltar &ndash;&gt;-->
+<!--      <button id="btnSkipLogin" class="btn btn-secondary">Saltar</button>-->
+<!--      &lt;!&ndash; No hay botón de Ingresar &ndash;&gt;-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!-- Hero Section Foto principal -->
+<section class="hero">
+  <img src="../assets/img/Lunairesinmodelo.jpg" alt="Lunaire luxury cosmetics and accessories" class="hero-image">
+</section>
+
+<!-- Sección Tienda -->
+<div id="tienda" class="container">
+  <h2>Catálogo de Productos</h2>
+
+  <!-- Barra de Búsqueda -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Buscar en Lunaire...">
+    <button id="searchButton"><i class="fas fa-search"></i> Buscar</button>
   </div>
 
+  <!-- Filtros y Ordenamiento -->
+  <div class="filters">
+    <select id="filterCategoria">
+      <option value="">Todas las categorías</option>
+    </select>
+    <select id="filterMarca">
+      <option value="">Todas las marcas</option>
+    </select>
+    <select id="sortBy">
+      <option value="default">Ordenar por</option>
+      <option value="price-asc">Precio: Menor a Mayor</option>
+      <option value="price-desc">Precio: Mayor a Menor</option>
+      <option value="name-asc">Nombre: A-Z</option>
+      <option value="name-desc">Nombre: Z-A</option>
+    </select>
+  </div>
 
-  <!-- Sección Checkout Mejorada Factura de vent-->
-  <div id="checkoutOverlay" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Factura</h3>
-        <button class="modal-close" id="closeCheckoutModal" aria-label="Cerrar">×</button>
+  <!-- Productos -->
+  <div class="products" id="productList">
+    <!-- Productos se cargarán aquí vía JS -->
+  </div>
+</div>
+
+<!-- Cart Section Carrito de compra -->
+<div id="cartModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Carrito <i class="fas fa-shopping-cart fa-lg"></i></h3>
+      <button class="modal-close" id="closeCartModal" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cartSection" class="cart">
+        <div class="table-responsive-container " id="cartTable">
+
+        </div>
       </div>
-      <div class="modal-body">
-        <div class="checkout-content">
-          <!-- Datos del Cliente -->
-          <div class="checkout-section">
-            <div class="invoice-header">
-              <div class="invoice-header-content">
-                <div class="company-logo">
-                  <h1 class="logo-text">LUNAIRE</h1>
-                  <p class="logo-tagline">Luxury Cosmetics & Accessories</p>
+    </div>
+    <div class="summary-item total-item">
+      <span>Total:</span>
+      <span id="cartTotal" class="checkoutTotal">$0.00</span>
+    </div>
+
+    <div class="modal-footer" id="cartActions">
+      <button id="btnEmptyCart" class="btn btn-outline-danger btn-icon">
+        Carrito <i class="fas fa-trash-alt fa-lg"></i>
+      </button>
+      <button id="btnCheckout" class="btn btn-success btn-icon">
+        Pagar <i class="fas fa-credit-card fa-lg"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Sección Checkout Mejorada Factura de vent-->
+<div id="checkoutOverlay" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Factura</h3>
+      <button class="modal-close" id="closeCheckoutModal" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="checkout-content">
+        <!-- Datos del Cliente -->
+        <div class="checkout-section">
+          <div class="invoice-header">
+            <div class="invoice-header-content">
+              <div class="company-logo">
+                <h1 class="logo-text">LUNAIRE</h1>
+                <p class="logo-tagline">Luxury Cosmetics & Accessories</p>
+              </div>
+              <div class="invoice-info">
+                <div class="invoice-details">
+                  <p><span id="invoiceNumber">--</span></p>
+                  <p class="hidden">Fecha: <span id="currentDate">--</span></p>
+                  <p><strong>Hora: </strong><span id="currentTime">--</span></p>
                 </div>
-                <div class="invoice-info">
-                  <div class="invoice-details">
-                    <p><span id="invoiceNumber">--</span></p>
-                    <p class="hidden">Fecha: <span id="currentDate">--</span></p>
-                    <p><strong>Hora: </strong><span id="currentTime">--</span></p>
-                  </div>
-                </div>
-              </div>
-              <div class="client-info ">
-                <div class="info-group">
-                  <label>Cliente:</label>
-                  <input class="inputFac" type="text" id="checkoutNombre" required>
-                </div>
-                <div class="info-group">
-                  <label>Teléfono:</label>
-                  <input class="inputFac" type="tel" id="checkoutTelefono" maxlength="10" required>
-                </div>
-                <div class="info-group">
-                  <label>Dirección:</label>
-                  <input class="inputFac" type="text" id="checkoutDireccion" required>
-                </div>
               </div>
             </div>
-          </div>
-
-          <!-- Resumen del Pedido -->
-          <div class="checkout-section" style="margin-top: 1rem;">
-            <h3 class="modal-title">Detalle factura</h3>
-
-            <div class="table-responsive-container">
-              <table id="checkoutCartTable" class="checkout-table">
-                <thead>
-                  <tr>
-                    <th class="text-center" style="font-size: 18px;">IMG</th>
-                    <th class="text-center" style="font-size: 18px;">Producto</th>
-                    <th class="text-center" style="font-size: 18px;">Cant.</th>
-                    <th class="text-center" style="font-size: 18px;">Valor</th>
-                    <th class="text-center" style="font-size: 18px;">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Los ítems se generarán dinámicamente -->
-                </tbody>
-              </table>
-            </div>
-
-            <div class="checkout-summary" id="checkoutSummary">
-              <div class="summary-item">
-                <span class="subtotal" style="font-size: 20px;">Subtotal:</span>
-                <span id="checkoutSubtotalValue" style="font-size: 18px;">$0.00</span>
+            <div class="client-info ">
+              <div class="info-group">
+                <label>Cliente:</label>
+                <input class="inputFac" type="text" id="checkoutNombre" required>
               </div>
-              <div class="summary-item">
-                <span class="envio" style="font-size: 20px;">Envío:</span>
-                <span id="checkoutShippingValue" style="font-size: 18px;">$0.00</span>
+              <div class="info-group">
+                <label>Teléfono:</label>
+                <input class="inputFac" type="tel" id="checkoutTelefono" maxlength="10" required>
               </div>
-              <hr class="summary-divider">
-              <div class="summary-item total-item">
-                <span>Total:</span>
-                <span id="checkoutTotal" class="checkoutTotal">$0.00</span>
+              <div class="info-group">
+                <label>Dirección:</label>
+                <input class="inputFac" type="text" id="checkoutDireccion" required>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Resumen del Pedido -->
+        <div class="checkout-section" style="margin-top: 1rem;">
+          <h3 class="modal-title">Detalle factura</h3>
+
+          <div class="table-responsive-container">
+            <table id="checkoutCartTable" class="checkout-table">
+              <thead>
+              <tr>
+                <th class="text-center" style="font-size: 18px;">IMG</th>
+                <th class="text-center" style="font-size: 18px;">Producto</th>
+                <th class="text-center" style="font-size: 18px;">Cant.</th>
+                <th class="text-center" style="font-size: 18px;">Valor</th>
+                <th class="text-center" style="font-size: 18px;">Subtotal</th>
+              </tr>
+              </thead>
+              <tbody>
+              <!-- Los ítems se generarán dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="checkout-summary" id="checkoutSummary">
+            <div class="summary-item">
+              <span class="subtotal" style="font-size: 20px;">Subtotal:</span>
+              <span id="checkoutSubtotalValue" style="font-size: 18px;">$0.00</span>
+            </div>
+            <div class="summary-item">
+              <span class="envio" style="font-size: 20px;">Envío:</span>
+              <span id="checkoutShippingValue" style="font-size: 18px;">$0.00</span>
+            </div>
+            <hr class="summary-divider">
+            <div class="summary-item total-item">
+              <span>Total:</span>
+              <span id="checkoutTotal" class="checkoutTotal">$0.00</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button id="btnCancelCheckout" class="btn btn-outline-danger btn-icon">
-          Cancelar <i class="fas fa-times-circle fa-lg"></i>
-        </button>
-        <button id="btnConfirmCheckout" class="btn btn-success btn-icon">
-          Confirmar <i class="fas fa-check-circle fa-lg"></i>
-        </button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="btnCancelCheckout" class="btn btn-outline-danger btn-icon">
+        Cancelar <i class="fas fa-times-circle fa-lg"></i>
+      </button>
+      <button id="btnConfirmCheckout" class="btn btn-success btn-icon">
+        Confirmar <i class="fas fa-check-circle fa-lg"></i>
+      </button>
     </div>
   </div>
+</div>
 
 
-  <!-- Modal para mostrar la factura al cliente  -->
-  <div id="invoiceModal" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Factura</h3>
-        <button class="modal-close" id="btnCloseInvoice" aria-label="Cerrar">×</button>
+<!-- Modal para mostrar la factura al cliente  -->
+<div id="invoiceModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Factura</h3>
+      <button class="modal-close" id="btnCloseInvoice" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="invoiceDetails">
+        <!-- Contenido de la factura generado por JS -->
       </div>
-      <div class="modal-body">
-        <div id="invoiceDetails">
-          <!-- Contenido de la factura generado por JS -->
-        </div>
-      </div>
+    </div>
 
-      <div class="modal-footer">
-        <span id="WST"></span>
-        <!-- WhatsApp -->
-      </div>
+    <div class="modal-footer">
+      <span id="WST"></span>
+      <!-- WhatsApp -->
     </div>
   </div>
+</div>
 
-  <!-- Modal para detalles de la factura (con toggle, exclusivo para el dueño) -->
-  <div id="historialModal" class="modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Detalles de Factura</h3>
-        <button id="btnCloseModalDetailsHistorial" class="modal-close" aria-label="Cerrar">×</button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Factura #:</strong> <span id="modalHistorialNumber"></span></p>
-        <p><strong>Cliente:</strong> <span id="modalHistorialCliente"></span></p>
-        <p><strong>Teléfono:</strong> <span id="modalHistorialTelefono"></span></p>
-        <p><strong>Dirección:</strong> <span id="modalHistorialDireccion"></span></p>
-        <p><strong>Total:</strong> <span id="modalHistorialTotal"></span></p>
-        <p><strong>Fecha de Creación:</strong> <span id="modalHistorialFechaCreacion"></span></p>
-        <p><strong>Fecha de Actualización:</strong> <span id="modalHistoralFechaActualizacion"></span></p>
-        <div class="triple-toggle-container">
-          <input type="radio" name="invoiceState" id="stateDenied" value="denegado">
-          <input type="radio" name="invoiceState" id="statePending" value="pendiente">
-          <input type="radio" name="invoiceState" id="stateCompleted" value="completado">
-          <div class="toggle-slider"></div>
-          <div class="toggle-labels">
-            <label for="stateDenied" class="denied-label" title="Denegada"><i class="fa-solid fa-xmark"
-                style="margin-left: -1rem"></i></label>
-            <label for="statePending" class="pending-label" title="Pendiente"><i
-                class="fa-solid fa-hourglass"></i></label>
-            <label for="stateCompleted" class="completed-label" title="Completada"><i
-                class="fa-solid fa-check"></i></label>
-          </div>
+<!-- Modal para detalles de la factura (con toggle, exclusivo para el dueño) -->
+<div id="historialModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Detalles de Factura</h3>
+      <button id="btnCloseModalDetailsHistorial" class="modal-close" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Factura #:</strong> <span id="modalHistorialNumber"></span></p>
+      <p><strong>Cliente:</strong> <span id="modalHistorialCliente"></span></p>
+      <p><strong>Teléfono:</strong> <span id="modalHistorialTelefono"></span></p>
+      <p><strong>Dirección:</strong> <span id="modalHistorialDireccion"></span></p>
+      <p><strong>Total:</strong> <span id="modalHistorialTotal"></span></p>
+      <p><strong>Fecha de Creación:</strong> <span id="modalHistorialFechaCreacion"></span></p>
+      <p><strong>Fecha de Actualización:</strong> <span id="modalHistoralFechaActualizacion"></span></p>
+      <div class="triple-toggle-container">
+        <input type="radio" name="invoiceState" id="stateDenied" value="denegado">
+        <input type="radio" name="invoiceState" id="statePending" value="pendiente">
+        <input type="radio" name="invoiceState" id="stateCompleted" value="completado">
+        <div class="toggle-slider"></div>
+        <div class="toggle-labels">
+          <label for="stateDenied" class="denied-label" title="Denegada"><i class="fa-solid fa-xmark"
+                                                                            style="margin-left: -1rem"></i></label>
+          <label for="statePending" class="pending-label" title="Pendiente"><i
+                  class="fa-solid fa-hourglass"></i></label>
+          <label for="stateCompleted" class="completed-label" title="Completada"><i
+                  class="fa-solid fa-check"></i></label>
         </div>
-        <div id="invoiceStateText" class="invoice-state-text"></div>
       </div>
+      <div id="invoiceStateText" class="invoice-state-text"></div>
     </div>
   </div>
+</div>
 
-  <!-- Sección Administrador -->
-  <div id="admin" class="container hidden">
-    <h2>Panel Administrador</h2>
+<!-- Sección Administrador -->
+<div id="admin" class="container hidden">
+  <h2>Panel Administrador</h2>
 
-    <div class="admin-tabs">
-      <div class="admin-tab active" data-tab="categorias"><i class="fas fa-tags"></i> Categorías</div>
-      <div class="admin-tab" data-tab="marcas"><i class="fas fa-bookmark"></i> Marcas</div>
-      <div class="admin-tab" data-tab="proveedores"><i class="fas fa-truck-loading"></i> Proveedores</div>
-      <div class="admin-tab" data-tab="clientes"><i class="fas fa-users"></i> Clientes</div>
-      <div class="admin-tab" data-tab="productos"><i class="fas fa-box-open"></i> Productos</div>
-      <div class="admin-tab" data-tab="ventas"><i class="fas fa-history"></i> Historial de Ventas</div>
-    </div>
-
-    <div class="admin-panel">
-
-      <div class="admin-section" id="adminCategorias">
-        <h3><i class="fas fa-tags"></i> Gestión de Categorías</h3>
-        <form id="formCategoria" class="needs-validation" novalidate>
-          <input type="hidden" id="categoriaId">
-          <div class="form-group">
-            <label for="categoriaNombre">Nombre de Categoría</label>
-            <input type="text" id="categoriaNombre" placeholder="Ej: Maquillaje, Cuidado Facial" required>
-            <div class="invalid-feedback">Por favor ingrese un nombre de categoría.</div>
-          </div>
-          <!-- Toggle para el estado -->
-          <div class="form-group hidden">
-            <label for="categoriaEstado">Estado</label>
-            <div class="toggle-container">
-              <input type="checkbox" id="categoriaEstado" class="toggle-input" checked>
-              <label for="categoriaEstado" class="toggle-label"></label>
-              <span id="estadoTexto">Activo</span>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetCategoriaForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Categoría</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaCategorias" class="table-admin">
-            <thead>
-              <tr>
-                <th style="text-align: center; font-size: 20px;">Nombre</th>
-                <th style="text-align: center; font-size: 20px;">Det.</th>
-                <th style="text-align: center; font-size: 20px;">Estado</th>
-                <th style="text-align: center; font-size: 20px;">Opc.</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Modal para mostrar la información de la categoría -->
-      <div id="categoriaModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Detalles</h3>
-            <button id="btnCloseModalDetails" class="modal-close" aria-label="Cerrar">×</button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Nombre Cat.:</strong> <span id="modalNombre"></span></p>
-            <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacion"></span></p>
-            <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacion"></span></p>
-            <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstado"
-                style="font-size: 30px;"></span></p>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="admin-section hidden" id="adminMarcas">
-        <h3><i class="fas fa-bookmark"></i> Gestión de Marcas</h3>
-        <form id="formMarca" class="needs-validation" novalidate>
-          <input type="hidden" id="marcaId">
-          <div class="form-group">
-            <label for="marcaNombre">Nombre de Marca</label>
-            <input type="text" id="marcaNombre" placeholder="Ej: L'Oréal, Maybelline" required>
-            <div class="invalid-feedback">Por favor ingrese un nombre de marca.</div>
-          </div>
-          <!-- Toggle para el estado -->
-          <div class="form-group hidden">
-            <label for="marcaEstado">Estado</label>
-            <div class="toggle-container">
-              <input type="checkbox" id="marcaEstado" class="toggle-input" checked>
-              <label for="marcaEstado" class="toggle-label"></label>
-              <span id="estadoMarcaTexto">Activo</span>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetMarcaForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Marca</button>
-          </div>
-        </form>
-
-        <div class="table-responsive-container">
-          <table id="tablaMarcas" class="table-admin">
-            <thead>
-              <tr>
-                <th style="text-align: center; font-size: 20px;">Nombre</th>
-                <th style="text-align: center; font-size: 20px;">Det.</th>
-                <th style="text-align: center; font-size: 20px;">Estado</th>
-                <th style="text-align: center; font-size: 20px;">Opc.</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-marcas-body"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Modal para mostrar la información de la marca -->
-      <div id="marcaModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Detalles</h3>
-            <button id="btnCloseModalMarDetails" class="modal-close" aria-label="Cerrar">×</button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Nombre Cat.:</strong> <span id="modalMarcaNombre"></span></p>
-            <p><strong>Fecha de Creación:</strong> <span id="modalMarcaFechaCreacion"></span></p>
-            <p><strong>Fecha de Actualización:</strong> <span id="modalMarcaFechaActualizacion"></span></p>
-            <p style="text-align: right"><strong>Estado:</strong> <span id="modalMarcaEstado"
-                style="font-size: 30px;"></span></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminProveedores">
-        <h3><i class="fas fa-truck-loading"></i> Gestión de Proveedores</h3>
-        <form id="formProveedor" class="needs-validation" novalidate>
-          <input type="hidden" id="proveedorId">
-          <div class="form-group">
-            <label for="proveedorNombre">Nombre</label>
-            <input type="text" id="proveedorNombre" placeholder="Nombre Completo o Razón Social" required>
-            <div class="invalid-feedback">Por favor ingrese el nombre del proveedor.</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="proveedorTelefono">Teléfono</label>
-              <input type="tel" id="proveedorTelefono" placeholder="Teléfono de contacto" maxlength="16">
-            </div>
-            <div class="form-group">
-              <label for="proveedorDireccion">Dirección</label>
-              <input type="text" id="proveedorDireccion" placeholder="Dirección Completa">
-            </div>
-          </div>
-          <!-- Toggle para el estado -->
-          <div class="form-group hidden">
-            <label for="proveedorEstado">Estado</label>
-            <div class="toggle-container">
-              <input type="checkbox" id="proveedorEstado" class="toggle-input" checked>
-              <label for="proveedorEstado" class="toggle-label"></label>
-              <span id="estadoProveedorTexto">Activo</span>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetProveedorForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Proveedor</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaProveedores" class="table-admin">
-            <thead>
-              <tr>
-                <th style="text-align: center; font-size: 20px;">Nombre</th>
-                <th style="text-align: center; font-size: 20px;">Telefono</th>
-                <!--  <th style="text-align: center; font-size: 20px;">Dirección</th>-->
-                <th style="text-align: center; font-size: 20px;">Det.</th>
-                <th style="text-align: center; font-size: 20px;">Estado</th>
-                <th style="text-align: center; font-size: 20px;">Opc.</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Modal para mostrar la información del proveedor -->
-      <div id="proveedorModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Detalles</h3>
-            <button id="btnCloseModalDetailsProveedor" class="modal-close" aria-label="Cerrar">×</button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Nombre:</strong> <span id="modalNombreProveedor"></span></p>
-            <p><strong>Teléfono:</strong> <span id="modalTelefonoProveedor"></span></p>
-            <p><strong>Dirección:</strong> <span id="modalDireccionProveedor"></span></p>
-            <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacionProveedor"></span></p>
-            <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacionProveedor"></span></p>
-            <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstadoProveedor"
-                style="font-size: 30px;"></span></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminClientes">
-        <h3><i class="fas fa-users"></i> Gestión de Clientes</h3>
-        <form id="formCliente" class="needs-validation" novalidate>
-          <input type="hidden" id="clienteId">
-          <div class="form-group">
-            <label for="clienteNombre">Nombres</label>
-            <input type="text" id="clienteNombre" placeholder="Nombre completo del cliente" required>
-            <div class="invalid-feedback">Por favor ingrese el nombre del cliente.</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="clienteTelefono">Teléfono</label>
-              <input type="tel" id="clienteTelefono" placeholder="Teléfono de contacto" required maxlength="16">
-              <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
-            </div>
-            <div class="form-group">
-              <label for="clienteDireccion">Dirección</label>
-              <input type="text" id="clienteDireccion" placeholder="Dirección completa de entrega" required>
-              <div class="invalid-feedback">Por favor ingrese la dirección.</div>
-            </div>
-          </div>
-          <!-- Toggle para el estado -->
-          <div class="form-group hidden">
-            <label for="clienteEstado">Estado</label>
-            <div class="toggle-container">
-              <input type="checkbox" id="clienteEstado" class="toggle-input" checked>
-              <label for="clienteEstado" class="toggle-label"></label>
-              <span id="estadoClienteTexto">Activo</span>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="resetClienteForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cliente</button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaClientes" class="table-admin">
-            <thead>
-              <tr>
-                <th style="text-align: center; font-size: 20px;">Nombre</th>
-                <th style="text-align: center; font-size: 20px;">Telefono</th>
-                <!-- <th style="text-align: center; font-size: 20px;">Dirección</th>-->
-                <th style="text-align: center; font-size: 20px;">Det.</th>
-                <th style="text-align: center; font-size: 20px;">Estado</th>
-                <th style="text-align: center; font-size: 20px;">Opc.</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Modal para mostrar la información de la cliente -->
-      <div id="clienteModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Detalles</h3>
-            <button id="btnCloseModalDetailsCliente" class="modal-close" aria-label="Cerrar">×</button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Nombre:</strong> <span id="modalNombreCliente"></span></p>
-            <p><strong>Teléfono:</strong> <span id="modalTelefonoCliente"></span></p>
-            <p><strong>Dirección:</strong> <span id="modalDireccionCliente"></span></p>
-            <p><strong>Comprando:</strong> <span id="modalContadorCliente"></span></p>
-            <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacionCliente"></span></p>
-            <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacionCliente"></span></p>
-            <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstadoCliente"
-                style="font-size: 30px;"></span></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminProductos">
-        <h3><i class="fas fa-box-open"></i> Gestión de Productos</h3>
-        <form id="formProducto" class="needs-validation" novalidate>
-          <input type="hidden" id="productoId">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoNombre">Nombre del Producto</label>
-              <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
-              <div class="invalid-feedback">Ingrese el nombre del producto.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoStock">Stock</label>
-              <input type="number" id="productoStock" placeholder="Cantidad" min="0" required>
-              <div class="invalid-feedback">Ingrese el stock (0 o más).</div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoPrecio">Costo</label>
-              <input type="number" id="productoPrecio" placeholder="Costo" step="0.01" min="0" required>
-              <div class="invalid-feedback">Ingrese costo del producto.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoPVP">Venta (PVP)</label>
-              <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
-              <div class="invalid-feedback">Ingrese precio de venta.</div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoCategoria">Categoría</label>
-              <select id="productoCategoria" required>
-                <option value="" disabled selected>Seleccione Categoría</option>
-              </select>
-              <div class="invalid-feedback">Seleccione una categoría.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoMarca">Marca</label>
-              <select id="productoMarca" required>
-                <option value="" disabled selected>Seleccione Marca</option>
-              </select>
-              <div class="invalid-feedback">Seleccione una marca.</div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="productoProveedor">Proveedor</label>
-              <select id="productoProveedor" required>
-                <option value="" disabled selected>Seleccione Proveedor</option>
-              </select>
-              <div class="invalid-feedback">Seleccione un proveedor.</div>
-            </div>
-            <div class="form-group">
-              <label for="productoImagen">URL de Imagen</label>
-              <input type="url" id="productoImagen" placeholder="https://ejemplo.com/imagen.jpg">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="productoDescripcion">Descripción</label>
-            <textarea id="productoDescripcion" placeholder="Descripción detallada del producto (opcional)"
-              rows="4"></textarea>
-          </div>
-
-
-          <div class="form-group hidden">
-            <label for="productoEstado">Estado</label>
-            <div class="toggle-container">
-              <input type="checkbox" id="productoEstado" class="toggle-input" checked>
-              <label for="productoEstado" class="toggle-label"></label>
-              <span id="estadoProductoTexto">Activo</span>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" id="resetProductoForm" class="btn btn-secondary"><i class="fas fa-times"></i>
-              Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary" id="guardar-producto-btn"><i class="fas fa-save"></i> Guardar
-              Producto
-            </button>
-          </div>
-        </form>
-        <div class="table-responsive-container">
-          <table id="tablaProductos" class="table-admin">
-            <thead>
-              <tr>
-                <th style="text-align: center; font-size: 20px;">Prod</th>
-                <th style="text-align: center; font-size: 20px;">Proveedor</th>
-                <th style="text-align: center; font-size: 20px;">Stock</th>
-                <th style="text-align: center; font-size: 20px;">Det.</th>
-                <th style="text-align: center; font-size: 20px;">Est</th>
-                <th style="text-align: center; font-size: 20px;">Acc</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-
-      <div id="productoModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Detalles</h3>
-            <button id="btnCloseModalProdDetails" class="modal-close" aria-label="Cerrar">×</button>
-          </div>
-          <div class="modal-body">
-            <!-- Sección superior con imagen y datos principales -->
-            <div class="modal-body-top" style="display: flex; gap: 3rem;">
-              <!-- Imagen del producto -->
-              <div class="modal-img" style="flex: 1;">
-                <span id="modalProdIMG"></span>
-                <!--          <img id="modalProdIMG" src="" alt="Imagen del producto" style="max-width: 100%; height: auto;">-->
-              </div>
-              <!-- Datos principales -->
-              <div class="modal-info" style="flex: 2;">
-                <h4 id="modalProdNombre">Nombre del Producto</h4>
-                <p><strong>Categoría:</strong> <span id="modalProdCatNombre"></span></p>
-                <p><strong>Marca:</strong> <span id="modalProdMarNombre"></span></p>
-                <p><strong>Proveedor:</strong> <span id="modalProdProvNombre"></span></p>
-                <p><strong>Costo:</strong> <span id="modalProdCosto"></span></p>
-                <p><strong>PVP:</strong> <span id="modalProdPVP"></span></p>
-                <p><strong>Cantidad:</strong> <span id="modalProdCant"></span></p>
-                <p><strong>Stock:</strong> <span id="modalProdStock"></span></p>
-              </div>
-            </div>
-
-            <!-- Sección inferior con información adicional -->
-            <div class="modal-body-bottom" style="margin-top: 20px;">
-              <div class="modal-details">
-                <p><strong>Descripción:</strong> <span id="modalProdDesc"></span></p>
-                <p><strong>Fecha de Creación:</strong> <span id="modalProdFechaCreacion"></span></p>
-                <p><strong>Fecha de Actualización:</strong> <span id="modalProdFechaActualizacion"></span></p>
-                <p style="text-align: right"><strong>Estado:</strong> <span id="modalProdEstado"
-                    style="font-size: 30px;"></span></p>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-section hidden" id="adminVentas">
-        <h3><i class="fas fa-history"></i> Historial de Ventas</h3>
-        <div class="table-responsive-container">
-          <table id="tablaVentas" class="table-admin">
-            <thead>
-              <tr>
-                <th style="text-align: center; font-size: 20px;">Factura #</th>
-                <!--            <th style="text-align: center; font-size: 20px;">Fecha</th>-->
-                <th style="text-align: center; font-size: 20px;">Cliente</th>
-                <th style="text-align: center; font-size: 20px;">Total</th>
-                <th style="text-align: center; font-size: 20px;">Det.</th>
-                <th style="text-align: center; font-size: 20px;">Estado</th>
-                <th style="text-align: center; font-size: 20px;">Opc.</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  <div class="admin-tabs">
+    <div class="admin-tab active" data-tab="categorias"><i class="fas fa-tags"></i> Categorías</div>
+    <div class="admin-tab" data-tab="marcas"><i class="fas fa-bookmark"></i> Marcas</div>
+    <div class="admin-tab" data-tab="proveedores"><i class="fas fa-truck-loading"></i> Proveedores</div>
+    <div class="admin-tab" data-tab="clientes"><i class="fas fa-users"></i> Clientes</div>
+    <div class="admin-tab" data-tab="productos"><i class="fas fa-box-open"></i> Productos</div>
+    <div class="admin-tab" data-tab="ventas"><i class="fas fa-history"></i> Historial de Ventas</div>
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p><strong>© 2024 JavicSoftCode
-        </strong> E-Commerce. Lunaire.</p>
-    </div>
-  </footer>
+  <div class="admin-panel">
 
-  <script type="module" src="../ui/ui.js"></script>
+    <div class="admin-section" id="adminCategorias">
+      <h3><i class="fas fa-tags"></i> Gestión de Categorías</h3>
+      <form id="formCategoria" class="needs-validation" novalidate>
+        <input type="hidden" id="categoriaId">
+        <div class="form-group">
+          <label for="categoriaNombre">Nombre de Categoría</label>
+          <input type="text" id="categoriaNombre" placeholder="Ej: Maquillaje, Cuidado Facial" required>
+          <div class="invalid-feedback">Por favor ingrese un nombre de categoría.</div>
+        </div>
+        <!-- Toggle para el estado -->
+        <div class="form-group hidden">
+          <label for="categoriaEstado">Estado</label>
+          <div class="toggle-container">
+            <input type="checkbox" id="categoriaEstado" class="toggle-input" checked>
+            <label for="categoriaEstado" class="toggle-label"></label>
+            <span id="estadoTexto">Activo</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetCategoriaForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Categoría</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaCategorias" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Det.</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Opc.</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal para mostrar la información de la categoría -->
+    <div id="categoriaModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalDetails" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre Cat.:</strong> <span id="modalNombre"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacion"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacion"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstado"
+                                                                      style="font-size: 30px;"></span></p>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="admin-section hidden" id="adminMarcas">
+      <h3><i class="fas fa-bookmark"></i> Gestión de Marcas</h3>
+      <form id="formMarca" class="needs-validation" novalidate>
+        <input type="hidden" id="marcaId">
+        <div class="form-group">
+          <label for="marcaNombre">Nombre de Marca</label>
+          <input type="text" id="marcaNombre" placeholder="Ej: L'Oréal, Maybelline" required>
+          <div class="invalid-feedback">Por favor ingrese un nombre de marca.</div>
+        </div>
+        <!-- Toggle para el estado -->
+        <div class="form-group hidden">
+          <label for="marcaEstado">Estado</label>
+          <div class="toggle-container">
+            <input type="checkbox" id="marcaEstado" class="toggle-input" checked>
+            <label for="marcaEstado" class="toggle-label"></label>
+            <span id="estadoMarcaTexto">Activo</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetMarcaForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Marca</button>
+        </div>
+      </form>
+
+      <div class="table-responsive-container">
+        <table id="tablaMarcas" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Det.</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Opc.</th>
+          </tr>
+          </thead>
+          <tbody id="tabla-marcas-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal para mostrar la información de la marca -->
+    <div id="marcaModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalMarDetails" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre Cat.:</strong> <span id="modalMarcaNombre"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalMarcaFechaCreacion"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalMarcaFechaActualizacion"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalMarcaEstado"
+                                                                      style="font-size: 30px;"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminProveedores">
+      <h3><i class="fas fa-truck-loading"></i> Gestión de Proveedores</h3>
+      <form id="formProveedor" class="needs-validation" novalidate>
+        <input type="hidden" id="proveedorId">
+        <div class="form-group">
+          <label for="proveedorNombre">Nombre</label>
+          <input type="text" id="proveedorNombre" placeholder="Nombre Completo o Razón Social" required>
+          <div class="invalid-feedback">Por favor ingrese el nombre del proveedor.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="proveedorTelefono">Teléfono</label>
+            <input type="tel" id="proveedorTelefono" placeholder="Teléfono de contacto" maxlength="16">
+          </div>
+          <div class="form-group">
+            <label for="proveedorDireccion">Dirección</label>
+            <input type="text" id="proveedorDireccion" placeholder="Dirección Completa">
+          </div>
+        </div>
+        <!-- Toggle para el estado -->
+        <div class="form-group hidden">
+          <label for="proveedorEstado">Estado</label>
+          <div class="toggle-container">
+            <input type="checkbox" id="proveedorEstado" class="toggle-input" checked>
+            <label for="proveedorEstado" class="toggle-label"></label>
+            <span id="estadoProveedorTexto">Activo</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetProveedorForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Proveedor</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaProveedores" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Telefono</th>
+            <!--  <th style="text-align: center; font-size: 20px;">Dirección</th>-->
+            <th style="text-align: center; font-size: 20px;">Det.</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Opc.</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal para mostrar la información del proveedor -->
+    <div id="proveedorModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalDetailsProveedor" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre:</strong> <span id="modalNombreProveedor"></span></p>
+          <p><strong>Teléfono:</strong> <span id="modalTelefonoProveedor"></span></p>
+          <p><strong>Dirección:</strong> <span id="modalDireccionProveedor"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacionProveedor"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacionProveedor"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstadoProveedor"
+                                                                      style="font-size: 30px;"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminClientes">
+      <h3><i class="fas fa-users"></i> Gestión de Clientes</h3>
+      <form id="formCliente" class="needs-validation" novalidate>
+        <input type="hidden" id="clienteId">
+        <div class="form-group">
+          <label for="clienteNombre">Nombres</label>
+          <input type="text" id="clienteNombre" placeholder="Nombre completo del cliente" required>
+          <div class="invalid-feedback">Por favor ingrese el nombre del cliente.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clienteTelefono">Teléfono</label>
+            <input type="tel" id="clienteTelefono" placeholder="Teléfono de contacto" required maxlength="16">
+            <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
+          </div>
+          <div class="form-group">
+            <label for="clienteDireccion">Dirección</label>
+            <input type="text" id="clienteDireccion" placeholder="Dirección completa de entrega" required>
+            <div class="invalid-feedback">Por favor ingrese la dirección.</div>
+          </div>
+        </div>
+        <!-- Toggle para el estado -->
+        <div class="form-group hidden">
+          <label for="clienteEstado">Estado</label>
+          <div class="toggle-container">
+            <input type="checkbox" id="clienteEstado" class="toggle-input" checked>
+            <label for="clienteEstado" class="toggle-label"></label>
+            <span id="estadoClienteTexto">Activo</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="resetClienteForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cliente</button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaClientes" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Nombre</th>
+            <th style="text-align: center; font-size: 20px;">Telefono</th>
+            <!-- <th style="text-align: center; font-size: 20px;">Dirección</th>-->
+            <th style="text-align: center; font-size: 20px;">Det.</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Opc.</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal para mostrar la información de la cliente -->
+    <div id="clienteModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalDetailsCliente" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre:</strong> <span id="modalNombreCliente"></span></p>
+          <p><strong>Teléfono:</strong> <span id="modalTelefonoCliente"></span></p>
+          <p><strong>Dirección:</strong> <span id="modalDireccionCliente"></span></p>
+          <p><strong>Comprando:</strong> <span id="modalContadorCliente"></span></p>
+          <p><strong>Fecha de Creación:</strong> <span id="modalFechaCreacionCliente"></span></p>
+          <p><strong>Fecha de Actualización:</strong> <span id="modalFechaActualizacionCliente"></span></p>
+          <p style="text-align: right"><strong>Estado:</strong> <span id="modalEstadoCliente"
+                                                                      style="font-size: 30px;"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminProductos">
+      <h3><i class="fas fa-box-open"></i> Gestión de Productos</h3>
+      <form id="formProducto" class="needs-validation" novalidate>
+        <input type="hidden" id="productoId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoNombre">Nombre del Producto</label>
+            <input type="text" id="productoNombre" placeholder="Nombre del Producto" required>
+            <div class="invalid-feedback">Ingrese el nombre del producto.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoStock">Stock</label>
+            <input type="number" id="productoStock" placeholder="Cantidad" min="0" required>
+            <div class="invalid-feedback">Ingrese el stock (0 o más).</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoPrecio">Costo</label>
+            <input type="number" id="productoPrecio" placeholder="Costo" step="0.01" min="0" required>
+            <div class="invalid-feedback">Ingrese costo del producto.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoPVP">Venta (PVP)</label>
+            <input type="number" id="productoPVP" placeholder="PVP" step="0.01" min="0" required>
+            <div class="invalid-feedback">Ingrese precio de venta.</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoCategoria">Categoría</label>
+            <select id="productoCategoria" required>
+              <option value="" disabled selected>Seleccione Categoría</option>
+            </select>
+            <div class="invalid-feedback">Seleccione una categoría.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoMarca">Marca</label>
+            <select id="productoMarca" required>
+              <option value="" disabled selected>Seleccione Marca</option>
+            </select>
+            <div class="invalid-feedback">Seleccione una marca.</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productoProveedor">Proveedor</label>
+            <select id="productoProveedor" required>
+              <option value="" disabled selected>Seleccione Proveedor</option>
+            </select>
+            <div class="invalid-feedback">Seleccione un proveedor.</div>
+          </div>
+          <div class="form-group">
+            <label for="productoImagen">URL de Imagen</label>
+            <input type="url" id="productoImagen" placeholder="https://ejemplo.com/imagen.jpg">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="productoDescripcion">Descripción</label>
+          <textarea id="productoDescripcion" placeholder="Descripción detallada del producto (opcional)"
+                    rows="4"></textarea>
+        </div>
+
+
+        <div class="form-group hidden">
+          <label for="productoEstado">Estado</label>
+          <div class="toggle-container">
+            <input type="checkbox" id="productoEstado" class="toggle-input" checked>
+            <label for="productoEstado" class="toggle-label"></label>
+            <span id="estadoProductoTexto">Activo</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="resetProductoForm" class="btn btn-secondary"><i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" id="guardar-producto-btn"><i class="fas fa-save"></i> Guardar
+            Producto
+          </button>
+        </div>
+      </form>
+      <div class="table-responsive-container">
+        <table id="tablaProductos" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Prod</th>
+            <th style="text-align: center; font-size: 20px;">Proveedor</th>
+            <th style="text-align: center; font-size: 20px;">Stock</th>
+            <th style="text-align: center; font-size: 20px;">Det.</th>
+            <th style="text-align: center; font-size: 20px;">Est</th>
+            <th style="text-align: center; font-size: 20px;">Acc</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <div id="productoModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalles</h3>
+          <button id="btnCloseModalProdDetails" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+          <!-- Sección superior con imagen y datos principales -->
+          <div class="modal-body-top" style="display: flex; gap: 3rem;">
+            <!-- Imagen del producto -->
+            <div class="modal-img" style="flex: 1;">
+              <span id="modalProdIMG"></span>
+              <!--          <img id="modalProdIMG" src="" alt="Imagen del producto" style="max-width: 100%; height: auto;">-->
+            </div>
+            <!-- Datos principales -->
+            <div class="modal-info" style="flex: 2;">
+              <h4 id="modalProdNombre">Nombre del Producto</h4>
+              <p><strong>Categoría:</strong> <span id="modalProdCatNombre"></span></p>
+              <p><strong>Marca:</strong> <span id="modalProdMarNombre"></span></p>
+              <p><strong>Proveedor:</strong> <span id="modalProdProvNombre"></span></p>
+              <p><strong>Costo:</strong> <span id="modalProdCosto"></span></p>
+              <p><strong>PVP:</strong> <span id="modalProdPVP"></span></p>
+              <p><strong>Cantidad:</strong> <span id="modalProdCant"></span></p>
+              <p><strong>Stock:</strong> <span id="modalProdStock"></span></p>
+            </div>
+          </div>
+
+          <!-- Sección inferior con información adicional -->
+          <div class="modal-body-bottom" style="margin-top: 20px;">
+            <div class="modal-details">
+              <p><strong>Descripción:</strong> <span id="modalProdDesc"></span></p>
+              <p><strong>Fecha de Creación:</strong> <span id="modalProdFechaCreacion"></span></p>
+              <p><strong>Fecha de Actualización:</strong> <span id="modalProdFechaActualizacion"></span></p>
+              <p style="text-align: right"><strong>Estado:</strong> <span id="modalProdEstado"
+                                                                          style="font-size: 30px;"></span></p>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section hidden" id="adminVentas">
+      <h3><i class="fas fa-history"></i> Historial de Ventas</h3>
+      <div class="search-bar">
+        <input type="text" id="searchInputFac" placeholder="Buscar Factura...">
+      </div>
+      <div class="table-responsive-container">
+        <table id="tablaVentas" class="table-admin">
+          <thead>
+          <tr>
+            <th style="text-align: center; font-size: 20px;">Factura #</th>
+            <!--            <th style="text-align: center; font-size: 20px;">Fecha</th>-->
+            <th style="text-align: center; font-size: 20px;">Cliente</th>
+            <th style="text-align: center; font-size: 20px;">Total</th>
+            <th style="text-align: center; font-size: 20px;">Det.</th>
+            <th style="text-align: center; font-size: 20px;">Estado</th>
+            <th style="text-align: center; font-size: 20px;">Opc.</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p><strong>© 2024 JavicSoftCode
+    </strong> E-Commerce. Lunaire.</p>
+  </div>
+</footer>
+
+<script type="module" src="../ui/ui.js"></script>
 </body>
 
 </html>

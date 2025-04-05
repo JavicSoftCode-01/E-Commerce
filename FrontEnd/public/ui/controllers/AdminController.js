@@ -1,13 +1,13 @@
 // FrontEnd/ui/controllers/AdminController.js
-import { app } from '../AppFactory.js';
-import { Categoria } from '../../../../BackEnd/src/models/Categoria.js';
-import { Marca } from '../../../../BackEnd/src/models/Marca.js';
-import { Proveedor } from '../../../../BackEnd/src/models/Proveedor.js';
-import { Cliente } from '../../../../BackEnd/src/models/Cliente.js';
-import { Producto } from '../../../../BackEnd/src/models/Producto.js';
-import { appService } from '../services/UшымтаService.js';
-import { InvoiceTemplate } from './InvoicePlantilla.js';
-import { Factura } from '../../../../BackEnd/src/models/Factura.js';
+import {app} from '../AppFactory.js';
+import {Categoria} from '../../../../BackEnd/src/models/Categoria.js';
+import {Marca} from '../../../../BackEnd/src/models/Marca.js';
+import {Proveedor} from '../../../../BackEnd/src/models/Proveedor.js';
+import {Cliente} from '../../../../BackEnd/src/models/Cliente.js';
+import {Producto} from '../../../../BackEnd/src/models/Producto.js';
+import {appService} from '../services/UшымтаService.js';
+import {InvoiceTemplate} from './InvoicePlantilla.js';
+import {Factura} from '../../../../BackEnd/src/models/Factura.js';
 
 class AdminController {
   constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService) {
@@ -547,7 +547,6 @@ class AdminController {
       alert("Error al cargar las marcas.");
     }
   }
-
 
 
   setupMarcaListeners() {
@@ -1499,7 +1498,7 @@ class AdminController {
 
 
     } catch (error) {     // Errores
-      //Feedback, si falla.
+                          //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }
@@ -1565,7 +1564,7 @@ class AdminController {
       document.body.classList.add('modal-open');
       requestAnimationFrame(() => invoiceModal.classList.add('show'));
 
-      document.getElementById('btnCloseInvoice').addEventListener('click', () => this.cerrarFactura(), { once: true });
+      document.getElementById('btnCloseInvoice').addEventListener('click', () => this.cerrarFactura(), {once: true});
     } catch (error) {
       console.error('Error al mostrar factura:', error);
       alert(`Error: ${error.message}`);
@@ -1607,7 +1606,7 @@ class AdminController {
             'denegado': 'Factura denegada: productos devueltos'
           }[nuevoEstado];
 
-          const resultado = await this.facturaService.actualizarFactura(factura.id, { estado: nuevoEstado });
+          const resultado = await this.facturaService.actualizarFactura(factura.id, {estado: nuevoEstado});
           if (resultado) {
             const estadoCell = document.querySelector(`.estado-celll[data-factura-id="${factura.id}"]`);
             if (estadoCell) {
@@ -1636,7 +1635,7 @@ class AdminController {
       document.body.classList.add('modal-open');
       requestAnimationFrame(() => modal.classList.add('show'));
 
-      document.getElementById('btnCloseModalDetailsHistorial').addEventListener('click', () => this.cerrarDetallesFactura(), { once: true });
+      document.getElementById('btnCloseModalDetailsHistorial').addEventListener('click', () => this.cerrarDetallesFactura(), {once: true});
     } catch (error) {
       console.error('Error al mostrar detalles:', error);
       alert(`Error: ${error.message}`);
@@ -1645,6 +1644,7 @@ class AdminController {
 
   setupVentasListeners() {
     const tabla = document.getElementById('tablaVentas');
+    const searchInput = document.getElementById('searchInputFac');
     if (!tabla) return;
 
     tabla.addEventListener('click', async (e) => {
@@ -1679,6 +1679,23 @@ class AdminController {
         }
       }
     });
+
+    searchInput.addEventListener('input', () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      const rows = tablaVentas.querySelectorAll('tbody tr');
+
+      rows.forEach(row => {
+        const facturaNumberCell = row.querySelector('td:first-child');
+        const facturaNumber = facturaNumberCell.textContent.toLowerCase();
+
+        if (facturaNumber.includes(searchTerm) || facturaNumber.endsWith(`-${searchTerm}`)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+
   }
 
   cerrarFactura() {
@@ -1702,4 +1719,4 @@ class AdminController {
 // Instancia única para toda la aplicación.
 const adminController = new AdminController(app.categoriaService, app.marcaService, app.proveedorService, app.clienteService, app.productoService, app.facturaService);
 
-export { adminController };
+export {adminController};

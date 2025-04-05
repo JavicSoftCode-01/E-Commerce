@@ -2,8 +2,6 @@ import {ExecuteManager} from "../utils/execute.js";
 
 class NotificationManager {
 
-  // >>> Métodos utilizados solo dentro de esta clase. <<<
-
   // Propiedad getter para obtener el contenedor de notificaciones
   get containerNot() {
     return ExecuteManager.execute(() => {
@@ -13,25 +11,8 @@ class NotificationManager {
     }, "Exitó! Al obtener el contenedor de notificaciones.", "Error! Al obtener el contenedor de notificaciones:");
   }
 
-  // Método de instancia para mostrar una notificación
-  showNotification(message, type = "success") {
-    return ExecuteManager.execute(() => {
-      const container = this.containerNot;
-      if (!container) throw new Error("Contenedor de notificaciones no existe.");
+  // >>> Métodos utilizados solo dentro de esta clase. <<<
 
-      const notification = document.createElement("div");
-      notification.className = `notification ${type}`;
-      notification.textContent = message;
-      container.append(notification);
-
-      setTimeout(() => {
-        notification.classList.add("fade-out");
-        notification.ontransitionend = () => notification.remove();
-      }, 5000);
-    }, "Exito! Al mostrar la notificación.", "Error! Al mostrar la notificación:");
-  }
-
-  // >>> Métodos estáticos utilizados en otros archivos. <<<
 
   /**
    * 🔰 Método para mostrar una notificación de éxito. 🔰
@@ -39,6 +20,8 @@ class NotificationManager {
   static success(message) {
     new NotificationManager().showNotification(message, "success");
   }
+
+  // >>> Métodos estáticos utilizados en otros archivos. <<<
 
   /**
    * 🔰 Método para mostrar una notificación de advertencia. 🔰
@@ -60,6 +43,24 @@ class NotificationManager {
   static info(message) {
     new NotificationManager().showNotification(message, "info");
   }
+
+  // Método de instancia para mostrar una notificación
+  showNotification(message, type = "success") {
+    return ExecuteManager.execute(() => {
+      const container = this.containerNot;
+      if (!container) throw new Error("Contenedor de notificaciones no existe.");
+
+      const notification = document.createElement("div");
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      container.append(notification);
+
+      setTimeout(() => {
+        notification.classList.add("fade-out");
+        notification.ontransitionend = () => notification.remove();
+      }, 5000);
+    }, "Exito! Al mostrar la notificación.", "Error! Al mostrar la notificación:");
+  }
 }
 
-export {NotificationManager};
+export {NotificationManager, lunaire};
