@@ -444,6 +444,7 @@ h3 {
 .btn-primary:hover {
     background-color: var(--secondary);
     border-color: var(--secondary);
+    color: var(--white);
 }
 
 .btn-secondary {
@@ -564,7 +565,7 @@ body.modal-open {
     /* Responsive width */
     max-width: 95%;
     /* Limit max width */
-    max-height: 90vh;
+    max-height: 80vh;
     /* Limit max height based on viewport height */
     display: flex;
     /* Use flex for internal structure */
@@ -1854,7 +1855,7 @@ footer strong {
     #cartModal .modal-content {
         width: 95%;
         /* Use more screen width */
-        max-height: 95vh;
+        max-height: 80vh;
         /* Allow slightly more height */
     }
 }
@@ -1918,7 +1919,7 @@ footer strong {
     /* Modal adjustments for small screens */
     .modal-content {
         width: 98%;
-        max-height: 98vh;
+        max-height: 90vh;
         /* Almost full screen */
         border-radius: 4px;
         /* Smaller radius */

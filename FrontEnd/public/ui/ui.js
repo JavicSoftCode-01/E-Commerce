@@ -67,6 +67,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   } catch (error) {
     console.error('Initialization error:', error);
-    alert('Error al inicializar la aplicación');
   }
 });

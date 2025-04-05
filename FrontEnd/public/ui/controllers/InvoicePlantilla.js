@@ -31,6 +31,11 @@ export class InvoiceTemplate {
     const fecha = new Date(factura.fecha || new Date());
     const numeroFactura = factura.numeroFactura || 'PREVIEW';
     const horaFormateada = this.formatearHora(fecha);
+    document.getElementById('WST').innerHTML = ` <a type="button" title="Chatear por WhatsApp" class="btn btn-primary no-print"
+    href="whatsapp://send?phone=593987848620&text=Buenos%20d%C3%ADas,%20Lunaire.%20Le%20informo%20que%20ya%20he%20realizado%20mi%20pedido%20del%20producto.%20Mi%20n%C3%BAmero%20de%20factura%20es%20${factura.numeroFactura}.%20Muchas%20gracias! 🛍️"
+    target="_blank">
+    Notificar Compra <i class="fa-brands fa-whatsapp fa-lg" style="font-size:2rem; color:white"></i>
+  </a> `;
 
     // Generar los detalles de la factura
     const detallesHTML = factura.detalles?.map(item => `
@@ -95,6 +100,7 @@ export class InvoiceTemplate {
               <div class="summary-item total-item"><span>Total:</span><span class="checkoutTotal">$${factura.total.toFixed(2)}</span></div>
             </div>
           </div>
+       
         </div>`;
   }
 }
