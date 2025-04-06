@@ -1,3 +1,4 @@
+// BackEnd/src/services/ProveedorService.js
 import { IndexedDB } from '../database/indexdDB.js';
 import { Validar } from '../utils/validar.js';
 import { Proveedor } from '../models/Proveedor.js';
@@ -11,7 +12,7 @@ import GoogleSheetReader from '../database/GoogleSheetReader.js';
  */
 class ProveedorService extends IndexedDB {
   static googleSheetSyncProveedor = new GoogleSheetSync('https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec');
-  static googleSheetReaderProveedor = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbyqMwleoQJW-ElR6MVHhgfSpt-P7wXP_TlDnBV9sjxvS8fJMrytgpB_vMKnx88Yhled/exec');
+  static googleSheetReaderProveedor = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbxEMaok6mE7Smn9R2DmvYtt5k_Uz48bTtHMlY5OSA0oX3Ebl2xlJx8Tln7cBaFC1Y1V/exec');
 
   constructor() {
     super('mydb', 'proveedores');
@@ -58,8 +59,8 @@ class ProveedorService extends IndexedDB {
    */
   async obtenerTodosLosProveedores() {
     try {
-      // Sincronizar si no hay datos recientes (cada 5 minutos)
-      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 5 * 60 * 1000) {
+      // Sincronizar si no hay datos recientes (cada 2 minutos)
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 2 * 60 * 1000) {
         await this.syncWithGoogleSheets();
       }
 

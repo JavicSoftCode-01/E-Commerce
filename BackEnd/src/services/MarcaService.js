@@ -1,3 +1,5 @@
+
+//BackEnd/src/services/MarcaService.js
 import { IndexedDB } from '../database/indexdDB.js';
 import { Validar } from '../utils/validar.js';
 import { Marca } from '../models/Marca.js';
@@ -56,8 +58,8 @@ class MarcaService extends IndexedDB {
    */
   async obtenerTodasLasMarcas() {
     try {
-      // Sincronizar si no hay datos recientes (cada 5 minutos)
-      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 5 * 60 * 1000) {
+      // Sincronizar si no hay datos recientes (cada 2 minutos)
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 2 * 60 * 1000) {
         await this.syncWithGoogleSheets();
       }
 
