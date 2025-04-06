@@ -778,10 +778,8 @@ async guardarMarca(e) {
                   <i class="fa fa-phone fa-lg"></i>
                 </a>
 
-                &nbsp;&nbsp;&nbsp; 
-
                 <!-- WhatsApp -->
-<a style="font-size: 25px;" title="Chatear por Whatsapp${proveedor.telefono}"
+<a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
    href="whatsapp://send?phone=${telefonoFormateado}&text=Hola muy buenas tardes, ${proveedor.nombre}, deseo realizar una compra del producto: ____ . Gracias!" 
    title="Chatear por WhatsApp">
   <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
@@ -1010,10 +1008,18 @@ async guardarMarca(e) {
   //---------------------------------------------------
   // Métodos CRUD para Clientes
   //---------------------------------------------------
-  formatearTelefono(telefono) {
-    // Elimina el "+" y todos los espacios
-    return telefono.replace(/\+/g, '').replace(/\s+/g, '');
-  }
+  // formatearTelefono(telefono) {
+  //   // Elimina el "+" y todos los espacios
+  //   return telefono.replace(/\+/g, '').replace(/\s+/g, '');
+  // }
+formatearTelefono(telefono) {
+  if (!telefono || typeof telefono !== 'string') return '';
+  return telefono
+    .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
+    .replace(/\+/g, '');    // Elimina el "+"
+}
+
+
 
   async cargarClientes() {
     try {

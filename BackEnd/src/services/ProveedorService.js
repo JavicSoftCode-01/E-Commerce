@@ -1,55 +1,142 @@
-// BackEnd/src/services/ProveedorService.js
-import {IndexedDB} from '../database/indexdDB.js';
-import {Validar} from '../utils/validar.js';
-import {Proveedor} from '../models/Proveedor.js';
-import {ProductoService} from './ProductoService.js';
+import { IndexedDB } from '../database/indexdDB.js';
+import { Validar } from '../utils/validar.js';
+import { Proveedor } from '../models/Proveedor.js';
+import { ProductoService } from './ProductoService.js';
 import GoogleSheetSync from '../database/syncGoogleSheet.js';
+import GoogleSheetReader from '../database/GoogleSheetReader.js';
 
 /**
  * 🔰 Servicio para la gestión de proveedores.
- * Extiende de IndexedDB para interactuar con la base de datos.
+ * Extiende de IndexedDB para interactuar con la base de datos y optimiza el rendimiento con caché local.
  */
 class ProveedorService extends IndexedDB {
-  static googleSheetSyncProveedor = new GoogleSheetSync(
-    'https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec'
-  );
+  static googleSheetSyncProveedor = new GoogleSheetSync('https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec');
+  static googleSheetReaderProveedor = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbyqMwleoQJW-ElR6MVHhgfSpt-P7wXP_TlDnBV9sjxvS8fJMrytgpB_vMKnx88Yhled/exec');
 
   constructor() {
     super('mydb', 'proveedores');
+    this.lastSyncTime = null; // Marca de tiempo de la última sincronización
   }
 
   /**
-   * Agrega un nuevo proveedor a la base de datos.
+   * Sincroniza los datos de proveedores desde Google Sheets a IndexedDB.
+   */
+  async syncWithGoogleSheets() {
+    try {
+      const proveedoresData = await ProveedorService.googleSheetReaderProveedor.getData('Proveedor');
+      const proveedoresInstancias = proveedoresData.map(pData => {
+        const instancia = new Proveedor(
+          pData.nombre,
+          pData.telefono,
+          pData.direccion,
+          pData.estado,
+          pData.fechaCreacion,
+          pData.fechaActualizacion
+        );
+        instancia.id = pData.id;
+        return instancia;
+      });
+
+      // Limpiar datos existentes en IndexedDB
+      await this.clearAll();
+
+      // Agregar nuevos datos a IndexedDB
+      for (const proveedor of proveedoresInstancias) {
+        await super.add(proveedor);
+      }
+
+      this.lastSyncTime = new Date();
+      console.info('Datos de proveedores sincronizados con Google Sheets y almacenados en IndexedDB.');
+    } catch (error) {
+      console.error('Error al sincronizar proveedores con Google Sheets:', error);
+    }
+  }
+
+  /**
+   * Obtiene todos los proveedores, usando caché en IndexedDB y sincronizando con Google Sheets si es necesario.
+   * @returns {Promise<Array<Proveedor>>} - Un array con todos los proveedores.
+   */
+  async obtenerTodosLosProveedores() {
+    try {
+      // Sincronizar si no hay datos recientes (cada 5 minutos)
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 5 * 60 * 1000) {
+        await this.syncWithGoogleSheets();
+      }
+
+      const proveedoresData = await super.getAll();
+      const proveedoresInstancias = proveedoresData.map(pData => {
+        const instancia = new Proveedor(
+          pData.nombre,
+          pData.telefono,
+          pData.direccion,
+          pData.estado,
+          pData.fechaCreacion,
+          pData.fechaActualizacion
+        );
+        instancia.id = pData.id;
+        return instancia;
+      });
+      return proveedoresInstancias;
+    } catch (error) {
+      console.error('Error al obtener proveedores:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Obtiene un proveedor por su ID desde IndexedDB.
+   * @param {number} id - ID del proveedor a obtener.
+   * @returns {Promise<Proveedor|null>} - El proveedor encontrado o null.
+   */
+  async obtenerProveedorPorId(id) {
+    try {
+      const proveedorData = await super.getById(id);
+      if (proveedorData) {
+        const instanciaProveedor = new Proveedor(
+          proveedorData.nombre,
+          proveedorData.telefono,
+          proveedorData.direccion,
+          proveedorData.estado,
+          proveedorData.fechaCreacion,
+          proveedorData.fechaActualizacion
+        );
+        instanciaProveedor.id = proveedorData.id;
+        return instanciaProveedor;
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error al obtener proveedor con ID ${id}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Agrega un nuevo proveedor a IndexedDB y sincroniza con Google Sheets.
    * @param {Proveedor} proveedor - Objeto proveedor a agregar.
-   * @returns {Promise<number|null>} - El ID del proveedor agregado o null si falla.
+   * @returns {Promise<Proveedor|null>} - El proveedor agregado o null si falla.
    */
   async agregarProveedor(proveedor) {
     try {
-      // 1. Validación
       const nombreValidado = Validar.nombreBP(proveedor.nombre);
       const direccionValidada = Validar.direccionBP(proveedor.direccion);
       const telefonoValidado = await Validar.telefonoBPT(proveedor.telefono, this);
       if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-        return null; // Los errores de validación se manejan en los métodos de Validar.
+        return null;
       }
 
-      // 2. Obtener el último ID y generar el siguiente
-      const lastId = await this.getAll()
-        .then(proveedores => {
-          if (proveedores.length === 0) return 0;
-          return Math.max(...proveedores.map(p => p.id));
-        });
+      const lastId = await this.getAll().then(proveedores => {
+        if (proveedores.length === 0) return 0;
+        return Math.max(...proveedores.map(p => p.id));
+      });
       const nextId = lastId + 1;
 
-      // 3. Crear instancia de Proveedor con ID
       const nuevoProveedor = new Proveedor(nombreValidado, telefonoValidado, direccionValidada);
-      nuevoProveedor.id = nextId; // Asignar el ID antes de guardar
+      nuevoProveedor.id = nextId;
 
-      // 4. Agregar a IndexedDB
       await super.add(nuevoProveedor);
+      await ProveedorService.googleSheetSyncProveedor.sync("create", nuevoProveedor);
       console.info(`Proveedor agregado con ID: ${nextId}`);
-      return nextId;
-
+      return nuevoProveedor;
     } catch (error) {
       console.error('Error al agregar proveedor:', error);
       return null;
@@ -57,40 +144,32 @@ class ProveedorService extends IndexedDB {
   }
 
   /**
-   * Actualiza un proveedor existente en la base de datos.
+   * Actualiza un proveedor existente en IndexedDB y sincroniza con Google Sheets si hay cambios.
    * @param {number} id - ID del proveedor a actualizar.
-   * @param {Proveedor} proveedorActualizado - Objeto proveedor con los datos actualizados.
-   * @returns {Promise<number|null>} - El ID del proveedor actualizado o null si falla.
+   * @param {object} datosActualizados - Objeto con los campos a actualizar.
+   * @returns {Promise<Proveedor|null>} - El proveedor actualizado o null si falla.
    */
-  async actualizarProveedor(id, proveedorActualizado) {
+  async actualizarProveedor(id, datosActualizados) {
     try {
-      // 1. Obtener la instancia actual del proveedor
       const proveedorExistente = await this.obtenerProveedorPorId(id);
-      if (!proveedorExistente) {
-        console.warn(`No se encontró proveedor con ID ${id}`);
-        return null;
-      }
+      if (!proveedorExistente) return null;
 
-      // 2. Validar cada campo solo si se proporcionó un nuevo valor,
-      //    y en caso contrario, usar el valor existente.
-      let nombreValidado = proveedorActualizado.nombre !== undefined
-        ? await Validar.nombreBP(proveedorActualizado.nombre)
+      let nombreValidado = datosActualizados.nombre !== undefined
+        ? Validar.nombreBP(datosActualizados.nombre)
         : proveedorExistente.nombre;
-      let direccionValidada = proveedorActualizado.direccion !== undefined
-        ? Validar.direccionBP(proveedorActualizado.direccion)
+      let direccionValidada = datosActualizados.direccion !== undefined
+        ? Validar.direccionBP(datosActualizados.direccion)
         : proveedorExistente.direccion;
-      let telefonoValidado = proveedorActualizado.telefono !== undefined
-        ? await Validar.telefonoBPT(proveedorActualizado.telefono, this, id)
+      let telefonoValidado = datosActualizados.telefono !== undefined
+        ? await Validar.telefonoBPT(datosActualizados.telefono, this, id)
         : proveedorExistente.telefono;
 
-      // Si se pasó un campo para actualizar y falla la validación, se retorna null.
-      if ((proveedorActualizado.nombre !== undefined && !nombreValidado) ||
-        (proveedorActualizado.direccion !== undefined && !direccionValidada) ||
-        (proveedorActualizado.telefono !== undefined && !telefonoValidado)) {
+      if ((datosActualizados.nombre !== undefined && !nombreValidado) ||
+        (datosActualizados.direccion !== undefined && !direccionValidada) ||
+        (datosActualizados.telefono !== undefined && !telefonoValidado)) {
         return null;
       }
 
-      // 3. Comparar si hubo cambios reales
       let huboCambios = false;
       if (proveedorExistente.nombre !== nombreValidado) {
         proveedorExistente.nombre = nombreValidado;
@@ -104,107 +183,64 @@ class ProveedorService extends IndexedDB {
         proveedorExistente.telefono = telefonoValidado;
         huboCambios = true;
       }
-
-      // Verificar cambios en el estado
-      if (proveedorActualizado.estado !== undefined && proveedorExistente.estado !== proveedorActualizado.estado) {
-        proveedorExistente.estado = proveedorActualizado.estado;
+      if (datosActualizados.estado !== undefined && proveedorExistente.estado !== datosActualizados.estado) {
+        proveedorExistente.estado = datosActualizados.estado;
         huboCambios = true;
       }
 
-      // 4. Si no hubo cambios, retornamos el ID sin actualizar
-      if (!huboCambios) {
-        console.info(`Proveedor con ID ${id} no tuvo cambios detectados.`);
-        return id;
+      if (huboCambios) {
+        proveedorExistente.prepareForUpdate();
+        await super.update(id, proveedorExistente);
+        await ProveedorService.googleSheetSyncProveedor.sync("update", proveedorExistente);
+        console.info(`Proveedor con ID ${id} actualizado correctamente.`);
+        return proveedorExistente;
       }
-
-      // 5. Si hubo cambios, actualizar el timestamp y guardar en la BD
-      proveedorExistente.prepareForUpdate();
-      await super.update(id, proveedorExistente);
-      console.info(`Proveedor con ID ${id} actualizado correctamente.`);
+      console.info(`Proveedor con ID ${id} no tuvo cambios detectados.`);
       return proveedorExistente;
     } catch (error) {
       console.error(`Error al actualizar proveedor con ID ${id}:`, error);
-      return proveedorExistente;
-    }
-  }
-
-
-  /**
-   * Obtiene todos los proveedores.
-   * @returns {Promise<Array<Proveedor>>} - Un array con todos los proveedores o un array vacío en caso de error.
-   */
-  async obtenerTodosLosProveedores() {
-    try {
-      const proveedores = await super.getAll();
-      // Convertir a instancias de Proveedor.
-      const proveedoresInstancias = proveedores.map(proveedor => {
-        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion, proveedor.estado, proveedor.fechaCreacion, proveedor.fechaActualizacion);
-        nuevoProveedor.id = proveedor.id
-        return nuevoProveedor
-      });
-      console.info('Proveedores obtenidos:', proveedoresInstancias);
-      return proveedoresInstancias; // Devuelve el array de instancias
-    } catch (error) {
-      console.error('Error al obtener todos los proveedores:', error);
-      return []; // Devuelve un array vacío
-    }
-  }
-
-  /**
-   * Obtiene un proveedor por su ID.
-   * @param {number} id - ID del proveedor a obtener.
-   * @returns {Promise<Proveedor|null>} - El proveedor encontrado o null si no se encuentra.
-   */
-  async obtenerProveedorPorId(id) {
-    try {
-      const proveedor = await super.getById(id);
-      if (proveedor) {
-        //Crear la instancia de proveedor
-        const nuevoProveedor = new Proveedor(proveedor.nombre, proveedor.telefono, proveedor.direccion, proveedor.estado, proveedor.fechaCreacion, proveedor.fechaActualizacion);
-        nuevoProveedor.id = proveedor.id;
-        console.info(`Proveedor con ID ${id} obtenido:`, nuevoProveedor);
-        return nuevoProveedor; // Retorna la instancia.
-      } else {
-        console.warn(`No se encontró ningún proveedor con ID ${id}.`);
-        return null;
-      }
-    } catch (error) {
-      console.error(`Error al obtener proveedor con ID ${id}:`, error);
       return null;
     }
   }
 
   /**
-   * Elimina un proveedor por su ID.
+   * Elimina un proveedor de IndexedDB y sincroniza con Google Sheets.
    * @param {number} id - ID del proveedor a eliminar.
-   * @returns {Promise<void|null>} - Devuelve void si se elimino con exito, o null en caso de error
+   * @returns {Promise<boolean|null>} - True si se elimina, false si hay dependencias, null si falla.
    */
   async eliminarProveedor(id) {
     try {
-      // Verificar dependencias con productos
       const productoService = new ProductoService(null, null, this);
       const dependencias = await productoService.verificarDependencias('proveedor', id);
-
       if (dependencias && dependencias.hasDependencies) {
         alert(`No se puede eliminar el proveedor porque está siendo utilizado por ${dependencias.count} producto(s).`);
-        console.warn(`Imposible eliminar: El proveedor con ID ${id} está siendo utilizado por ${dependencias.count} producto(s).`);
         return false;
       }
 
-      // Si no hay dependencias, proceder con la eliminación
       await super.delete(id);
-      // Sincronizar con Google Sheets
-      ProveedorService.googleSheetSyncProveedor.sync("delete", {id: id}); // << CAMBIO AQUÍ
-      alert(`Proveedor con ID ${id} eliminado correctamente.`);
+      await ProveedorService.googleSheetSyncProveedor.sync("delete", { id: id });
       console.info(`Proveedor con ID ${id} eliminado correctamente.`);
       return true;
-
     } catch (error) {
       console.error(`Error al eliminar proveedor con ID ${id}:`, error);
       return null;
     }
   }
 
+  /**
+   * Limpia todos los registros de proveedores en IndexedDB.
+   */
+  async clearAll() {
+    try {
+      const db = await this.dbPromise;
+      const transaction = db.transaction([this.storeName], 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      store.clear();
+      console.info('Todos los registros de proveedores en IndexedDB han sido eliminados.');
+    } catch (error) {
+      console.error('Error al limpiar IndexedDB para proveedores:', error);
+    }
+  }
 }
 
-export {ProveedorService};
+export { ProveedorService };
