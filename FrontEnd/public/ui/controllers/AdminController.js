@@ -62,7 +62,7 @@ class AdminController {
     });
     // this.btnResetMarcaForm = document.getElementById('resetMarcaForm')//ya no es necesario
 
-  // Elementos Proveedores con los IDs reales
+    // Elementos Proveedores con los IDs reales
     this.formProveedor = document.getElementById('formProveedor');
     this.proveedorIdInput = document.getElementById('proveedorId');
     this.proveedorNombreInput = document.getElementById('proveedorNombre');
@@ -80,9 +80,14 @@ class AdminController {
     this.proveedorService = new ProveedorService();
     // Iniciar la carga de proveedores
     this.cargarProveedores();
-     setInterval(() => {
-      this.refreshProviders();
-    }, 300);
+// En el constructor:
+    setInterval(async () => {
+      // Forzamos la sincronización sin mostrar el overlay completo
+      await this.proveedorService.forceSyncNow();
+      // Actualizamos la tabla sin usar el loader
+      this.cargarProveedores(false);
+    }, 30000);
+
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
     // Elementos Clientes
@@ -123,22 +128,22 @@ class AdminController {
     this.setupEventListeners();
   }
 
-    // Método para refrescar la tabla forzando la sincronización con Google Sheets
+  // Método para refrescar la tabla forzando la sincronización con Google Sheets
   async refreshProviders() {
     // Se fuerza la sincronización para obtener los datos actualizados
     await this.cargarProveedores(true);
   }
 
-    // Funciones para el Loader
+  // Funciones para el Loader
   showLoader() {
     requestAnimationFrame(() => {
-        document.getElementById('loaderOverlay').classList.remove('hidden');
+      document.getElementById('loaderOverlay').classList.remove('hidden');
     });
   }
 
   hideLoader() {
     requestAnimationFrame(() => {
-        document.getElementById('loaderOverlay').classList.add('hidden');
+      document.getElementById('loaderOverlay').classList.add('hidden');
     });
   }
 
@@ -788,138 +793,164 @@ class AdminController {
   // Cargar la tabla de Proveedores
   /**
    * Cargar la tabla de proveedores.
-   * @param {boolean} forceSync - Si es true, se fuerza la sincronización con Google Sheets.
+   * @param mostrarLoader
    */
-  async cargarProveedores(forceSync = false) {
-    try {
-      this.showLoader();
-      // Si se solicita forzar la sincronización, se llama al método forceSyncNow del servicio
-      if (forceSync) {
-        await this.proveedorService.forceSyncNow();
-      }
-      const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
-      this.tablaProveedores.innerHTML = ''; // Limpiar la tabla
+// Cargar la tabla de Proveedores
+async cargarProveedores(mostrarLoader = true) {
+  try {
+    if (mostrarLoader) this.showLoader();
+    // Si se requiere forzar la sincronización, se puede llamar previamente a forceSyncNow en el polling
+    const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
+    this.tablaProveedores.innerHTML = ""; // Limpiar la tabla
 
-      if (!Array.isArray(proveedores)) {
-        console.error("Error: proveedores no es un array.");
-        return;
-      }
+    if (!Array.isArray(proveedores)) {
+      console.error("Error: proveedores no es un array.");
+      return;
+    }
 
-      proveedores.forEach(proveedor => {
-        const tr = document.createElement('tr');
-        // Formatear el teléfono removiendo caracteres no numéricos
-        const telefonoFormateado = proveedor.telefono.replace(/[^0-9]/g, '');
-        tr.innerHTML = `
-          <td class="text-center">${proveedor.nombre}</td>
-          <td class="text-center">
-            <a href="tel:${telefonoFormateado}" title="Llamar ${telefonoFormateado}" style="font-size: 22px;">
-              <i class="fa fa-phone fa-lg"></i>
-            </a>
-            <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
-               href="whatsapp://send?phone=${telefonoFormateado}&text=Hola, ${proveedor.nombre}">
-              <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
-            </a>
-          </td>
-          <td class="text-center">
-              <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${proveedor.id}"></i>
-          </td>
-          <td class="text-center">
-            <div class="estado-cell">
-              <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
-              <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? 'checked' : ''}>
-              <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
-            </div>
-          </td>
-          <td class="text-center">
-            <div class="action-buttons">
-              <button class="action-button edit-button" data-id="${proveedor.id}">
-                <i class="fa-solid fa-pencil fa-lg"></i>
-              </button>
-              <button class="action-button delete-button" data-id="${proveedor.id}">
-                <i class="fa-solid fa-trash-can fa-lg"></i>
-              </button>
-            </div>
-          </td>
-        `;
+    proveedores.forEach((proveedor) => {
+      const tr = document.createElement("tr");
+      // Formatear el teléfono removiendo caracteres no numéricos
+      const telefonoFormateado = proveedor.telefono.replace(/[^0-9]/g, "");
+      tr.innerHTML = `
+        <td class="text-center">${proveedor.nombre}</td>
+        <td class="text-center">
+          <a href="tel:${telefonoFormateado}" title="Llamar ${telefonoFormateado}" style="font-size: 22px;">
+            <i class="fa fa-phone fa-lg"></i>
+          </a>
+          <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
+             href="whatsapp://send?phone=${telefonoFormateado}&text=Hola, ${proveedor.nombre}">
+            <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
+          </a>
+        </td>
+        <td class="text-center">
+          <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${proveedor.id}"></i>
+        </td>
+        <td class="text-center">
+          <div class="estado-cell">
+            <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
+            <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? "checked" : ""}>
+            <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
+          </div>
+        </td>
+        <td class="text-center">
+          <div class="action-buttons">
+            <button class="action-button edit-button" data-id="${proveedor.id}">
+              <i class="fa-solid fa-pencil fa-lg"></i>
+            </button>
+            <button class="action-button delete-button" data-id="${proveedor.id}">
+              <i class="fa-solid fa-trash-can fa-lg"></i>
+            </button>
+          </div>
+        </td>
+      `;
 
-        // Listener para abrir el modal de detalles
-        tr.querySelector('.btn-details').addEventListener('click', async (e) => {
-          const id = parseInt(e.currentTarget.dataset.id);
-          await this.openModalDetailsProveedor(id);
-        });
+      // Listener para abrir el modal de detalles
+      tr.querySelector(".btn-details").addEventListener("click", async (e) => {
+        const id = parseInt(e.currentTarget.dataset.id);
+        await this.openModalDetailsProveedor(id);
+      });
 
-        // Listener para editar proveedor (evita múltiples clics)
-        tr.querySelector('.edit-button').addEventListener('click', async (e) => {
-          const btn = e.currentTarget;
-          btn.disabled = true;
-          try {
-            const id = parseInt(btn.dataset.id);
-            const proveedor = await this.proveedorService.obtenerProveedorPorId(id);
-            if (proveedor) {
-              this.proveedorIdInput.value = proveedor.id;
-              this.proveedorNombreInput.value = proveedor.nombre;
-              this.proveedorDireccionInput.value = proveedor.direccion;
-              this.proveedorTelefonoInput.value = proveedor.telefono;
-              this.proveedorEstadoInput.checked = proveedor.estado;
-              this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
-              window.scrollTo(0, 0);
-            }
-          } finally {
-            btn.disabled = false;
+      // Listener para editar proveedor
+      tr.querySelector(".edit-button").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        try {
+          const id = parseInt(btn.dataset.id);
+          const proveedor = await this.proveedorService.obtenerProveedorPorId(id);
+          if (proveedor) {
+            this.proveedorIdInput.value = proveedor.id;
+            this.proveedorNombreInput.value = proveedor.nombre;
+            this.proveedorDireccionInput.value = proveedor.direccion;
+            this.proveedorTelefonoInput.value = proveedor.telefono;
+            this.proveedorEstadoInput.checked = proveedor.estado;
+            this.estadoProveedorTextoSpan.textContent = proveedor.estado ? "Activo" : "Inactivo";
+            window.scrollTo(0, 0);
           }
-        });
+        } finally {
+          btn.disabled = false;
+        }
+      });
 
-        // Listener para eliminar proveedor
-        tr.querySelector('.delete-button').addEventListener('click', async (e) => {
+      // Listener para eliminar proveedor
+      tr.querySelector(".delete-button").addEventListener("click", async (e) => {
+        const id = parseInt(e.currentTarget.dataset.id);
+        if (confirm("¿Está seguro de eliminar?")) {
+          this.showLoader();
+          const result = await this.proveedorService.eliminarProveedor(id);
+          if (result !== null) {
+            // Llamada sin bloquear (loader ya se muestra antes de la operación)
+            await this.cargarProveedores(mostrarLoader);
+          }
+          this.hideLoader();
+        }
+      });
+
+      // Listener para el cambio de estado en la tabla
+      const toggleEstado = tr.querySelector(".estado-toggleProveedor");
+      if (toggleEstado) {
+        toggleEstado.addEventListener("change", async (e) => {
           const id = parseInt(e.currentTarget.dataset.id);
-          if (confirm("¿Está seguro de eliminar?")) {
+          const nuevoEstado = e.currentTarget.checked;
+          try {
             this.showLoader();
-            const result = await this.proveedorService.eliminarProveedor(id);
-            if (result !== null) {
-              await this.cargarProveedores(forceSync); // Mantener la opción de forzar sincronización
+            const resultado = await this.proveedorService.actualizarProveedor(id, { estado: nuevoEstado });
+            if (resultado !== null) {
+              const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicatorProveedor");
+              if (tdEstado) {
+                tdEstado.innerHTML = nuevoEstado
+                  ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+                  : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+              }
             }
+          } catch (error) {
+            console.error("Error al actualizar estado:", error);
+            e.currentTarget.checked = !nuevoEstado;
+            alert("Error al actualizar el estado del proveedor.");
+          } finally {
             this.hideLoader();
           }
         });
+      }
 
-        // Listener para el cambio de estado en la tabla
-        const toggleEstado = tr.querySelector('.estado-toggleProveedor');
-        if (toggleEstado) {
-          toggleEstado.addEventListener('change', async (e) => {
-            const id = parseInt(e.currentTarget.dataset.id);
-            const nuevoEstado = e.currentTarget.checked;
-            try {
-              this.showLoader();
-              const resultado = await this.proveedorService.actualizarProveedor(id, { estado: nuevoEstado });
-              if (resultado !== null) {
-                const tdEstado = e.currentTarget.closest('td').querySelector('.estado-indicatorProveedor');
-                if (tdEstado) {
-                  tdEstado.innerHTML = nuevoEstado ?
-                    '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
-                    '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-                }
-              }
-            } catch (error) {
-              console.error('Error al actualizar estado:', error);
-              e.currentTarget.checked = !nuevoEstado;
-              alert("Error al actualizar el estado del proveedor.");
-            } finally {
-              this.hideLoader();
-            }
-          });
-        }
-
-        this.tablaProveedores.appendChild(tr);
-      });
-    } catch (error) {
-      console.error("Error al cargar los Proveedores:", error);
-      alert("Error al cargar los Proveedores.");
-    } finally {
-      this.hideLoader();
-    }
+      this.tablaProveedores.appendChild(tr);
+    });
+  } catch (error) {
+    console.error("Error al cargar los Proveedores:", error);
+    alert("Error al cargar los Proveedores.");
+  } finally {
+    if (mostrarLoader) this.hideLoader();
   }
+}
+
 
   // Función para abrir el modal con detalles del proveedor
+  // async openModalDetailsProveedor(proveedorId) {
+  //   try {
+  //     this.showLoader();
+  //     const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId);
+  //     if (!proveedor) {
+  //       console.error("No se encontró el proveedor");
+  //       return;
+  //     }
+  //     document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
+  //     document.getElementById('modalTelefonoProveedor').textContent = proveedor.telefono;
+  //     document.getElementById('modalDireccionProveedor').textContent = proveedor.direccion;
+  //     document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
+  //     document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
+  //     document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
+  //     const modalDetails = document.getElementById('proveedorModal');
+  //     modalDetails.classList.remove('hidden');
+  //     document.body.classList.add('modal-open');
+  //     requestAnimationFrame(() => {
+  //       modalDetails.classList.add('show');
+  //     });
+  //   } catch (error) {
+  //     console.error("Error abriendo el modal de detalles:", error);
+  //   } finally {
+  //     this.hideLoader();
+  //   }
+  // }
   async openModalDetailsProveedor(proveedorId) {
     try {
       this.showLoader();
