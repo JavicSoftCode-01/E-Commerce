@@ -958,7 +958,7 @@ async guardarMarca(e) {
         // Importante: resultado ahora contiene el objeto completo del proveedor actualizado (ver el return en actualizarProveedor)
         if (resultado) {
           // Pasamos el objeto completo al método sync
-          AdminController.googleSheetSyncProveedor.sync("update", resultado);
+          // AdminController.googleSheetSyncProveedor.sync("update", resultado);
           alert("Proveedor ACTUALIZADO"); //Feedback al usuario!
         }
       } else { // Si NO, ... CREAR
@@ -972,7 +972,7 @@ async guardarMarca(e) {
           // Obtenemos el proveedor completo para sincronizar
           const proveedorCompleto = await this.proveedorService.obtenerProveedorPorId(proveedorId);
           // Pasamos el objeto completo al método sync
-          AdminController.googleSheetSyncProveedor.sync("create", proveedorCompleto);
+          // AdminController.googleSheetSyncProveedor.sync("create", proveedorCompleto);
 
           resultado = proveedorId; // Mantenemos resultado para el código siguiente
           alert(`EXITO Agregando Proveedor, ID ${proveedorId}`);

@@ -12,19 +12,42 @@ import GoogleSheetReader from '../database/GoogleSheetReader.js';
  */
 class ProveedorService extends IndexedDB {
   static googleSheetSyncProveedor = new GoogleSheetSync('https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec');
-  static googleSheetReaderProveedor = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbxEMaok6mE7Smn9R2DmvYtt5k_Uz48bTtHMlY5OSA0oX3Ebl2xlJx8Tln7cBaFC1Y1V/exec');
+  static googleSheetReaderProveedor = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbxJ3QMI3GgkmLmYGYIu_JuRqKKU0J5Er5Bzq6UXR9osUGnnkj0JZEVBLO2eJSteZQWg/exec');
+
+  // Intervalo de sincronización en milisegundos (reducido de 2 minutos a 30 segundos)
+  static SYNC_INTERVAL = 30 * 1000;
 
   constructor() {
     super('mydb', 'proveedores');
     this.lastSyncTime = null; // Marca de tiempo de la última sincronización
+
+    // Iniciar sincronización periódica
+    this.startPeriodicSync();
+  }
+
+  /**
+   * Inicia la sincronización periódica con Google Sheets
+   */
+  startPeriodicSync() {
+    // Sincronización inicial al instanciar el servicio
+    this.syncWithGoogleSheets();
+
+    // Configurar sincronización periódica cada 30 segundos
+    setInterval(() => {
+      this.syncWithGoogleSheets();
+    }, ProveedorService.SYNC_INTERVAL);
   }
 
   /**
    * Sincroniza los datos de proveedores desde Google Sheets a IndexedDB.
+   * @returns {Promise<boolean>} - True si la sincronización fue exitosa
    */
   async syncWithGoogleSheets() {
     try {
+      console.log('Iniciando sincronización de proveedores con Google Sheets...');
       const proveedoresData = await ProveedorService.googleSheetReaderProveedor.getData('Proveedor');
+      console.log(`Recibidos ${proveedoresData.length} registros de proveedores desde Google Sheets`);
+
       const proveedoresInstancias = proveedoresData.map(pData => {
         const instancia = new Proveedor(
           pData.nombre,
@@ -40,6 +63,7 @@ class ProveedorService extends IndexedDB {
 
       // Limpiar datos existentes en IndexedDB
       await this.clearAll();
+      console.log('Base de datos local limpiada exitosamente');
 
       // Agregar nuevos datos a IndexedDB
       for (const proveedor of proveedoresInstancias) {
@@ -47,10 +71,20 @@ class ProveedorService extends IndexedDB {
       }
 
       this.lastSyncTime = new Date();
-      console.info('Datos de proveedores sincronizados con Google Sheets y almacenados en IndexedDB.');
+      console.info(`Datos de proveedores sincronizados con Google Sheets. Total: ${proveedoresInstancias.length} registros. Hora: ${this.lastSyncTime}`);
+      return true;
     } catch (error) {
-      console.error('Error al sincronizar proveedores con Google Sheets:', error);
+      console.error('Error detallado al sincronizar proveedores con Google Sheets:', error);
+      return false;
     }
+  }
+
+  /**
+   * Fuerza una sincronización inmediata con Google Sheets
+   */
+  async forceSyncNow() {
+    this.lastSyncTime = null;
+    return await this.syncWithGoogleSheets();
   }
 
   /**
@@ -59,8 +93,8 @@ class ProveedorService extends IndexedDB {
    */
   async obtenerTodosLosProveedores() {
     try {
-      // Sincronizar si no hay datos recientes (cada 2 minutos)
-      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 2 * 60 * 1000) {
+      // Sincronizar si no hay datos recientes según el intervalo configurado
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > ProveedorService.SYNC_INTERVAL) {
         await this.syncWithGoogleSheets();
       }
 
@@ -91,6 +125,11 @@ class ProveedorService extends IndexedDB {
    */
   async obtenerProveedorPorId(id) {
     try {
+      // Forzar sincronización antes de obtener por ID para garantizar datos actualizados
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > ProveedorService.SYNC_INTERVAL) {
+        await this.syncWithGoogleSheets();
+      }
+
       const proveedorData = await super.getById(id);
       if (proveedorData) {
         const instanciaProveedor = new Proveedor(
@@ -118,6 +157,9 @@ class ProveedorService extends IndexedDB {
    */
   async agregarProveedor(proveedor) {
     try {
+      // Forzar sincronización antes de añadir para evitar conflictos de ID
+      await this.forceSyncNow();
+
       const nombreValidado = Validar.nombreBP(proveedor.nombre);
       const direccionValidada = Validar.direccionBP(proveedor.direccion);
       const telefonoValidado = await Validar.telefonoBPT(proveedor.telefono, this);
@@ -135,11 +177,17 @@ class ProveedorService extends IndexedDB {
       nuevoProveedor.id = nextId;
 
       await super.add(nuevoProveedor);
+      console.log(`Proveedor creado localmente con ID: ${nextId}. Sincronizando con Google Sheets...`);
+
       await ProveedorService.googleSheetSyncProveedor.sync("create", nuevoProveedor);
-      console.info(`Proveedor agregado con ID: ${nextId}`);
+      console.info(`Proveedor agregado con ID: ${nextId} y sincronizado con Google Sheets.`);
+
+      // Forzar sincronización después de la operación para actualizar datos en todos los dispositivos
+      await this.forceSyncNow();
+
       return nuevoProveedor;
     } catch (error) {
-      console.error('Error al agregar proveedor:', error);
+      console.error('Error detallado al agregar proveedor:', error);
       return null;
     }
   }
@@ -152,6 +200,9 @@ class ProveedorService extends IndexedDB {
    */
   async actualizarProveedor(id, datosActualizados) {
     try {
+      // Forzar sincronización antes de actualizar
+      await this.forceSyncNow();
+
       const proveedorExistente = await this.obtenerProveedorPorId(id);
       if (!proveedorExistente) return null;
 
@@ -192,14 +243,20 @@ class ProveedorService extends IndexedDB {
       if (huboCambios) {
         proveedorExistente.prepareForUpdate();
         await super.update(id, proveedorExistente);
+        console.log(`Proveedor con ID ${id} actualizado localmente. Sincronizando con Google Sheets...`);
+
         await ProveedorService.googleSheetSyncProveedor.sync("update", proveedorExistente);
-        console.info(`Proveedor con ID ${id} actualizado correctamente.`);
+        console.info(`Proveedor con ID ${id} actualizado correctamente y sincronizado con Google Sheets.`);
+
+        // Forzar sincronización después de la operación
+        await this.forceSyncNow();
+
         return proveedorExistente;
       }
       console.info(`Proveedor con ID ${id} no tuvo cambios detectados.`);
       return proveedorExistente;
     } catch (error) {
-      console.error(`Error al actualizar proveedor con ID ${id}:`, error);
+      console.error(`Error detallado al actualizar proveedor con ID ${id}:`, error);
       return null;
     }
   }
@@ -211,6 +268,9 @@ class ProveedorService extends IndexedDB {
    */
   async eliminarProveedor(id) {
     try {
+      // Forzar sincronización antes de eliminar
+      await this.forceSyncNow();
+
       const productoService = new ProductoService(null, null, this);
       const dependencias = await productoService.verificarDependencias('proveedor', id);
       if (dependencias && dependencias.hasDependencies) {
@@ -219,11 +279,17 @@ class ProveedorService extends IndexedDB {
       }
 
       await super.delete(id);
+      console.log(`Proveedor con ID ${id} eliminado localmente. Sincronizando con Google Sheets...`);
+
       await ProveedorService.googleSheetSyncProveedor.sync("delete", { id: id });
-      console.info(`Proveedor con ID ${id} eliminado correctamente.`);
+      console.info(`Proveedor con ID ${id} eliminado correctamente y sincronizado con Google Sheets.`);
+
+      // Forzar sincronización después de la operación
+      await this.forceSyncNow();
+
       return true;
     } catch (error) {
-      console.error(`Error al eliminar proveedor con ID ${id}:`, error);
+      console.error(`Error detallado al eliminar proveedor con ID ${id}:`, error);
       return null;
     }
   }
