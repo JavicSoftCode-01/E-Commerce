@@ -82,6 +82,12 @@ class AdminController {
     this.proveedorEstadoInput.addEventListener('change', () => {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
+    // Configurar el listener para el formulario de proveedor
+    this.setupFormListener();
+
+    // Iniciar la carga de proveedores
+    this.cargarProveedores();
+
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
     // Elementos Clientes
@@ -257,6 +263,7 @@ class AdminController {
       alert("Error al cargar las categorías.");
     }
   }
+
   // async cargarCategorias() {
   //   try {
   //     const categorias = await this.categoriaService.obtenerTodasLasCategorias();
@@ -498,71 +505,71 @@ class AdminController {
   //---------------------------------------------------
 
 // In AdminController.js - Fix guardarMarca method
-async guardarMarca(e) {
-  e.preventDefault();
-  const marcaId = this.marcaIdInput.value;
-  const nombre = this.marcaNombreInput.value.trim();
-  const estado = this.marcaEstadoInput.checked;
+  async guardarMarca(e) {
+    e.preventDefault();
+    const marcaId = this.marcaIdInput.value;
+    const nombre = this.marcaNombreInput.value.trim();
+    const estado = this.marcaEstadoInput.checked;
 
-  if (!nombre) {
-    alert("El nombre de la marca es obligatorio.");
-    return;
-  }
-
-  let resultado;
-  try {
-    if (marcaId) {
-      // --- ACTUALIZACIÓN ---
-      console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
-      const datosParaActualizar = {
-        nombre: nombre,
-        estado: estado
-      };
-
-      resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
-
-      if (resultado !== null) {
-        // Obtener la marca actualizada para asegurar sincronización
-        const marcaActualizada = await this.marcaService.obtenerMarcaPorId(parseInt(marcaId));
-        // Descomentar si necesitas sincronizar con Google Sheets:
-        // AdminController.googleSheetSyncMarca.sync("update", marcaActualizada);
-
-        alert("Marca guardada/actualizada exitosamente.");
-        this.resetFormMarca();
-        await this.cargarMarcas(); // Recarga las marcas en la UI
-        await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
-        await appService.refreshCache(); // Refresca el caché para la UI
-      } else {
-        alert("Error al actualizar la marca. Revisa la consola.");
-      }
-
-    } else {
-      // --- CREACIÓN ---
-      console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
-      const nuevaMarca = new Marca(nombre, estado);
-      resultado = await this.marcaService.agregarMarca(nuevaMarca);
-
-      if (resultado !== null) {
-        // Obtener la marca creada para sincronización
-        const marcaCreada = await this.marcaService.obtenerMarcaPorId(resultado);
-        // Descomentar si necesitas sincronizar con Google Sheets:
-        // AdminController.googleSheetSyncMarca.sync("create", marcaCreada);
-
-        alert(`Marca agregada exitosamente con ID: ${resultado}`);
-        this.resetFormMarca();
-        await this.cargarMarcas(); // Recarga las marcas en la UI
-        await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
-        await appService.refreshCache(); // Refresca el caché para la UI
-      } else {
-        alert("Error al agregar la marca. Revisa la consola.");
-      }
+    if (!nombre) {
+      alert("El nombre de la marca es obligatorio.");
+      return;
     }
 
-  } catch (error) {
-    console.error("Error en guardarMarca:", error);
-    alert("Ocurrió un error inesperado al guardar la marca. Revisa la consola.");
+    let resultado;
+    try {
+      if (marcaId) {
+        // --- ACTUALIZACIÓN ---
+        console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
+        const datosParaActualizar = {
+          nombre: nombre,
+          estado: estado
+        };
+
+        resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
+
+        if (resultado !== null) {
+          // Obtener la marca actualizada para asegurar sincronización
+          const marcaActualizada = await this.marcaService.obtenerMarcaPorId(parseInt(marcaId));
+          // Descomentar si necesitas sincronizar con Google Sheets:
+          // AdminController.googleSheetSyncMarca.sync("update", marcaActualizada);
+
+          alert("Marca guardada/actualizada exitosamente.");
+          this.resetFormMarca();
+          await this.cargarMarcas(); // Recarga las marcas en la UI
+          await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
+          await appService.refreshCache(); // Refresca el caché para la UI
+        } else {
+          alert("Error al actualizar la marca. Revisa la consola.");
+        }
+
+      } else {
+        // --- CREACIÓN ---
+        console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
+        const nuevaMarca = new Marca(nombre, estado);
+        resultado = await this.marcaService.agregarMarca(nuevaMarca);
+
+        if (resultado !== null) {
+          // Obtener la marca creada para sincronización
+          const marcaCreada = await this.marcaService.obtenerMarcaPorId(resultado);
+          // Descomentar si necesitas sincronizar con Google Sheets:
+          // AdminController.googleSheetSyncMarca.sync("create", marcaCreada);
+
+          alert(`Marca agregada exitosamente con ID: ${resultado}`);
+          this.resetFormMarca();
+          await this.cargarMarcas(); // Recarga las marcas en la UI
+          await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
+          await appService.refreshCache(); // Refresca el caché para la UI
+        } else {
+          alert("Error al agregar la marca. Revisa la consola.");
+        }
+      }
+
+    } catch (error) {
+      console.error("Error en guardarMarca:", error);
+      alert("Ocurrió un error inesperado al guardar la marca. Revisa la consola.");
+    }
   }
-}
 
   // --- Asegúrate de tener el método resetFormMarca ---
   resetFormMarca() {
@@ -757,94 +764,168 @@ async guardarMarca(e) {
   //---------------------------------------------------
   // Métodos CRUD para Proveedores
   //---------------------------------------------------
-  async cargarProveedores() {
-    try {
-      const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
-      this.tablaProveedores.innerHTML = ''; // Limpiar
 
-      if (!Array.isArray(proveedores)) {
-        console.error("Error: proveedores is not an array.");
-        return;
-      }
-      proveedores.forEach(proveedor => {
-        const tr = document.createElement('tr');   // row
-        const telefonoFormateado = this.formatearTelefono(proveedor.telefono); // Formatear el teléfono
-        tr.innerHTML = `
-               <td class="text-center">${proveedor.nombre}</td>
-
-              <td class="text-center">
-                <!-- Llamada telefónica -->
-                <a href="tel:${proveedor.telefono}" title="LLamar vía telefónica ${proveedor.telefono}" style="font-size: 22px;">
-                  <i class="fa fa-phone fa-lg"></i>
-                </a>
-
-                <!-- WhatsApp -->
-<a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
-   href="whatsapp://send?phone=${telefonoFormateado}&text=Hola muy buenas tardes, ${proveedor.nombre}, deseo realizar una compra del producto: ____ . Gracias!" 
-   title="Chatear por WhatsApp">
-  <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
-</a>
-
-              </td>
-
-             <!--   <td class="text-center">${proveedor.direccion}</td>-->
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProveedor" data-id="${proveedor.id}"></i></td>
-                
-                 <td class="text-center">
-                    <div class="estado-cell">
-                      <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
-                      <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? 'checked' : ''}>
-                      <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
-                    </div>
-                  </td>
-               
-              <td class="text-center">
-                <div class="action-buttons">
-                 <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${proveedor.id}"></i></button>
-                 <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${proveedor.id}"></i></button>
-                </div>
-              </td>
-          `;
-        const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProveedor');
-        if (btnOpenModal) {
-          btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsProveedor(proveedor.id); // Pasar ID de la proveedor seleccionada
-          });
-        }
-        this.tablaProveedores.appendChild(tr);  // Append, al tbody!
-      });
-
-      // Configurar listeners para los botones de editar y eliminar
-      this.setupProveedorListeners();
-
-    } catch (error) {
-      console.error("Error al cargar los Proveedores:", error);
-      alert("Error al cargar los Proveedores."); // Mejor feedback al usuario
-    }
-  }
-
-  async openModalDetailsProveedor(proveedorId) {
-    const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // Obtener solo la proveedor seleccionada
-    const modalDetails = document.getElementById('proveedorModal');
-    if (!proveedor) {
-      console.error("No se encontró el proveedor");
-      return;
-    }
-    // Llenar el modal con la información correcta
-    document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
-    document.getElementById('modalTelefonoProveedor').textContent = proveedor.telefono;
-    document.getElementById('modalDireccionProveedor').textContent = proveedor.direccion;
-    document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
-    document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
-    document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
-    // Mostrar el modal
-    modalDetails.classList.remove('hidden');
-    document.body.classList.add('modal-open');
+  // adminController.js
+  // Funciones para el Loader
+  showLoader() {
     requestAnimationFrame(() => {
-      modalDetails.classList.add('show');
+        document.getElementById('loaderOverlay').classList.remove('hidden');
     });
   }
 
+  hideLoader() {
+    requestAnimationFrame(() => {
+        document.getElementById('loaderOverlay').classList.add('hidden');
+    });
+  }
+
+  setupFormListener() {
+    this.formProveedor.addEventListener('submit', (e) => this.guardarProveedor(e));
+  }
+
+  // Cargar la tabla de Proveedores
+  async cargarProveedores() {
+    try {
+      this.showLoader();
+      const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
+      this.tablaProveedores.innerHTML = ''; // Limpiar la tabla
+
+      if (!Array.isArray(proveedores)) {
+        console.error("Error: proveedores no es un array.");
+        return;
+      }
+
+      proveedores.forEach(proveedor => {
+        const tr = document.createElement('tr');
+        // Formatear el teléfono removiendo caracteres no numéricos
+        const telefonoFormateado = proveedor.telefono.replace(/[^0-9]/g, '');
+        tr.innerHTML = `
+          <td class="text-center">${proveedor.nombre}</td>
+          <td class="text-center">
+            <a href="tel:${proveedor.telefono}" title="Llamar ${proveedor.telefono}" style="font-size: 22px;">
+              <i class="fa fa-phone fa-lg"></i>
+            </a>
+            <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
+               href="whatsapp://send?phone=${telefonoFormateado}&text=Hola, ${proveedor.nombre}">
+              <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
+            </a>
+          </td>
+          <td class="text-center">
+            <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" 
+              data-id="${proveedor.id}" onclick="adminController.openModalDetailsProveedor(${proveedor.id})"></i>
+          </td>
+          <td class="text-center">
+            <div class="estado-cell">
+              <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
+              <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? 'checked' : ''}>
+              <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
+            </div>
+          </td>
+          <td class="text-center">
+            <div class="action-buttons">
+              <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}">
+                <i class="fa-solid fa-pencil fa-lg"></i>
+              </button>
+              <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}">
+                <i class="fa-solid fa-trash-can fa-lg"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        // Listener para editar proveedor
+        tr.querySelector('.edit-proveedor').addEventListener('click', async (e) => {
+          const proveedorId = parseInt(e.target.dataset.id);
+          const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId);
+          if (proveedor) {
+            this.proveedorIdInput.value = proveedor.id;
+            this.proveedorNombreInput.value = proveedor.nombre;
+            this.proveedorDireccionInput.value = proveedor.direccion;
+            this.proveedorTelefonoInput.value = proveedor.telefono;
+            this.proveedorEstadoInput.checked = proveedor.estado;
+            this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
+            window.scrollTo(0, 0);
+          }
+        });
+
+        // Listener para eliminar proveedor
+        tr.querySelector('.delete-proveedor').addEventListener('click', async (e) => {
+          const proveedorId = parseInt(e.target.dataset.id);
+          if (confirm("¿Está seguro de eliminar?")) {
+            this.showLoader();
+            const result = await this.proveedorService.eliminarProveedor(proveedorId);
+            if (result !== null) {
+              await this.cargarProveedores();
+            }
+            this.hideLoader();
+          }
+        });
+
+        // Listener para el cambio de estado en la tabla
+        const toggleEstado = tr.querySelector('.estado-toggleProveedor');
+        if (toggleEstado) {
+          toggleEstado.addEventListener('change', async (e) => {
+            const proveedorId = parseInt(e.target.dataset.id);
+            const nuevoEstado = e.target.checked;
+            try {
+              this.showLoader();
+              const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {estado: nuevoEstado});
+              if (resultado !== null) {
+                const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProveedor');
+                if (tdEstado) {
+                  tdEstado.innerHTML = nuevoEstado ?
+                    '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
+                    '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+                }
+              }
+            } catch (error) {
+              console.error('Error al actualizar estado:', error);
+              e.target.checked = !nuevoEstado;
+              alert("Error al actualizar el estado del proveedor.");
+            } finally {
+              this.hideLoader();
+            }
+          });
+        }
+        this.tablaProveedores.appendChild(tr);
+      });
+    } catch (error) {
+      console.error("Error al cargar los Proveedores:", error);
+      alert("Error al cargar los Proveedores.");
+    } finally {
+      this.hideLoader();
+    }
+  }
+
+  // Función para abrir el modal con detalles del proveedor
+  async openModalDetailsProveedor(proveedorId) {
+    try {
+      this.showLoader();
+      const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId);
+      if (!proveedor) {
+        console.error("No se encontró el proveedor");
+        return;
+      }
+      document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
+      document.getElementById('modalTelefonoProveedor').textContent = proveedor.telefono;
+      document.getElementById('modalDireccionProveedor').textContent = proveedor.direccion;
+      document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
+      document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
+      document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
+      const modalDetails = document.getElementById('proveedorModal');
+      modalDetails.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      requestAnimationFrame(() => {
+        modalDetails.classList.add('show');
+      });
+    } catch (error) {
+      console.error("Error abriendo el modal de detalles:", error);
+    } finally {
+      this.hideLoader();
+    }
+  }
+
+  // Cerrar modal de detalles
   closeModalDetailsProveedor() {
     const modalDetails = document.getElementById('proveedorModal');
     modalDetails.classList.remove('show');
@@ -854,156 +935,313 @@ async guardarMarca(e) {
     }, 300);
   }
 
-  setupProveedorListeners() {
-    // Editar
-    this.tablaProveedores.querySelectorAll('.edit-proveedor').forEach(button => {
-      button.addEventListener('click', async (e) => { // Pone Evento click
-
-        const proveedorId = parseInt(e.target.dataset.id);        // Obtiene
-
-        const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // proveedor por ID
-
-        if (proveedor) { // proveedor existe!
-          // Cargar  form
-          this.proveedorIdInput.value = proveedor.id;   // carga de datos
-          this.proveedorNombreInput.value = proveedor.nombre;//
-          this.proveedorDireccionInput.value = proveedor.direccion;
-          this.proveedorTelefonoInput.value = proveedor.telefono;
-          // Establecer el estado del toggle en el formulario
-          this.proveedorEstadoInput.checked = proveedor.estado;
-          this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
-          window.scrollTo(0, 0);
-        }
-      });
-    });
-    // Eliminar Proveedor
-    this.tablaProveedores.querySelectorAll('.delete-proveedor').forEach(button => { // forEach para el boton eliminar
-      button.addEventListener('click', async (e) => {               //
-        const proveedorId = parseInt(e.target.dataset.id);     //
-        // --- CONFIRMACION ---
-        if (confirm("Esta seguro de eliminar?")) { //
-
-          //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-          const result = await this.proveedorService.eliminarProveedor(proveedorId);  //
-          //Actualiza
-          if (result !== null) {
-            await this.cargarProveedores();      // Vuelve a cargar proveedores
-            // Para actualizar select de Productos.
-            await this.cargarOpcionesProductoForm(); //   productos
-
-          }
-        }
-      });
-    });
-    // Nuevo: Toggle para cambiar estado en la tabla
-    this.tablaProveedores.querySelectorAll('.estado-toggleProveedor').forEach(toggle => {
-      toggle.addEventListener('change', async (e) => {
-        const proveedorId = parseInt(e.target.dataset.id);
-        const nuevoEstado = e.target.checked;
-
-        try {
-          const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {
-            estado: nuevoEstado
-          });
-          AdminController.googleSheetSyncProveedor.sync("update", resultado);
-
-
-          if (resultado !== null) {
-            // Actualizar la vista sin recargar toda la tabla
-            const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProveedor');
-            if (tdEstado) {
-              tdEstado.innerHTML = nuevoEstado ?
-                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
-                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-            }
-          }
-        } catch (error) {
-          console.error('Error al actualizar estado:', error);
-          // Revertir cambio en UI en caso de error
-          e.target.checked = !nuevoEstado;
-          alert("Error al actualizar el estado del proveedor.");
-        }
-      });
-    });
-  }
-
-  // Enviar Formulario Proveedor:  CREATE y UPDATE:
-// In AdminController.js - Fix guardarProveedor method
-  async guardarProveedor(e) { // METODO, RECIBE EL EVENTO
-    e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
-    const proveedorId = this.proveedorIdInput.value;       //Desde elemento del DOM! -> HTML
-    const nombre = this.proveedorNombreInput.value;       // Valor en la caja texto
+  // Guardar (crear o actualizar) un proveedor
+  async guardarProveedor(e) {
+    e.preventDefault();
+    const proveedorId = this.proveedorIdInput.value;
+    const nombre = this.proveedorNombreInput.value;
     const direccion = this.proveedorDireccionInput.value;
     const telefono = this.proveedorTelefonoInput.value;
-    const estado = this.proveedorEstadoInput.checked; // Obtener el estado del checkbox
-
+    const estado = this.proveedorEstadoInput.checked;
     if (!nombre || !direccion) {
       alert("Campos obligatorios");
-      return;  // Salida temprana
+      return;
     }
-
-    let resultado;
     try {
-      if (proveedorId) {  // Si ya hay id, es para:  *ACTUALIZACION*:
-        const proveedorExistente = await this.proveedorService.obtenerProveedorPorId(parseInt(proveedorId)); //Buscar
-        //Cambiar nombre, segun  *NUEVO* VALOR:
+      this.showLoader();
+      let resultado;
+      if (proveedorId) {
+        // Actualización
+        const proveedorExistente = await this.proveedorService.obtenerProveedorPorId(parseInt(proveedorId));
         proveedorExistente.nombre = nombre;
         proveedorExistente.direccion = direccion;
         proveedorExistente.telefono = telefono;
-        proveedorExistente.estado = estado; // Asegúrate de actualizar también el estado
-
-        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
-        resultado = await this.proveedorService.actualizarProveedor(parseInt(proveedorId), proveedorExistente); // Persistir cambios
-
-        // Importante: resultado ahora contiene el objeto completo del proveedor actualizado (ver el return en actualizarProveedor)
+        proveedorExistente.estado = estado;
+        resultado = await this.proveedorService.actualizarProveedor(parseInt(proveedorId), proveedorExistente);
         if (resultado) {
-          // Pasamos el objeto completo al método sync
-          // AdminController.googleSheetSyncProveedor.sync("update", resultado);
-          alert("Proveedor ACTUALIZADO"); //Feedback al usuario!
+          alert("Proveedor ACTUALIZADO");
         }
-      } else { // Si NO, ... CREAR
-        const nuevoProveedor = new Proveedor(nombre, telefono, direccion, estado); // crea *INSTANCIA* Proveedor
-
-        //Asigna
-        const proveedorId = await this.proveedorService.agregarProveedor(nuevoProveedor); //  await *RETORNA* id Generado.
-
-        //Solo Si id *EXISTE* despues de haber sido agregado
-        if (proveedorId) {
-          // Obtenemos el proveedor completo para sincronizar
-          const proveedorCompleto = await this.proveedorService.obtenerProveedorPorId(proveedorId);
-          // Pasamos el objeto completo al método sync
-          // AdminController.googleSheetSyncProveedor.sync("create", proveedorCompleto);
-
-          resultado = proveedorId; // Mantenemos resultado para el código siguiente
-          alert(`EXITO Agregando Proveedor, ID ${proveedorId}`);
-        } else { // Fallo registro, por alguna razón
-          throw new Error('Errores en Datos o Validacion.');
-        } // cierra else
-      } // Fin if-else
-
+      } else {
+        // Creación
+        const nuevoProveedor = new Proveedor(nombre, telefono, direccion, estado);
+        const proveedorCreado = await this.proveedorService.agregarProveedor(nuevoProveedor);
+        if (proveedorCreado) {
+          alert(`Éxito al agregar Proveedor, ID ${proveedorCreado.id}`);
+          resultado = proveedorCreado;
+        } else {
+          throw new Error('Errores en datos o validación.');
+        }
+      }
       if (resultado) {
         this.resetFormProveedor();
-        //Cargar Opciones actualizadas
-        await this.cargarProveedores();// llama, volver cargar los datos, *ACTUALIZADOS*.
-        await this.cargarOpcionesProductoForm();
-        await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
+        await this.cargarProveedores();
+        await appService.refreshCache();
       }
+    } catch (error) {
+      console.error("Error en guardarProveedor:", error);
+      alert("Revise consola");
+    } finally {
+      this.hideLoader();
+    }
+  }
 
-    } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-      console.error("Error :", error); // Programador
-      alert("Revise consola"); // Feedback al Usuario
-    } //Finaliza TRY-CATCH
-  } //CIERRA METODO guardarProveedor()
-
-  // Reset
+  // Reiniciar el formulario de proveedor
   resetFormProveedor() {
     this.proveedorIdInput.value = '';
     this.proveedorNombreInput.value = '';
     this.proveedorDireccionInput.value = '';
     this.proveedorTelefonoInput.value = '';
-    this.proveedorEstadoInput.checked = true; // Resetear a activo por defecto
-    this.estadoProveedorTextoSpan.textContent = 'Activo'; // Resetear texto del estado
+    this.proveedorEstadoInput.checked = true;
+    this.estadoProveedorTextoSpan.textContent = 'Activo';
   }
+
+//   async cargarProveedores() {
+//     try {
+//       const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
+//       this.tablaProveedores.innerHTML = ''; // Limpiar
+//
+//       if (!Array.isArray(proveedores)) {
+//         console.error("Error: proveedores is not an array.");
+//         return;
+//       }
+//       proveedores.forEach(proveedor => {
+//         const tr = document.createElement('tr');   // row
+//         const telefonoFormateado = this.formatearTelefono(proveedor.telefono); // Formatear el teléfono
+//         tr.innerHTML = `
+//                <td class="text-center">${proveedor.nombre}</td>
+//
+//               <td class="text-center">
+//                 <!-- Llamada telefónica -->
+//                 <a href="tel:${proveedor.telefono}" title="LLamar vía telefónica ${proveedor.telefono}" style="font-size: 22px;">
+//                   <i class="fa fa-phone fa-lg"></i>
+//                 </a>
+//
+//                 <!-- WhatsApp -->
+// <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
+//    href="whatsapp://send?phone=${telefonoFormateado}&text=Hola muy buenas tardes, ${proveedor.nombre}, deseo realizar una compra del producto: ____ . Gracias!"
+//    title="Chatear por WhatsApp">
+//   <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
+// </a>
+//
+//               </td>
+//
+//              <!--   <td class="text-center">${proveedor.direccion}</td>-->
+//                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProveedor" data-id="${proveedor.id}"></i></td>
+//
+//                  <td class="text-center">
+//                     <div class="estado-cell">
+//                       <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
+//                       <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? 'checked' : ''}>
+//                       <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
+//                     </div>
+//                   </td>
+//
+//               <td class="text-center">
+//                 <div class="action-buttons">
+//                  <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${proveedor.id}"></i></button>
+//                  <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${proveedor.id}"></i></button>
+//                 </div>
+//               </td>
+//           `;
+//         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProveedor');
+//         if (btnOpenModal) {
+//           btnOpenModal.addEventListener('click', () => {
+//             this.openModalDetailsProveedor(proveedor.id); // Pasar ID de la proveedor seleccionada
+//           });
+//         }
+//         this.tablaProveedores.appendChild(tr);  // Append, al tbody!
+//       });
+//
+//       // Configurar listeners para los botones de editar y eliminar
+//       this.setupProveedorListeners();
+//
+//     } catch (error) {
+//       console.error("Error al cargar los Proveedores:", error);
+//       alert("Error al cargar los Proveedores."); // Mejor feedback al usuario
+//     }
+//   }
+//
+//   async openModalDetailsProveedor(proveedorId) {
+//      console.log("Proveedor obtenido:", proveedor); // Agregar esta línea
+//     const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // Obtener solo la proveedor seleccionada
+//     const modalDetails = document.getElementById('proveedorModal');
+//     if (!proveedor) {
+//       console.error("No se encontró el proveedor");
+//       return;
+//     }
+//     // Llenar el modal con la información correcta
+//     document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
+//     document.getElementById('modalTelefonoProveedor').innerHTML = proveedor.telefono;
+//     document.getElementById('modalDireccionProveedor').innerHTML = proveedor.direccion;
+//     document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
+//     document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
+//     document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
+//     // Mostrar el modal
+//     modalDetails.classList.remove('hidden');
+//     document.body.classList.add('modal-open');
+//     requestAnimationFrame(() => {
+//       modalDetails.classList.add('show');
+//     });
+//   }
+//
+//   closeModalDetailsProveedor() {
+//     const modalDetails = document.getElementById('proveedorModal');
+//     modalDetails.classList.remove('show');
+//     document.body.classList.remove('modal-open');
+//     setTimeout(() => {
+//       modalDetails.classList.add('hidden');
+//     }, 300);
+//   }
+//
+//   setupProveedorListeners() {
+//     // Editar
+//     this.tablaProveedores.querySelectorAll('.edit-proveedor').forEach(button => {
+//       button.addEventListener('click', async (e) => { // Pone Evento click
+//
+//         const proveedorId = parseInt(e.target.dataset.id);        // Obtiene
+//
+//         const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // proveedor por ID
+//
+//         if (proveedor) { // proveedor existe!
+//           // Cargar  form
+//           this.proveedorIdInput.value = proveedor.id;   // carga de datos
+//           this.proveedorNombreInput.value = proveedor.nombre;//
+//           this.proveedorDireccionInput.value = proveedor.direccion;
+//           this.proveedorTelefonoInput.value = proveedor.telefono;
+//           // Establecer el estado del toggle en el formulario
+//           this.proveedorEstadoInput.checked = proveedor.estado;
+//           this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
+//           window.scrollTo(0, 0);
+//         }
+//       });
+//     });
+//     // Eliminar Proveedor
+//     this.tablaProveedores.querySelectorAll('.delete-proveedor').forEach(button => { // forEach para el boton eliminar
+//       button.addEventListener('click', async (e) => {               //
+//         const proveedorId = parseInt(e.target.dataset.id);     //
+//         // --- CONFIRMACION ---
+//         if (confirm("Esta seguro de eliminar?")) { //
+//
+//           //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
+//           const result = await this.proveedorService.eliminarProveedor(proveedorId);  //
+//           //Actualiza
+//           if (result !== null) {
+//             await this.cargarProveedores();      // Vuelve a cargar proveedores
+//             // Para actualizar select de Productos.
+//             await this.cargarOpcionesProductoForm(); //   productos
+//
+//           }
+//         }
+//       });
+//     });
+//     // Nuevo: Toggle para cambiar estado en la tabla
+//     this.tablaProveedores.querySelectorAll('.estado-toggleProveedor').forEach(toggle => {
+//       toggle.addEventListener('change', async (e) => {
+//         const proveedorId = parseInt(e.target.dataset.id);
+//         const nuevoEstado = e.target.checked;
+//
+//         try {
+//           const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {
+//             estado: nuevoEstado
+//           });
+//           AdminController.googleSheetSyncProveedor.sync("update", resultado);
+//
+//
+//           if (resultado !== null) {
+//             // Actualizar la vista sin recargar toda la tabla
+//             const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProveedor');
+//             if (tdEstado) {
+//               tdEstado.innerHTML = nuevoEstado ?
+//                 '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
+//                 '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+//             }
+//           }
+//         } catch (error) {
+//           console.error('Error al actualizar estado:', error);
+//           // Revertir cambio en UI en caso de error
+//           e.target.checked = !nuevoEstado;
+//           alert("Error al actualizar el estado del proveedor.");
+//         }
+//       });
+//     });
+//   }
+//
+//   // Enviar Formulario Proveedor:  CREATE y UPDATE:
+//   async guardarProveedor(e) { // METODO, RECIBE EL EVENTO
+//     e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
+//     const proveedorId = this.proveedorIdInput.value;       //Desde elemento del DOM! -> HTML
+//     const nombre = this.proveedorNombreInput.value;       // Valor en la caja texto
+//     const direccion = this.proveedorDireccionInput.value;
+//     const telefono = this.proveedorTelefonoInput.value;
+//     const estado = this.proveedorEstadoInput.checked; // Obtener el estado del checkbox
+//
+//     if (!nombre || !direccion) {
+//       alert("Campos obligatorios");
+//       return;  // Salida temprana
+//     }
+//
+//     let resultado;
+//     try {
+//       if (proveedorId) {  // Si ya hay id, es para:  *ACTUALIZACION*:
+//         const proveedorExistente = await this.proveedorService.obtenerProveedorPorId(parseInt(proveedorId)); //Buscar
+//         //Cambiar nombre, segun  *NUEVO* VALOR:
+//         proveedorExistente.nombre = nombre;
+//         proveedorExistente.direccion = direccion;
+//         proveedorExistente.telefono = telefono;
+//         proveedorExistente.estado = estado; // Asegúrate de actualizar también el estado
+//
+//         // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
+//         resultado = await this.proveedorService.actualizarProveedor(parseInt(proveedorId), proveedorExistente); // Persistir cambios
+//
+//         // Importante: resultado ahora contiene el objeto completo del proveedor actualizado (ver el return en actualizarProveedor)
+//         if (resultado) {
+//           // Pasamos el objeto completo al método sync
+//           // AdminController.googleSheetSyncProveedor.sync("update", resultado);
+//           alert("Proveedor ACTUALIZADO"); //Feedback al usuario!
+//         }
+//       } else { // Si NO, ... CREAR
+//         const nuevoProveedor = new Proveedor(nombre, telefono, direccion, estado); // crea *INSTANCIA* Proveedor
+//
+//         //Asigna
+//         const proveedorId = await this.proveedorService.agregarProveedor(nuevoProveedor); //  await *RETORNA* id Generado.
+//
+//         //Solo Si id *EXISTE* despues de haber sido agregado
+//         if (proveedorId) {
+//           // Obtenemos el proveedor completo para sincronizar
+//           const proveedorCompleto = await this.proveedorService.obtenerProveedorPorId(proveedorId);
+//           // Pasamos el objeto completo al método sync
+//           // AdminController.googleSheetSyncProveedor.sync("create", proveedorCompleto);
+//
+//           resultado = proveedorId; // Mantenemos resultado para el código siguiente
+//           alert(`EXITO Agregando Proveedor, ID ${proveedorId}`);
+//         } else { // Fallo registro, por alguna razón
+//           throw new Error('Errores en Datos o Validacion.');
+//         } // cierra else
+//       } // Fin if-else
+//
+//       if (resultado) {
+//         this.resetFormProveedor();
+//         //Cargar Opciones actualizadas
+//         await this.cargarProveedores();// llama, volver cargar los datos, *ACTUALIZADOS*.
+//         await this.cargarOpcionesProductoForm();
+//         await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
+//       }
+//
+//     } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
+//       console.error("Error :", error); // Programador
+//       alert("Revise consola"); // Feedback al Usuario
+//     } //Finaliza TRY-CATCH
+//   } //CIERRA METODO guardarProveedor()
+//
+//   // Reset
+//   resetFormProveedor() {
+//     this.proveedorIdInput.value = '';
+//     this.proveedorNombreInput.value = '';
+//     this.proveedorDireccionInput.value = '';
+//     this.proveedorTelefonoInput.value = '';
+//     this.proveedorEstadoInput.checked = true; // Resetear a activo por defecto
+//     this.estadoProveedorTextoSpan.textContent = 'Activo'; // Resetear texto del estado
+//   }
 
   //---------------------------------------------------
   // Métodos CRUD para Clientes
@@ -1012,13 +1250,12 @@ async guardarMarca(e) {
   //   // Elimina el "+" y todos los espacios
   //   return telefono.replace(/\+/g, '').replace(/\s+/g, '');
   // }
-formatearTelefono(telefono) {
-  if (!telefono || typeof telefono !== 'string') return '';
-  return telefono
-    .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
-    .replace(/\+/g, '');    // Elimina el "+"
-}
-
+  formatearTelefono(telefono) {
+    if (!telefono || typeof telefono !== 'string') return '';
+    return telefono
+      .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
+      .replace(/\+/g, '');    // Elimina el "+"
+  }
 
 
   async cargarClientes() {

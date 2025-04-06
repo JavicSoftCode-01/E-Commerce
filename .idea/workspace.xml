@@ -5,6 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/database/GoogleSheetReader.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/database/GoogleSheetReader.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ProveedorService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ProveedorService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/pages/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +120,7 @@
       <workItem from="1743052057223" duration="7220000" />
       <workItem from="1743089413186" duration="9460000" />
       <workItem from="1743353954118" duration="6071000" />
-      <workItem from="1743904787812" duration="15075000" />
+      <workItem from="1743904787812" duration="19561000" />
     </task>
     <servers />
   </component>

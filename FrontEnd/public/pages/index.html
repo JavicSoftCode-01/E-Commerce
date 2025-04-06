@@ -13,6 +13,96 @@
 
 <body>
 
+<style>
+    /* Loader Overlay */
+    #loaderOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        background-color: rgba(0, 0, 0, 0.4); /* Color oscuro semi-transparente */
+        backdrop-filter: blur(6px); /* Desenfoque del fondo */
+        -webkit-backdrop-filter: blur(6px); /* Compatibilidad con Safari */
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+
+    .hidden {
+        display: none;
+    }
+
+    /*.loader {*/
+    /*     position: relative; !* Necesario para posicionar el botón 'X' absoluto *!*/
+    /*    background-image: url('../assets/img/Auth.jpg'); !* <-- ¡¡CAMBIA ESTO!! *!*/
+    /*    background-size: cover; !* Cubre todo el área *!*/
+    /*    background-position: center center; !* Centra la imagen *!*/
+    /*    padding: 30px 40px; !* Padding interno *!*/
+    /*    border-radius: 10px; !* Hereda el redondeo *!*/
+    /*    color: white; !* Color de texto por defecto para contraste *!*/
+    /*    !* Añade una capa oscura semi-transparente encima de la imagen para legibilidad *!*/
+    /*    background-blend-mode: overlay; !* Mezcla el color con la imagen *!*/
+    /*    display: flex;*/
+    /*    flex-direction: column;*/
+    /*    align-items: center; !* Centra contenido horizontalmente *!*/
+    /*    text-align: center; !* Centra texto *!*/
+    /*    width: 250px; !* Ancho fijo *!*/
+    /*    height: 250px; !* Alto fijo *!*/
+    /*}*/
+    .loader {
+        position: relative;
+
+        background-image: url('../assets/img/Auth.jpg');
+        background-size: cover;
+        background-position: center center;
+        border-radius: 10px;
+        color: white;
+        background-blend-mode: overlay;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* centra verticalmente */
+        text-align: center;
+        width: 250px;
+        height: 250px;
+        gap: 5px; /* espacio entre spinner y texto */
+        padding: 0; /* quita el padding para un centrado exacto */
+    }
+
+    .spinner {
+        margin-top: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #810101;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        /*margin: 0 auto 10px;*/
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<!-- Loader Overlay -->
+<div id="loaderOverlay" class=" hidden">
+  <div class="loader">
+    <div class="spinner"></div>
+    <p style="font-family: 'Times New Roman',sans-serif; font-weight: bold ; color: white; font-size: 25px">💄 Lunaire 💄</p>
+  </div>
+</div>
+
+
 <!-- Navegación -->
 <header>
   <div class="nav-container">
@@ -28,305 +118,224 @@
   </div>
 </header>
 
-<!--<style>/* Asegúrate de que el overlay cubra todo y esté detrás del contenido */-->
-<!--#loginModal .modal-overlay {-->
-<!--  position: fixed;-->
-<!--  top: 0;-->
-<!--  left: 0;-->
-<!--  width: 100%;-->
-<!--  height: 100%;-->
-<!--  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparente */-->
-<!--  z-index: 999; /* Detrás del modal, delante del resto */-->
-<!--}-->
-
-<!--/* Estilos básicos para el contenido del modal de login */-->
-<!--#loginModal .modal-content {-->
-<!--  position: fixed;-->
-<!--  top: 50%;-->
-<!--  left: 50%;-->
-<!--  transform: translate(-50%, -50%);-->
-<!--  background-color: white;-->
-<!--  padding: 20px 30px;-->
-<!--  border-radius: 8px;-->
-<!--  z-index: 1000; /* Encima del overlay */-->
-<!--  min-width: 300px; /* Ancho mínimo */-->
-<!--  max-width: 90%; /* Ancho máximo */-->
-<!--  box-shadow: 0 4px 15px rgba(0,0,0,0.2);-->
-<!--  /* Transiciones si usas las clases 'show'/'hidden' */-->
-<!--  opacity: 0;-->
-<!--  visibility: hidden;-->
-<!--  transition: opacity 0.3s ease, visibility 0.3s ease;-->
-<!--}-->
-
-<!--/* Estado visible del modal */-->
-<!--#loginModal.show .modal-content {-->
-<!--    opacity: 1;-->
-<!--    visibility: visible;-->
-<!--}-->
-<!--/* Ocultar modal */-->
-<!--#loginModal.hidden .modal-content {-->
-<!--    opacity: 0;-->
-<!--    visibility: hidden;-->
-<!--}-->
-
-
-<!--#loginModal .modal-header {-->
-<!--  border-bottom: 1px solid #eee;-->
-<!--  padding-bottom: 10px;-->
-<!--  margin-bottom: 15px;-->
-<!--}-->
-
-<!--#loginModal .modal-title {-->
-<!--  margin: 0;-->
-<!--  font-size: 1.5em;-->
-<!--}-->
-
-<!--#loginModal .modal-body .form-group {-->
-<!--  margin-bottom: 15px;-->
-<!--}-->
-<!--#loginModal .modal-body label {-->
-<!--  display: block;-->
-<!--  margin-bottom: 5px;-->
-<!--  font-weight: bold;-->
-<!--}-->
-
-<!--#loginModal .inputFac { /* Reutiliza tu clase de input si es adecuada */-->
-<!--  width: 100%;-->
-<!--  padding: 10px;-->
-<!--  border: 1px solid #ccc;-->
-<!--  border-radius: 4px;-->
-<!--  box-sizing: border-box; /* Importante */-->
-<!--}-->
-
-<!--#loginModal .modal-footer {-->
-<!--  display: flex;-->
-<!--  justify-content: space-between; /* Espacia los botones */-->
-<!--  padding-top: 15px;-->
-<!--  border-top: 1px solid #eee;-->
-<!--  margin-top: 20px;-->
-<!--}-->
-
-<!--/* Estilos para el body cuando un modal está abierto */-->
-<!--body.modal-open {-->
-<!--  overflow: hidden; /* Evita scroll del fondo */-->
-<!--}-->
-<!--</style>-->
+<!--  /* -&#45;&#45; Estilos Generales del Modal de Login (Mejorados) -&#45;&#45; */-->
 <style>
-  /* --- Estilos Generales del Modal de Login (Mejorados) --- */
+    /* Overlay (sin cambios significativos) */
+    #loginModal .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Un poco más oscuro quizás */
+        z-index: 999;
+        opacity: 0; /* Para transición */
+        visibility: hidden; /* Para transición */
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
 
-/* Overlay (sin cambios significativos) */
-#loginModal .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Un poco más oscuro quizás */
-  z-index: 999;
-  opacity: 0; /* Para transición */
-  visibility: hidden; /* Para transición */
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
+    /* Contenido Principal del Modal */
+    #loginModal .modal-content.login-modal-appearance {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: transparent; /* Hacemos transparente el contenedor exterior */
+        padding: 0; /* Sin padding aquí, lo maneja el inner-content */
+        border-radius: 12px; /* Bordes redondeados más pronunciados */
+        z-index: 1000;
+        min-width: 320px;
+        max-width: 450px; /* Ajusta según tu preferencia */
+        width: 90%;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+        overflow: hidden; /* Para que el inner-content respete el border-radius */
+    }
 
-/* Contenido Principal del Modal */
-#loginModal .modal-content.login-modal-appearance {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: transparent; /* Hacemos transparente el contenedor exterior */
-  padding: 0; /* Sin padding aquí, lo maneja el inner-content */
-  border-radius: 12px; /* Bordes redondeados más pronunciados */
-  z-index: 1000;
-  min-width: 320px;
-  max-width: 450px; /* Ajusta según tu preferencia */
-  width: 90%;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-  overflow: hidden; /* Para que el inner-content respete el border-radius */
-}
-
-/* Contenedor Interno con la Imagen de Fondo */
-#loginModal .login-modal-inner-content {
-  position: relative; /* Necesario para posicionar el botón 'X' absoluto */
-  background-image: url('../assets/img/Auth.jpg'); /* <-- ¡¡CAMBIA ESTO!! */
-  background-size: cover; /* Cubre todo el área */
-  background-position: center center; /* Centra la imagen */
-  padding: 30px 40px; /* Padding interno */
-  border-radius: inherit; /* Hereda el redondeo */
-  color: white; /* Color de texto por defecto para contraste */
-  /* Añade una capa oscura semi-transparente encima de la imagen para legibilidad */
-  background-color: rgba(0, 0, 0, 0.5); /* Ajusta la opacidad (0.5 = 50%) */
-  background-blend-mode: overlay; /* Mezcla el color con la imagen */
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centra contenido horizontalmente */
-  text-align: center; /* Centra texto */
-}
+    /* Contenedor Interno con la Imagen de Fondo */
+    #loginModal .login-modal-inner-content {
+        position: relative; /* Necesario para posicionar el botón 'X' absoluto */
+        background-image: url('../assets/img/Auth.jpg'); /* <-- ¡¡CAMBIA ESTO!! */
+        background-size: cover; /* Cubre todo el área */
+        background-position: center center; /* Centra la imagen */
+        padding: 30px 40px; /* Padding interno */
+        border-radius: inherit; /* Hereda el redondeo */
+        color: white; /* Color de texto por defecto para contraste */
+        /* Añade una capa oscura semi-transparente encima de la imagen para legibilidad */
+        background-color: rgba(0, 0, 0, 0.5); /* Ajusta la opacidad (0.5 = 50%) */
+        background-blend-mode: overlay; /* Mezcla el color con la imagen */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra contenido horizontalmente */
+        text-align: center; /* Centra texto */
+    }
 
 
-/* Estado Visible del Modal */
-#loginModal.show .modal-overlay {
-    opacity: 1;
-    visibility: visible;
-}
-#loginModal.show .modal-content.login-modal-appearance {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%) scale(1); /* Animación de escala opcional */
-}
-#loginModal.hidden .modal-content.login-modal-appearance {
-   /* La transición se define en el estado base */
+    /* Estado Visible del Modal */
+    #loginModal.show .modal-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
 
-    transform: translate(-50%, -50%) scale(0.9); /* Animación de escala opcional */
-    opacity: 0;
-    visibility: hidden;
-}
+    #loginModal.show .modal-content.login-modal-appearance {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1); /* Animación de escala opcional */
+    }
 
+    #loginModal.hidden .modal-content.login-modal-appearance {
+        /* La transición se define en el estado base */
 
-/* Estilo Botón Cerrar 'X' */
-#loginModal .modal-closeAuth {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 2rem; /* Más grande */
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.8); /* Blanco semi-transparente */
-  background: none;
-  border: none;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 5px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  z-index: 10; /* Encima de otros elementos internos */
-  transition: color 0.2s ease;
-}
-#loginModal .modal-closeAuth:hover {
-  color: white; /* Blanco sólido al pasar el mouse */
-}
-
-/* Encabezado del Modal */
-#loginModal .modal-header {
-  border-bottom: none; /* Quitamos borde inferior */
-  padding-bottom: 5px;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-#loginModal .modal-title {
-  margin: 0;
-  font-size: 1.8em; /* Tamaño del título */
-  font-weight: bold;
-  color: #fff; /* Asegurar color blanco */
-   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-}
-
-/* Cuerpo del Modal */
-#loginModal .modal-body {
-    width: 100%; /* Ocupa todo el ancho disponible */
-}
-
-#loginModal .login-intro-text {
-    font-size: 1.4em; /* Más grande */
-    margin-bottom: 5px;
-    font-weight: 500;
-    text-align: justify;
-    font-family: "Times New Roman",fantasy;
-}
-
-#loginModal .login-quality-text {
-    font-size: 1.1em;
-    margin-bottom: 25px;
-    opacity: 0.9;
-}
+        transform: translate(-50%, -50%) scale(0.9); /* Animación de escala opcional */
+        opacity: 0;
+        visibility: hidden;
+    }
 
 
-/* Grupo de Formulario */
-#loginModal .login-form-group {
-  margin-bottom: 20px;
-  width: 100%;
-}
+    /* Estilo Botón Cerrar 'X' */
+    #loginModal .modal-closeAuth {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 2rem; /* Más grande */
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.8); /* Blanco semi-transparente */
+        background: none;
+        border: none;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 5px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        z-index: 10; /* Encima de otros elementos internos */
+        transition: color 0.2s ease;
+    }
 
-#loginModal .login-prompt-label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 500;
-  font-size: 1.1em;
-}
+    #loginModal .modal-closeAuth:hover {
+        color: white; /* Blanco sólido al pasar el mouse */
+    }
 
-/* Input */
-#loginModal .inputFac.login-input {
-  width: 100%;
-  padding: 12px 15px; /* Más padding */
-  border: 1px solid rgba(255, 255, 255, 0); /* Borde blanco translúcido */
-  border-radius: 6px;
-  box-sizing: border-box;
-  background-color: rgba(255, 255, 255, 0); /* Fondo muy sutil */
-  color: rgba(255, 255, 255, 0.5); /* Texto blanco */
-  font-size: 0.8em;
-  text-align: center; /* Texto centrado en input */
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-}
+    /* Encabezado del Modal */
+    #loginModal .modal-header {
+        border-bottom: none; /* Quitamos borde inferior */
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+        width: 100%;
+    }
 
-#loginModal .inputFac.login-input::placeholder {
-  color: rgba(255, 255, 255, 0); /* Color del placeholder */
-  text-align: center;
-}
+    #loginModal .modal-title {
+        margin: 0;
+        font-size: 1.8em; /* Tamaño del título */
+        font-weight: bold;
+        color: #fff; /* Asegurar color blanco */
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    }
 
-#loginModal .inputFac.login-input:focus {
-  background-color: none;
-  border-color: rgba(255, 255, 255, 0);
-  outline: none; /* Quitar borde de focus por defecto */
-}
+    /* Cuerpo del Modal */
+    #loginModal .modal-body {
+        width: 100%; /* Ocupa todo el ancho disponible */
+    }
 
-/* Mensaje de Error */
-#loginModal .login-error-message {
-  color: #ffdddd; /* Rojo claro para contraste */
-  background-color: rgba(220, 53, 69, 0.7); /* Fondo rojo translúcido */
-  margin-top: 10px;
-  font-size: 0.9em;
-  display: none; /* Empieza oculto */
-  padding: 8px 10px;
-  border-radius: 4px;
-}
+    #loginModal .login-intro-text {
+        font-size: 1.4em; /* Más grande */
+        margin-bottom: 5px;
+        font-weight: 500;
+        text-align: justify;
+        font-family: "Times New Roman", fantasy;
+    }
+
+    #loginModal .login-quality-text {
+        font-size: 1.1em;
+        margin-bottom: 25px;
+        opacity: 0.9;
+    }
 
 
-/* Pie de página del Modal */
-#loginModal .login-modal-footer {
-  display: flex;
-  justify-content: center; /* Centra el botón */
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2); /* Borde superior sutil */
-  margin-top: 20px;
-   width: 100%;
-}
+    /* Grupo de Formulario */
+    #loginModal .login-form-group {
+        margin-bottom: 20px;
+        width: 100%;
+    }
 
-/* Botón Saltar */
-#loginModal .login-skip-button {
-  /* Reutiliza tu clase .btn y .btn-secondary si las tienes bien definidas */
-  /* O añade estilos específicos aquí */
-  padding: 10px 30px; /* Más padding horizontal */
-  font-size: 1em;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 20px; /* Botón redondeado */
-  background-color: rgba(255, 255, 255, 0.8); /* Blanco translúcido */
-  color: #5D0207; /* Texto oscuro */
-  border: none;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
+    #loginModal .login-prompt-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+        font-size: 1.1em;
+    }
 
-#loginModal .login-skip-button:hover {
-  background-color: rgba(255, 255, 255, 1); /* Blanco sólido */
-  transform: scale(1.05); /* Ligero aumento */
-}
+    /* Input */
+    #loginModal .inputFac.login-input {
+        width: 100%;
+        padding: 12px 15px; /* Más padding */
+        border: 1px solid rgba(255, 255, 255, 0); /* Borde blanco translúcido */
+        border-radius: 6px;
+        box-sizing: border-box;
+        background-color: rgba(255, 255, 255, 0); /* Fondo muy sutil */
+        color: rgba(255, 255, 255, 0.5); /* Texto blanco */
+        font-size: 0.8em;
+        text-align: center; /* Texto centrado en input */
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
 
-/* Evita scroll del body cuando el modal está abierto */
-body.modal-open {
-  overflow: hidden;
-}
+    #loginModal .inputFac.login-input::placeholder {
+        color: rgba(255, 255, 255, 0); /* Color del placeholder */
+        text-align: center;
+    }
+
+    #loginModal .inputFac.login-input:focus {
+        background-color: none;
+        border-color: rgba(255, 255, 255, 0);
+        outline: none; /* Quitar borde de focus por defecto */
+    }
+
+    /* Mensaje de Error */
+    #loginModal .login-error-message {
+        color: #ffdddd; /* Rojo claro para contraste */
+        background-color: rgba(220, 53, 69, 0.7); /* Fondo rojo translúcido */
+        margin-top: 10px;
+        font-size: 0.9em;
+        display: none; /* Empieza oculto */
+        padding: 8px 10px;
+        border-radius: 4px;
+    }
+
+
+    /* Pie de página del Modal */
+    #loginModal .login-modal-footer {
+        display: flex;
+        justify-content: center; /* Centra el botón */
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2); /* Borde superior sutil */
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    /* Botón Saltar */
+    #loginModal .login-skip-button {
+        /* Reutiliza tu clase .btn y .btn-secondary si las tienes bien definidas */
+        /* O añade estilos específicos aquí */
+        padding: 10px 30px; /* Más padding horizontal */
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 20px; /* Botón redondeado */
+        background-color: rgba(255, 255, 255, 0.8); /* Blanco translúcido */
+        color: #5D0207; /* Texto oscuro */
+        border: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    #loginModal .login-skip-button:hover {
+        background-color: rgba(255, 255, 255, 1); /* Blanco sólido */
+        transform: scale(1.05); /* Ligero aumento */
+    }
+
+    /* Evita scroll del body cuando el modal está abierto */
+    body.modal-open {
+        overflow: hidden;
+    }
 </style>
 
 <!-- Modal de Identificación de Usuario -->
@@ -336,33 +345,35 @@ body.modal-open {
   <div class="modal-content login-modal-appearance"> <!-- Clase específica para estilo -->
     <!-- Contenedor INTERNO para el fondo y contenido -->
     <div class="login-modal-inner-content">
-        <!-- Botón Cerrar 'X' va aquí, encima del contenido interno -->
-        <button class="modal-close modal-closeAuth" id="closetModalAuth" aria-label="Cerrar">×</button>
+      <!-- Botón Cerrar 'X' va aquí, encima del contenido interno -->
+      <button class="modal-close modal-closeAuth" id="closetModalAuth" aria-label="Cerrar">×</button>
 
-        <!-- Encabezado dentro del contenido -->
-        <div class="modal-header">
-<!--          <h3 class="modal-title">Lunaire</h3> &lt;!&ndash; Título más limpio quizás &ndash;&gt;-->
+      <!-- Encabezado dentro del contenido -->
+      <div class="modal-header">
+        <!--          <h3 class="modal-title">Lunaire</h3> &lt;!&ndash; Título más limpio quizás &ndash;&gt;-->
+      </div>
+
+      <!-- Cuerpo dentro del contenido -->
+      <div class="modal-body">
+        <!--          <p class="login-intro-text">✨ El Placer de Comprar ✨</p>-->
+        <!--          <p class="login-quality-text">Productos de la mejor Calidad.</p>-->
+        <!--          <p class="login-intro-text">✨ El Placer de Comprar ✨</p>-->
+
+        <div class="form-group login-form-group" style="margin-top: 7rem">
+          <!--            <label for="loginIdentifierInput" class="login-prompt-label">Hola, ¿qué tal?</label>-->
+          <p class="login-intro-text">💄¡Bienvenidas a Lunaire un espacio donde cada mujer brilla con luz propia y su
+            belleza!❤️✨</p>
+
+          <input type="text" id="loginIdentifierInput" placeholder="Atenderla todo un placer."
+                 class="inputFac login-input">
+          <div id="loginErrorMsg" class="login-error-message"></div> <!-- Clase específica -->
         </div>
+      </div>
 
-        <!-- Cuerpo dentro del contenido -->
-        <div class="modal-body">
-<!--          <p class="login-intro-text">✨ El Placer de Comprar ✨</p>-->
-<!--          <p class="login-quality-text">Productos de la mejor Calidad.</p>-->
-<!--          <p class="login-intro-text">✨ El Placer de Comprar ✨</p>-->
-
-          <div class="form-group login-form-group" style="margin-top: 7rem">
-<!--            <label for="loginIdentifierInput" class="login-prompt-label">Hola, ¿qué tal?</label>-->
-          <p class="login-intro-text">💄¡Bienvenidas a Lunaire un espacio donde cada mujer brilla con luz propia y su belleza!❤️✨</p>
-
-            <input type="text" id="loginIdentifierInput" placeholder="Atenderla todo un placer." class="inputFac login-input">
-            <div id="loginErrorMsg" class="login-error-message"></div> <!-- Clase específica -->
-          </div>
-        </div>
-
-        <!-- Pie de página dentro del contenido -->
-        <div class="modal-footer login-modal-footer">
-          <button id="btnSkipLogin" class="btn btn-secondary login-skip-button">✨ Bienvenida ✨</button>
-        </div>
+      <!-- Pie de página dentro del contenido -->
+      <div class="modal-footer login-modal-footer">
+        <button id="btnSkipLogin" class="btn btn-secondary login-skip-button">✨ Bienvenida ✨</button>
+      </div>
     </div><!-- Fin de login-modal-inner-content -->
   </div><!-- Fin de modal-content -->
 </div>
