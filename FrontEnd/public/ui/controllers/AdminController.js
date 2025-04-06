@@ -86,7 +86,7 @@ class AdminController {
       await this.proveedorService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarProveedores(false);
-    }, 30000);
+    }, 500);
 
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
