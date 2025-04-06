@@ -99,21 +99,21 @@ class IndexedDB {
 async add(item) {
     try {
         const db = await this.dbPromise;
-        
+
         // Asegurarse de que el item sea un objeto plano
         const plainItem = JSON.parse(JSON.stringify(item));
 
         return new Promise((resolve, reject) => {
             const transaction = db.transaction([this.storeName], 'readwrite');
             const store = transaction.objectStore(this.storeName);
-            
+
             const request = store.add(plainItem);
-            
+
             request.onsuccess = () => {
                 console.info(`Registro agregado en ${this.storeName}:`, plainItem);
                 resolve(plainItem);
             };
-            
+
             request.onerror = (event) => {
                 console.error(`Error al agregar registro en ${this.storeName}:`, event.target.error);
                 reject(event.target.error);
@@ -175,61 +175,6 @@ async add(item) {
 /**
  * 🔰 Clase para manejar la generación y almacenamiento de IDs secuenciales para diferentes modelos en IndexedDB.
  */
-//class IdGenerator extends IndexedDB {
-//  constructor() {
-//    super('mydb', 'idGenerator');
-//  }
-//
-//  /**
-//   * Obtiene el último ID utilizado para un modelo específico.
-//   * @param {string} modelName - Nombre del modelo.
-//   * @returns {Promise<number>} Promesa que resuelve al último ID utilizado o 0 si no existe.
-//   */
-//  async getLastId(modelName) {
-//    try {
-//      const idObject = await this.getById(modelName);
-//      console.info(`Obtenido lastId para el modelo ${modelName}:`, idObject);
-//      return idObject ? idObject.lastId : 0;
-//    } catch (error) {
-//      console.error(`Error al obtener lastId para el modelo ${modelName}:`, error);
-//      return 0; // Valor predeterminado en caso de error.
-//    }
-//  }
-//
-//  /**
-//   * Establece el último ID utilizado para un modelo específico.
-//   * @param {string} modelName - Nombre del modelo.
-//   * @param {number} lastId - El último ID a almacenar.
-//   * @returns {Promise<void>} Promesa que se resuelve una vez que el ID ha sido actualizado.
-//   */
-//  async setLastId(modelName, lastId) {
-//    try {
-//      await this.update(modelName, {id: modelName, lastId: lastId}); // Asegúrate de pasar el 'id'
-//      console.info(`Actualizado lastId para el modelo ${modelName} a ${lastId}`);
-//    } catch (error) {
-//      console.error(`Error al actualizar lastId para el modelo ${modelName}:`, error);
-//    }
-//  }
-//
-//  /**
-//   * Asegura que exista un registro de ID inicial para un modelo dado. Si no existe, lo crea.
-//   * @param {string} modelName - Nombre del modelo.
-//   * @returns {Promise<void>}  Promesa que se resuelve una vez que se ha verificado/creado el registro.
-//   */
-//  async ensureIdExists(modelName) {
-//    try {
-//      const exists = await this.getById(modelName);
-//      if (!exists) {
-//        await this.add({id: modelName, lastId: 0}); //Inicializa el valor a 0.
-//        console.info(`Creado registro inicial de lastId para el modelo ${modelName}`);
-//      }
-//    } catch (error) {
-//      console.error(`Error al verificar o crear el registro para el modelo ${modelName}:`, error);
-//    }
-//  }
-//}
-//
-//export {IndexedDB, IdGenerator};
 
 class IdGenerator extends IndexedDB {
   constructor() {

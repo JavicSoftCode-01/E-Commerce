@@ -8,8 +8,23 @@ import {Producto} from '../../../../BackEnd/src/models/Producto.js';
 import {appService} from '../services/UшымтаService.js';
 import {InvoiceTemplate} from './InvoicePlantilla.js';
 import {Factura} from '../../../../BackEnd/src/models/Factura.js';
+import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js';
 
 class AdminController {
+
+  static googleSheetSync = new GoogleSheetSync(        // categoria
+    'https://script.google.com/macros/s/AKfycbx0M1Jaz4ZIHs4tqeIulSrdIsn1tsu6BW0twVwc3Vo0_YybZftwE0RR8dQL3ZZgtUg/exec'
+  );
+  static googleSheetSyncMarca = new GoogleSheetSync(
+    'https://script.google.com/macros/s/AKfycbzrQBaqY-DyXEiKSd_BZQjrRCwGX2Q-mehjcjucQQUm2SWoDOdzu6ZJ5bbk9ubEid_i/exec'
+  );
+  static googleSheetSyncProveedor = new GoogleSheetSync(
+    'https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec'
+  );
+  static googleSheetSyncCliente = new GoogleSheetSync(
+    'https://script.google.com/macros/s/AKfycbz3HgLCJkEZ3-NUZ-fCPUbJLwpfnuR_80DiijfuJSooFSueIBORx-4lWc5pMt-5Taqh/exec'
+  );
+
   constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService) {
     this.categoriaService = categoriaService;
     this.marcaService = marcaService;
@@ -142,6 +157,7 @@ class AdminController {
     });
   }
 
+
   async mostrarPanelAdmin() {
     //Ocultar otros
     document.getElementById('tienda').classList.add('hidden');
@@ -180,11 +196,13 @@ class AdminController {
     }
   }
 
+
   //---------------------------------------------------
   // Métodos CRUD para Categorías
   //---------------------------------------------------
-
   // adminController.js
+
+
   async cargarCategorias() {
     try {
       const categorias = await appService.getCategorias();
@@ -239,6 +257,58 @@ class AdminController {
       alert("Error al cargar las categorías.");
     }
   }
+  // async cargarCategorias() {
+  //   try {
+  //     const categorias = await this.categoriaService.obtenerTodasLasCategorias();
+  //     this.tablaCategorias.innerHTML = '';
+  //
+  //     if (!Array.isArray(categorias)) {
+  //       console.error("Error: los datos de categorías no son un array.");
+  //       return;
+  //     }
+  //
+  //     categorias.forEach(categoria => {
+  //       const tr = document.createElement('tr');
+  //       tr.innerHTML = `
+  //       <td class="text-center">${categoria.nombre}</td>
+  //       <td class="text-center">
+  //         <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer;" id="btnOpenModalDetails" data-id="${categoria.id}"></i>
+  //       </td>
+  //       <td class="text-center">
+  //         <div class="estado-cell">
+  //           <span class="estado-indicator hidden">${categoria.iconTrueFalse()}</span>
+  //           <input type="checkbox" id="categoriaEstadoToggle${categoria.id}" class="toggle-input estado-toggle" data-id="${categoria.id}" ${categoria.estado ? 'checked' : ''}>
+  //           <label for="categoriaEstadoToggle${categoria.id}" class="toggle-label"></label>
+  //         </div>
+  //       </td>
+  //       <td class="text-center">
+  //         <div class="action-buttons">
+  //           <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">
+  //             <i class="fa-solid fa-pencil fa-lg" data-id="${categoria.id}"></i>
+  //           </button>
+  //           <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">
+  //             <i class="fa-solid fa-trash-can fa-lg" data-id="${categoria.id}"></i>
+  //           </button>
+  //         </div>
+  //       </td>
+  //     `;
+  //
+  //       const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
+  //       if (btnOpenModal) {
+  //         btnOpenModal.addEventListener('click', () => {
+  //           this.openModalDetailsCat(categoria.id);
+  //         });
+  //       }
+  //
+  //       this.tablaCategorias.appendChild(tr);
+  //     });
+  //
+  //     this.setupCategoriaListeners();
+  //   } catch (error) {
+  //     console.error("Error al cargar las categorías desde Google Sheets:", error);
+  //     alert("Error al cargar las categorías.");
+  //   }
+  // }
 
   async openModalDetailsCat(categoriaId) {
     const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId); // Obtener solo la categoría seleccionada
@@ -289,6 +359,8 @@ class AdminController {
           // Establecer el estado del toggle
           this.categoriaEstadoInput.checked = categoria.estado;
           this.estadoTextoSpan.textContent = categoria.estado ? 'Activo' : 'Inactivo';
+          window.scrollTo(0, 0);
+
         }
       });
     });
@@ -322,6 +394,7 @@ class AdminController {
           const resultado = await this.categoriaService.actualizarCategoria(categoriaId, {
             estado: nuevoEstado
           });
+          AdminController.googleSheetSync.sync("update", resultado);
 
           if (resultado !== null) {
             // Actualizar la vista sin recargar toda la tabla
@@ -372,16 +445,11 @@ class AdminController {
           // El servicio retornó null, indicando un error (probablemente de validación o BD)
           alert("Error al actualizar la categoría. Revisa la consola para más detalles.");
           // No reseteamos el form para que el usuario pueda corregir
-        } else if (resultado === parseInt(categoriaId)) {
-          // El servicio retornó el mismo ID, indicando éxito pero sin cambios guardados
-          alert("Categoría guardada.");
-          this.resetFormCategoria(); // Resetea el formulario
-          await this.cargarCategorias(); // Recarga la tabla
-          await this.cargarOpcionesProductoForm(); // Actualiza selects dependientes
-          await appService.refreshCache(); // Actualiza caché si es necesario
         } else {
-          // El servicio retornó un ID (puede ser el mismo o uno nuevo si la lógica de update lo retornara así)
-          // y la operación implicó cambios.
+          // El servicio retornó el objeto de categoría actualizado
+          // IMPORTANTE: Sincronizar con Google Sheets
+          AdminController.googleSheetSync.sync("update", resultado);
+
           alert("Categoría ACTUALIZADA exitosamente.");
           this.resetFormCategoria(); // Resetea el formulario
           await this.cargarCategorias(); // Recarga la tabla
@@ -396,7 +464,10 @@ class AdminController {
         resultado = await this.categoriaService.agregarCategoria(nuevaCategoria);
 
         if (resultado !== null) { // Si agregarCategoria retorna el nuevo ID
-          alert(`Categoría agregada exitosamente con ID: ${resultado}`);
+          // CORRECCIÓN: Solo sincroniza una vez
+          // AdminController.googleSheetSync.sync("create", resultado); // Envía el objeto
+
+          alert(`Categoría agregada exitosamente con ID: ${resultado.id}`); // Accede al id del objeto
           this.resetFormCategoria();
           await this.cargarCategorias();
           await this.cargarOpcionesProductoForm();
@@ -425,62 +496,73 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Marcas
   //---------------------------------------------------
-  async guardarMarca(e) {
-    e.preventDefault();
-    const marcaId = this.marcaIdInput.value;
-    const nombre = this.marcaNombreInput.value.trim();
-    const estado = this.marcaEstadoInput.checked;
 
-    if (!nombre) {
-      alert("El nombre de la marca es obligatorio.");
-      return;
-    }
+// In AdminController.js - Fix guardarMarca method
+async guardarMarca(e) {
+  e.preventDefault();
+  const marcaId = this.marcaIdInput.value;
+  const nombre = this.marcaNombreInput.value.trim();
+  const estado = this.marcaEstadoInput.checked;
 
-    let resultado;
-    try {
-      if (marcaId) {
-        // --- ACTUALIZACIÓN ---
-        console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
-        const datosParaActualizar = {
-          nombre: nombre,
-          estado: estado
-        };
-
-        resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
-
-        if (resultado === null) {
-          alert("Error al actualizar la marca. Revisa la consola.");
-        } else if (resultado === parseInt(marcaId)) {
-          alert("Marca guardada/actualizada exitosamente.");
-          this.resetFormMarca();
-          await this.cargarMarcas();
-          await this.cargarOpcionesProductoForm();
-          await appService.refreshCache();
-        }
-
-      } else {
-        // --- CREACIÓN ---
-        console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
-        const nuevaMarca = new Marca(nombre, estado);
-        resultado = await this.marcaService.agregarMarca(nuevaMarca);
-
-        if (resultado !== null) {
-          alert(`Marca agregada exitosamente con ID: ${resultado}`);
-          this.resetFormMarca();
-          await this.cargarMarcas();
-          await this.cargarOpcionesProductoForm();
-          await appService.refreshCache();
-        } else {
-          alert("Error al agregar la marca. Revisa la consola.");
-        }
-      }
-
-    } catch (error) {
-      console.error("Error en guardarMarca:", error);
-      alert("Ocurrió un error inesperado al guardar la marca. Revisa la consola.");
-    }
+  if (!nombre) {
+    alert("El nombre de la marca es obligatorio.");
+    return;
   }
 
+  let resultado;
+  try {
+    if (marcaId) {
+      // --- ACTUALIZACIÓN ---
+      console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
+      const datosParaActualizar = {
+        nombre: nombre,
+        estado: estado
+      };
+
+      resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
+
+      if (resultado !== null) {
+        // Obtener la marca actualizada para asegurar sincronización
+        const marcaActualizada = await this.marcaService.obtenerMarcaPorId(parseInt(marcaId));
+        // Descomentar si necesitas sincronizar con Google Sheets:
+        // AdminController.googleSheetSyncMarca.sync("update", marcaActualizada);
+
+        alert("Marca guardada/actualizada exitosamente.");
+        this.resetFormMarca();
+        await this.cargarMarcas(); // Recarga las marcas en la UI
+        await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
+        await appService.refreshCache(); // Refresca el caché para la UI
+      } else {
+        alert("Error al actualizar la marca. Revisa la consola.");
+      }
+
+    } else {
+      // --- CREACIÓN ---
+      console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
+      const nuevaMarca = new Marca(nombre, estado);
+      resultado = await this.marcaService.agregarMarca(nuevaMarca);
+
+      if (resultado !== null) {
+        // Obtener la marca creada para sincronización
+        const marcaCreada = await this.marcaService.obtenerMarcaPorId(resultado);
+        // Descomentar si necesitas sincronizar con Google Sheets:
+        // AdminController.googleSheetSyncMarca.sync("create", marcaCreada);
+
+        alert(`Marca agregada exitosamente con ID: ${resultado}`);
+        this.resetFormMarca();
+        await this.cargarMarcas(); // Recarga las marcas en la UI
+        await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
+        await appService.refreshCache(); // Refresca el caché para la UI
+      } else {
+        alert("Error al agregar la marca. Revisa la consola.");
+      }
+    }
+
+  } catch (error) {
+    console.error("Error en guardarMarca:", error);
+    alert("Ocurrió un error inesperado al guardar la marca. Revisa la consola.");
+  }
+}
 
   // --- Asegúrate de tener el método resetFormMarca ---
   resetFormMarca() {
@@ -606,6 +688,7 @@ class AdminController {
           const resultado = await this.marcaService.actualizarMarca(marcaId, {
             estado: nuevoEstado
           });
+          AdminController.googleSheetSyncMarca.sync("update", resultado);
 
           if (resultado !== null) {
             // Actualizar la vista sin recargar toda la tabla
@@ -773,8 +856,6 @@ class AdminController {
     }, 300);
   }
 
-
-  // setupProveedorListeners
   setupProveedorListeners() {
     // Editar
     this.tablaProveedores.querySelectorAll('.edit-proveedor').forEach(button => {
@@ -797,7 +878,6 @@ class AdminController {
         }
       });
     });
-
     // Eliminar Proveedor
     this.tablaProveedores.querySelectorAll('.delete-proveedor').forEach(button => { // forEach para el boton eliminar
       button.addEventListener('click', async (e) => {               //
@@ -817,7 +897,6 @@ class AdminController {
         }
       });
     });
-
     // Nuevo: Toggle para cambiar estado en la tabla
     this.tablaProveedores.querySelectorAll('.estado-toggleProveedor').forEach(toggle => {
       toggle.addEventListener('change', async (e) => {
@@ -828,6 +907,8 @@ class AdminController {
           const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {
             estado: nuevoEstado
           });
+          AdminController.googleSheetSyncProveedor.sync("update", resultado);
+
 
           if (resultado !== null) {
             // Actualizar la vista sin recargar toda la tabla
@@ -849,6 +930,7 @@ class AdminController {
   }
 
   // Enviar Formulario Proveedor:  CREATE y UPDATE:
+// In AdminController.js - Fix guardarProveedor method
   async guardarProveedor(e) { // METODO, RECIBE EL EVENTO
     e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
     const proveedorId = this.proveedorIdInput.value;       //Desde elemento del DOM! -> HTML
@@ -856,57 +938,65 @@ class AdminController {
     const direccion = this.proveedorDireccionInput.value;
     const telefono = this.proveedorTelefonoInput.value;
     const estado = this.proveedorEstadoInput.checked; // Obtener el estado del checkbox
+
     if (!nombre || !direccion) {
       alert("Campos obligatorios");
       return;  // Salida temprana
     }
+
     let resultado;
     try {
-      if (proveedorId) {  // Si ya  id , es para:  *ACTUALIZACION*:
-
+      if (proveedorId) {  // Si ya hay id, es para:  *ACTUALIZACION*:
         const proveedorExistente = await this.proveedorService.obtenerProveedorPorId(parseInt(proveedorId)); //Buscar
         //Cambiar nombre, segun  *NUEVO* VALOR:
         proveedorExistente.nombre = nombre;
         proveedorExistente.direccion = direccion;
         proveedorExistente.telefono = telefono;
-        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
+        proveedorExistente.estado = estado; // Asegúrate de actualizar también el estado
 
+        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
         resultado = await this.proveedorService.actualizarProveedor(parseInt(proveedorId), proveedorExistente); // Persistir cambios
-        //Actualizar Vista:
-        alert("Proveedor ACTUALIZADO") //Feedback al usuario!
+
+        // Importante: resultado ahora contiene el objeto completo del proveedor actualizado (ver el return en actualizarProveedor)
+        if (resultado) {
+          // Pasamos el objeto completo al método sync
+          AdminController.googleSheetSyncProveedor.sync("update", resultado);
+          alert("Proveedor ACTUALIZADO"); //Feedback al usuario!
+        }
       } else { // Si NO, ... CREAR
         const nuevoProveedor = new Proveedor(nombre, telefono, direccion, estado); // crea *INSTANCIA* Proveedor
 
         //Asigna
-        resultado = await this.proveedorService.agregarProveedor(nuevoProveedor); //  await *RETORNA* id Generado.
+        const proveedorId = await this.proveedorService.agregarProveedor(nuevoProveedor); //  await *RETORNA* id Generado.
 
         //Solo Si id *EXISTE* despues de haber sido agregado
-        if (resultado) {
+        if (proveedorId) {
+          // Obtenemos el proveedor completo para sincronizar
+          const proveedorCompleto = await this.proveedorService.obtenerProveedorPorId(proveedorId);
+          // Pasamos el objeto completo al método sync
+          AdminController.googleSheetSyncProveedor.sync("create", proveedorCompleto);
 
-          //Añadir Fila
-          alert(`EXITO Agregando Proveedor, ID ${resultado} `);
-
-        } else { // Fallo registro,  por  razon
+          resultado = proveedorId; // Mantenemos resultado para el código siguiente
+          alert(`EXITO Agregando Proveedor, ID ${proveedorId}`);
+        } else { // Fallo registro, por alguna razón
           throw new Error('Errores en Datos o Validacion.');
-
         } // cierra else
-      }
-      // Fin  if-else
+      } // Fin if-else
+
       if (resultado) {
-        this.resetFormProveedor()
+        this.resetFormProveedor();
         //Cargar Opciones actualizadas
         await this.cargarProveedores();// llama, volver cargar los datos, *ACTUALIZADOS*.
         await this.cargarOpcionesProductoForm();
         await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
-
       }
 
     } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
       console.error("Error :", error); // Programador
-      alert("Revise consola") // Feedback al Usuario
+      alert("Revise consola"); // Feedback al Usuario
     } //Finaliza TRY-CATCH
+  } //CIERRA METODO guardarProveedor()
 
-  } //CIERRA METODO  guardarProveedor()
   // Reset
   resetFormProveedor() {
     this.proveedorIdInput.value = '';
@@ -1071,57 +1161,108 @@ class AdminController {
   } //cierra metodo
 
   // Enviar Formulario Cliente:  CREATE y UPDATE:
-  async guardarCliente(e) { // METODO, RECIBE EL EVENTO
-    e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
-    const clienteId = this.clienteIdInput.value;       //Desde elemento del DOM! -> HTML
-    const nombre = this.clienteNombreInput.value;       // Valor en la caja texto
+  // async guardarCliente(e) { // METODO, RECIBE EL EVENTO
+  //   e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
+  //   const clienteId = this.clienteIdInput.value;       //Desde elemento del DOM! -> HTML
+  //   const nombre = this.clienteNombreInput.value;       // Valor en la caja texto
+  //   const telefono = this.clienteTelefonoInput.value;
+  //   const direccion = this.clienteDireccionInput.value
+  //
+  //   if (!nombre || !direccion || !telefono) {
+  //     alert("Campos obligatorios");
+  //     return;  // Salida temprana
+  //   }
+  //   let resultado;
+  //   try {
+  //     if (clienteId) {  // Si ya  id , es para:  *ACTUALIZACION*:
+  //
+  //       const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId)); //Buscar
+  //       //Cambiar nombre, segun  *NUEVO* VALOR:
+  //       clienteExistente.nombre = nombre;
+  //       clienteExistente.telefono = telefono;
+  //       clienteExistente.direccion = direccion;
+  //       resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente); // Persistir cambios
+  //       //Actualizar Vista:
+  //       // Pasamos el objeto completo al método sync
+  //       AdminController.googleSheetSyncCliente.sync("update", resultado);
+  //       alert("Cliente ACTUALIZADO") //Feedback al usuario!
+  //     } else { // Si NO, ... CREAR
+  //       const nuevoCliente = new Cliente(nombre, telefono, direccion); // crea *INSTANCIA* Cliente
+  //       //Asigna
+  //       resultado = await this.clienteService.agregarCliente(nuevoCliente); //  await *RETORNA* id Generado.
+  //       //Solo Si id *EXISTE* despues de haber sido agregado
+  //       if (resultado) {
+  //         //Añadir Fila
+  //         AdminController.googleSheetSyncCliente.sync("create", resultado);
+  //         alert(`EXITO Agregando Cliente, ID ${resultado} `);
+  //       } else { // Fallo registro,  por  razon
+  //         throw new Error('Errores en Datos o Validacion.');
+  //       } // cierra else
+  //     }
+  //     // Fin  if-else
+  //
+  //     if (resultado) {
+  //       this.resetFormCliente()
+  //       //Cargar Opciones actualizadas
+  //       await this.cargarClientes();// llama, volver cargar los datos, *ACTUALIZADOS*.
+  //       await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
+  //     }
+  //
+  //   } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
+  //     console.error("Error :", error); // Programador
+  //     alert("Revise consola") // Feedback al Usuario
+  //   } //Finaliza TRY-CATCH
+  // } //CIERRA METODO  guardarCliente()
+  async guardarCliente(e) {
+    e.preventDefault();
+    const clienteId = this.clienteIdInput.value;
+    const nombre = this.clienteNombreInput.value;
     const telefono = this.clienteTelefonoInput.value;
-    const direccion = this.clienteDireccionInput.value
+    const direccion = this.clienteDireccionInput.value;
 
     if (!nombre || !direccion || !telefono) {
       alert("Campos obligatorios");
-      return;  // Salida temprana
+      return;
     }
+
     let resultado;
     try {
-      if (clienteId) {  // Si ya  id , es para:  *ACTUALIZACION*:
-
-        const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId)); //Buscar
-        //Cambiar nombre, segun  *NUEVO* VALOR:
+      if (clienteId) {  // Actualización
+        const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId));
         clienteExistente.nombre = nombre;
         clienteExistente.telefono = telefono;
         clienteExistente.direccion = direccion;
-        resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente); // Persistir cambios
-        //Actualizar Vista:
-        alert("Cliente ACTUALIZADO") //Feedback al usuario!
-      } else { // Si NO, ... CREAR
-        const nuevoCliente = new Cliente(nombre, telefono, direccion); // crea *INSTANCIA* Cliente
-        //Asigna
-        resultado = await this.clienteService.agregarCliente(nuevoCliente); //  await *RETORNA* id Generado.
-        //Solo Si id *EXISTE* despues de haber sido agregado
+        resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente);
+
+        // Eliminar esta línea ya que ahora la sincronización se hace dentro del servicio
+        // AdminController.googleSheetSyncCliente.sync("update", resultado);
+
+        alert("Cliente ACTUALIZADO");
+      } else { // Crear nuevo
+        const nuevoCliente = new Cliente(nombre, telefono, direccion);
+        resultado = await this.clienteService.agregarCliente(nuevoCliente);
+
         if (resultado) {
-          //Añadir Fila
-          alert(`EXITO Agregando Cliente, ID ${resultado} `);
-        } else { // Fallo registro,  por  razon
+          // Aquí también podrías considerar mover esta sincronización al método agregarCliente
+          // AdminController.googleSheetSyncCliente.sync("create", resultado);
+          alert(`EXITO Agregando Cliente, ID ${resultado.id}`);
+        } else {
           throw new Error('Errores en Datos o Validacion.');
-        } // cierra else
+        }
       }
-      // Fin  if-else
 
       if (resultado) {
-        this.resetFormCliente()
-        //Cargar Opciones actualizadas
-        await this.cargarClientes();// llama, volver cargar los datos, *ACTUALIZADOS*.
-        await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
+        this.resetFormCliente();
+        await this.cargarClientes();
+        await appService.refreshCache();
       }
+    } catch (error) {
+      console.error("Error :", error);
+      alert("Revise consola");
+    }
+  }
 
-    } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-      console.error("Error :", error); // Programador
-      alert("Revise consola") // Feedback al Usuario
-    } //Finaliza TRY-CATCH
-  } //CIERRA METODO  guardarCliente()
   // Reset
-
   resetFormCliente() {
     this.clienteIdInput.value = '';
     this.clienteNombreInput.value = '';
