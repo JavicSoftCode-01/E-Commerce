@@ -76,12 +76,13 @@ class AdminController {
     this.proveedorEstadoInput.addEventListener('change', () => {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
-    // Configurar el listener para el formulario de proveedor
-    // this.setupFormListener();
     // Instancia del servicio de proveedores
     this.proveedorService = new ProveedorService();
     // Iniciar la carga de proveedores
     this.cargarProveedores();
+     setInterval(() => {
+      this.refreshProviders();
+    }, 300);
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
     // Elementos Clientes
@@ -120,6 +121,12 @@ class AdminController {
     this.tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
 
     this.setupEventListeners();
+  }
+
+    // Método para refrescar la tabla forzando la sincronización con Google Sheets
+  async refreshProviders() {
+    // Se fuerza la sincronización para obtener los datos actualizados
+    await this.cargarProveedores(true);
   }
 
     // Funciones para el Loader
@@ -779,9 +786,17 @@ class AdminController {
   // }
 
   // Cargar la tabla de Proveedores
-  async cargarProveedores() {
+  /**
+   * Cargar la tabla de proveedores.
+   * @param {boolean} forceSync - Si es true, se fuerza la sincronización con Google Sheets.
+   */
+  async cargarProveedores(forceSync = false) {
     try {
       this.showLoader();
+      // Si se solicita forzar la sincronización, se llama al método forceSyncNow del servicio
+      if (forceSync) {
+        await this.proveedorService.forceSyncNow();
+      }
       const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
       this.tablaProveedores.innerHTML = ''; // Limpiar la tabla
 
@@ -797,7 +812,7 @@ class AdminController {
         tr.innerHTML = `
           <td class="text-center">${proveedor.nombre}</td>
           <td class="text-center">
-            <a href="tel:${telefonoFormateado} " title="Llamar ${telefonoFormateado}" style="font-size: 22px;">
+            <a href="tel:${telefonoFormateado}" title="Llamar ${telefonoFormateado}" style="font-size: 22px;">
               <i class="fa fa-phone fa-lg"></i>
             </a>
             <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
@@ -827,15 +842,14 @@ class AdminController {
           </td>
         `;
 
-        // Listener para abrir el modal de detalles (uso de currentTarget)
+        // Listener para abrir el modal de detalles
         tr.querySelector('.btn-details').addEventListener('click', async (e) => {
           const id = parseInt(e.currentTarget.dataset.id);
           await this.openModalDetailsProveedor(id);
         });
 
-        // Listener para editar proveedor
+        // Listener para editar proveedor (evita múltiples clics)
         tr.querySelector('.edit-button').addEventListener('click', async (e) => {
-          // Deshabilitar temporalmente el botón para evitar múltiples clicks
           const btn = e.currentTarget;
           btn.disabled = true;
           try {
@@ -851,19 +865,18 @@ class AdminController {
               window.scrollTo(0, 0);
             }
           } finally {
-            // Habilitar el botón después de la acción
             btn.disabled = false;
           }
         });
 
-        // Listener para eliminar proveedor (uso de currentTarget)
+        // Listener para eliminar proveedor
         tr.querySelector('.delete-button').addEventListener('click', async (e) => {
           const id = parseInt(e.currentTarget.dataset.id);
           if (confirm("¿Está seguro de eliminar?")) {
             this.showLoader();
             const result = await this.proveedorService.eliminarProveedor(id);
             if (result !== null) {
-              await this.cargarProveedores();
+              await this.cargarProveedores(forceSync); // Mantener la opción de forzar sincronización
             }
             this.hideLoader();
           }
@@ -924,7 +937,6 @@ class AdminController {
       const modalDetails = document.getElementById('proveedorModal');
       modalDetails.classList.remove('hidden');
       document.body.classList.add('modal-open');
-      // Agregamos un retardo para asegurar la animación
       requestAnimationFrame(() => {
         modalDetails.classList.add('show');
       });
