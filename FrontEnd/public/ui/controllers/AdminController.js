@@ -19,12 +19,6 @@ class AdminController {
   static googleSheetSyncMarca = new GoogleSheetSync(
     'https://script.google.com/macros/s/AKfycbzrQBaqY-DyXEiKSd_BZQjrRCwGX2Q-mehjcjucQQUm2SWoDOdzu6ZJ5bbk9ubEid_i/exec'
   );
-  static googleSheetSyncProveedor = new GoogleSheetSync(
-    'https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec'
-  );
-  static googleSheetSyncCliente = new GoogleSheetSync(
-    'https://script.google.com/macros/s/AKfycbz3HgLCJkEZ3-NUZ-fCPUbJLwpfnuR_80DiijfuJSooFSueIBORx-4lWc5pMt-5Taqh/exec'
-  );
 
   constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService) {
     this.categoriaService = categoriaService;
@@ -82,16 +76,12 @@ class AdminController {
     this.proveedorEstadoInput.addEventListener('change', () => {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
-
     // Configurar el listener para el formulario de proveedor
-    this.setupFormListener();
-
+    // this.setupFormListener();
     // Instancia del servicio de proveedores
     this.proveedorService = new ProveedorService();
-
     // Iniciar la carga de proveedores
     this.cargarProveedores();
-
     //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
 
     // Elementos Clientes
@@ -130,6 +120,19 @@ class AdminController {
     this.tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
 
     this.setupEventListeners();
+  }
+
+    // Funciones para el Loader
+  showLoader() {
+    requestAnimationFrame(() => {
+        document.getElementById('loaderOverlay').classList.remove('hidden');
+    });
+  }
+
+  hideLoader() {
+    requestAnimationFrame(() => {
+        document.getElementById('loaderOverlay').classList.add('hidden');
+    });
   }
 
   setupEventListeners() {
@@ -770,22 +773,10 @@ class AdminController {
   //---------------------------------------------------
 
   // adminController.js
-  // Funciones para el Loader
-  showLoader() {
-    requestAnimationFrame(() => {
-        document.getElementById('loaderOverlay').classList.remove('hidden');
-    });
-  }
 
-  hideLoader() {
-    requestAnimationFrame(() => {
-        document.getElementById('loaderOverlay').classList.add('hidden');
-    });
-  }
-
-   setupFormListener() {
-    this.formProveedor.addEventListener('submit', (e) => this.guardarProveedor(e));
-  }
+  //  setupFormListener() {
+  //   this.formProveedor.addEventListener('submit', (e) => this.guardarProveedor(e));
+  // }
 
   // Cargar la tabla de Proveedores
   async cargarProveedores() {
@@ -806,7 +797,7 @@ class AdminController {
         tr.innerHTML = `
           <td class="text-center">${proveedor.nombre}</td>
           <td class="text-center">
-            <a href="tel:${proveedor.telefono}" title="Llamar ${proveedor.telefono}" style="font-size: 22px;">
+            <a href="tel:${telefonoFormateado} " title="Llamar ${telefonoFormateado}" style="font-size: 22px;">
               <i class="fa fa-phone fa-lg"></i>
             </a>
             <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
@@ -815,9 +806,7 @@ class AdminController {
             </a>
           </td>
           <td class="text-center">
-            <button class="btn-details" data-id="${proveedor.id}">
-              <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue;"></i>
-            </button>
+              <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${proveedor.id}"></i>
           </td>
           <td class="text-center">
             <div class="estado-cell">
