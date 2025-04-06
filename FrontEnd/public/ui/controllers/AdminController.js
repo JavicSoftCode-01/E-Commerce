@@ -60,9 +60,8 @@ class AdminController {
     this.marcaEstadoInput.addEventListener('change', () => {
       this.estadoMarcaTextoSpan.textContent = this.marcaEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
-    // this.btnResetMarcaForm = document.getElementById('resetMarcaForm')//ya no es necesario
 
-    // Elementos Proveedores con los IDs reales
+    // Elementos Proveedores con los IDs reales  =======================================
     this.formProveedor = document.getElementById('formProveedor');
     this.proveedorIdInput = document.getElementById('proveedorId');
     this.proveedorNombreInput = document.getElementById('proveedorNombre');
@@ -80,15 +79,7 @@ class AdminController {
     this.proveedorService = new ProveedorService();
     // Iniciar la carga de proveedores
     this.cargarProveedores();
-// En el constructor:
-    setInterval(async () => {
-      // Forzamos la sincronización sin mostrar el overlay completo
-      await this.proveedorService.forceSyncNow();
-      // Actualizamos la tabla sin usar el loader
-      this.cargarProveedores(false);
-    }, 500);
-
-    //this.btnResetProveedorForm = document.getElementById('resetProveedorForm'); //ya no es necesario
+    //========================================================================
 
     // Elementos Clientes
     this.formCliente = document.getElementById('formCliente');
@@ -97,7 +88,6 @@ class AdminController {
     this.clienteTelefonoInput = document.getElementById('clienteTelefono');
     this.clienteDireccionInput = document.getElementById('clienteDireccion');
     this.tablaClientes = document.getElementById('tablaClientes').querySelector('tbody');
-    // this.btnResetClienteForm = document.getElementById('resetClienteForm'); //ya no es necesario
 
     // Elementos Productos
     this.formProducto = document.getElementById('formProducto');
@@ -121,17 +111,16 @@ class AdminController {
       this.estadoProductoTextoSpan.textContent = this.productoEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
 
+    // =====================================================================
+    // Forzamos la sincronización sin mostrar el overlay completo
+    setInterval(async () => {
+      await this.proveedorService.forceSyncNow();
+      // Actualizamos la tabla sin usar el loader
+      this.cargarProveedores(false);
+    }, 50);
 
-    // Elementos Ventas (factura)
-    this.tablaVentas = document.getElementById('tablaVentas').querySelector('tbody');
-
+  // Envio de formularios
     this.setupEventListeners();
-  }
-
-  // Método para refrescar la tabla forzando la sincronización con Google Sheets
-  async refreshProviders() {
-    // Se fuerza la sincronización para obtener los datos actualizados
-    await this.cargarProveedores(true);
   }
 
   // Funciones para el Loader
@@ -147,6 +136,7 @@ class AdminController {
     });
   }
 
+  // Envio de formularios
   setupEventListeners() {
     this.adminTabs.forEach(tab => {
       tab.addEventListener('click', () => this.cargarSeccionAdmin(tab.dataset.tab));
@@ -182,7 +172,7 @@ class AdminController {
     });
   }
 
-
+  // Mostrar el panel de administración UI
   async mostrarPanelAdmin() {
     //Ocultar otros
     document.getElementById('tienda').classList.add('hidden');
@@ -192,6 +182,7 @@ class AdminController {
     this.cargarSeccionAdmin('categorias');  // Por defecto
   }
 
+  // Cargar la sección de administración seleccionada
   async cargarSeccionAdmin(tabName) {
     this.adminSections.forEach(section => section.classList.add('hidden'));
     document.getElementById('admin' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
@@ -226,8 +217,6 @@ class AdminController {
   // Métodos CRUD para Categorías
   //---------------------------------------------------
   // adminController.js
-
-
   async cargarCategorias() {
     try {
       const categorias = await appService.getCategorias();
@@ -282,59 +271,6 @@ class AdminController {
       alert("Error al cargar las categorías.");
     }
   }
-
-  // async cargarCategorias() {
-  //   try {
-  //     const categorias = await this.categoriaService.obtenerTodasLasCategorias();
-  //     this.tablaCategorias.innerHTML = '';
-  //
-  //     if (!Array.isArray(categorias)) {
-  //       console.error("Error: los datos de categorías no son un array.");
-  //       return;
-  //     }
-  //
-  //     categorias.forEach(categoria => {
-  //       const tr = document.createElement('tr');
-  //       tr.innerHTML = `
-  //       <td class="text-center">${categoria.nombre}</td>
-  //       <td class="text-center">
-  //         <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer;" id="btnOpenModalDetails" data-id="${categoria.id}"></i>
-  //       </td>
-  //       <td class="text-center">
-  //         <div class="estado-cell">
-  //           <span class="estado-indicator hidden">${categoria.iconTrueFalse()}</span>
-  //           <input type="checkbox" id="categoriaEstadoToggle${categoria.id}" class="toggle-input estado-toggle" data-id="${categoria.id}" ${categoria.estado ? 'checked' : ''}>
-  //           <label for="categoriaEstadoToggle${categoria.id}" class="toggle-label"></label>
-  //         </div>
-  //       </td>
-  //       <td class="text-center">
-  //         <div class="action-buttons">
-  //           <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">
-  //             <i class="fa-solid fa-pencil fa-lg" data-id="${categoria.id}"></i>
-  //           </button>
-  //           <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">
-  //             <i class="fa-solid fa-trash-can fa-lg" data-id="${categoria.id}"></i>
-  //           </button>
-  //         </div>
-  //       </td>
-  //     `;
-  //
-  //       const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
-  //       if (btnOpenModal) {
-  //         btnOpenModal.addEventListener('click', () => {
-  //           this.openModalDetailsCat(categoria.id);
-  //         });
-  //       }
-  //
-  //       this.tablaCategorias.appendChild(tr);
-  //     });
-  //
-  //     this.setupCategoriaListeners();
-  //   } catch (error) {
-  //     console.error("Error al cargar las categorías desde Google Sheets:", error);
-  //     alert("Error al cargar las categorías.");
-  //   }
-  // }
 
   async openModalDetailsCat(categoriaId) {
     const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId); // Obtener solo la categoría seleccionada
@@ -522,8 +458,7 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Marcas
   //---------------------------------------------------
-
-// In AdminController.js - Fix guardarMarca method
+// In AdminController.js
   async guardarMarca(e) {
     e.preventDefault();
     const marcaId = this.marcaIdInput.value;
@@ -656,7 +591,6 @@ class AdminController {
     }
   }
 
-
   setupMarcaListeners() {
     const tabla = document.getElementById('tabla-marcas-body'); // ID del tbody de marcas
     if (!tabla) return;
@@ -735,8 +669,6 @@ class AdminController {
     });
   }
 
-
-  // Necesitarás un método similar a openModalDetailsCat pero para Marcas
   async openModalDetailsMar(marcaId) {
     const marca = await this.marcaService.obtenerMarcaPorId(marcaId); // Usa el servicio de Marca
     const modalDetails = document.getElementById('marcaModal'); // Asegúrate que tienes un modal con este ID
@@ -767,7 +699,6 @@ class AdminController {
     });
   }
 
-  // Necesitarás un método para cerrar el modal de Marca
   closeModalDetailsMar() {
     const modalDetails = document.getElementById('marcaModal'); // ID del modal de marca
     if (!modalDetails) return;
@@ -783,20 +714,10 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Proveedores
   //---------------------------------------------------
-
+  
   // adminController.js
-
-  //  setupFormListener() {
-  //   this.formProveedor.addEventListener('submit', (e) => this.guardarProveedor(e));
-  // }
-
   // Cargar la tabla de Proveedores
-  /**
-   * Cargar la tabla de proveedores.
-   * @param mostrarLoader
-   */
-// Cargar la tabla de Proveedores
-async cargarProveedores(mostrarLoader = true) {
+  async cargarProveedores(mostrarLoader = true) {
   try {
     if (mostrarLoader) this.showLoader();
     // Si se requiere forzar la sincronización, se puede llamar previamente a forceSyncNow en el polling
@@ -824,7 +745,7 @@ async cargarProveedores(mostrarLoader = true) {
           </a>
         </td>
         <td class="text-center">
-          <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${proveedor.id}"></i>
+          <i type="buttom" class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${proveedor.id}"></i>
         </td>
         <td class="text-center">
           <div class="estado-cell">
@@ -836,10 +757,10 @@ async cargarProveedores(mostrarLoader = true) {
         <td class="text-center">
           <div class="action-buttons">
             <button class="action-button edit-button" data-id="${proveedor.id}">
-              <i class="fa-solid fa-pencil fa-lg"></i>
+              <i class="fa-solid fa-pencil fa-lg" data-id="${proveedor.id}"></i>
             </button>
             <button class="action-button delete-button" data-id="${proveedor.id}">
-              <i class="fa-solid fa-trash-can fa-lg"></i>
+              <i class="fa-solid fa-trash-can fa-lg" data-id="${proveedor.id}"></i>
             </button>
           </div>
         </td>
@@ -923,34 +844,7 @@ async cargarProveedores(mostrarLoader = true) {
   }
 }
 
-
-  // Función para abrir el modal con detalles del proveedor
-  // async openModalDetailsProveedor(proveedorId) {
-  //   try {
-  //     this.showLoader();
-  //     const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId);
-  //     if (!proveedor) {
-  //       console.error("No se encontró el proveedor");
-  //       return;
-  //     }
-  //     document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
-  //     document.getElementById('modalTelefonoProveedor').textContent = proveedor.telefono;
-  //     document.getElementById('modalDireccionProveedor').textContent = proveedor.direccion;
-  //     document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
-  //     document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
-  //     document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
-  //     const modalDetails = document.getElementById('proveedorModal');
-  //     modalDetails.classList.remove('hidden');
-  //     document.body.classList.add('modal-open');
-  //     requestAnimationFrame(() => {
-  //       modalDetails.classList.add('show');
-  //     });
-  //   } catch (error) {
-  //     console.error("Error abriendo el modal de detalles:", error);
-  //   } finally {
-  //     this.hideLoader();
-  //   }
-  // }
+  // Abrir modal de detalles del proveedor
   async openModalDetailsProveedor(proveedorId) {
     try {
       this.showLoader();
@@ -1048,268 +942,15 @@ async cargarProveedores(mostrarLoader = true) {
     this.estadoProveedorTextoSpan.textContent = 'Activo';
   }
 
-//   async cargarProveedores() {
-//     try {
-//       const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
-//       this.tablaProveedores.innerHTML = ''; // Limpiar
-//
-//       if (!Array.isArray(proveedores)) {
-//         console.error("Error: proveedores is not an array.");
-//         return;
-//       }
-//       proveedores.forEach(proveedor => {
-//         const tr = document.createElement('tr');   // row
-//         const telefonoFormateado = this.formatearTelefono(proveedor.telefono); // Formatear el teléfono
-//         tr.innerHTML = `
-//                <td class="text-center">${proveedor.nombre}</td>
-//
-//               <td class="text-center">
-//                 <!-- Llamada telefónica -->
-//                 <a href="tel:${proveedor.telefono}" title="LLamar vía telefónica ${proveedor.telefono}" style="font-size: 22px;">
-//                   <i class="fa fa-phone fa-lg"></i>
-//                 </a>
-//
-//                 <!-- WhatsApp -->
-// <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
-//    href="whatsapp://send?phone=${telefonoFormateado}&text=Hola muy buenas tardes, ${proveedor.nombre}, deseo realizar una compra del producto: ____ . Gracias!"
-//    title="Chatear por WhatsApp">
-//   <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
-// </a>
-//
-//               </td>
-//
-//              <!--   <td class="text-center">${proveedor.direccion}</td>-->
-//                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProveedor" data-id="${proveedor.id}"></i></td>
-//
-//                  <td class="text-center">
-//                     <div class="estado-cell">
-//                       <span class="estado-indicatorProveedor hidden">${proveedor.iconTrueFalse()}</span>
-//                       <input type="checkbox" id="proveedorEstadoToggle${proveedor.id}" class="toggle-input estado-toggleProveedor" data-id="${proveedor.id}" ${proveedor.estado ? 'checked' : ''}>
-//                       <label for="proveedorEstadoToggle${proveedor.id}" class="toggle-label"></label>
-//                     </div>
-//                   </td>
-//
-//               <td class="text-center">
-//                 <div class="action-buttons">
-//                  <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${proveedor.id}"></i></button>
-//                  <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${proveedor.id}"></i></button>
-//                 </div>
-//               </td>
-//           `;
-//         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProveedor');
-//         if (btnOpenModal) {
-//           btnOpenModal.addEventListener('click', () => {
-//             this.openModalDetailsProveedor(proveedor.id); // Pasar ID de la proveedor seleccionada
-//           });
-//         }
-//         this.tablaProveedores.appendChild(tr);  // Append, al tbody!
-//       });
-//
-//       // Configurar listeners para los botones de editar y eliminar
-//       this.setupProveedorListeners();
-//
-//     } catch (error) {
-//       console.error("Error al cargar los Proveedores:", error);
-//       alert("Error al cargar los Proveedores."); // Mejor feedback al usuario
-//     }
-//   }
-//
-//   async openModalDetailsProveedor(proveedorId) {
-//      console.log("Proveedor obtenido:", proveedor); // Agregar esta línea
-//     const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // Obtener solo la proveedor seleccionada
-//     const modalDetails = document.getElementById('proveedorModal');
-//     if (!proveedor) {
-//       console.error("No se encontró el proveedor");
-//       return;
-//     }
-//     // Llenar el modal con la información correcta
-//     document.getElementById('modalNombreProveedor').textContent = proveedor.nombre;
-//     document.getElementById('modalTelefonoProveedor').innerHTML = proveedor.telefono;
-//     document.getElementById('modalDireccionProveedor').innerHTML = proveedor.direccion;
-//     document.getElementById('modalEstadoProveedor').innerHTML = proveedor.iconTrueFalse();
-//     document.getElementById('modalFechaCreacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaCreacion);
-//     document.getElementById('modalFechaActualizacionProveedor').textContent = proveedor.formatEcuadorDateTime(proveedor.fechaActualizacion);
-//     // Mostrar el modal
-//     modalDetails.classList.remove('hidden');
-//     document.body.classList.add('modal-open');
-//     requestAnimationFrame(() => {
-//       modalDetails.classList.add('show');
-//     });
-//   }
-//
-//   closeModalDetailsProveedor() {
-//     const modalDetails = document.getElementById('proveedorModal');
-//     modalDetails.classList.remove('show');
-//     document.body.classList.remove('modal-open');
-//     setTimeout(() => {
-//       modalDetails.classList.add('hidden');
-//     }, 300);
-//   }
-//
-//   setupProveedorListeners() {
-//     // Editar
-//     this.tablaProveedores.querySelectorAll('.edit-proveedor').forEach(button => {
-//       button.addEventListener('click', async (e) => { // Pone Evento click
-//
-//         const proveedorId = parseInt(e.target.dataset.id);        // Obtiene
-//
-//         const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId); // proveedor por ID
-//
-//         if (proveedor) { // proveedor existe!
-//           // Cargar  form
-//           this.proveedorIdInput.value = proveedor.id;   // carga de datos
-//           this.proveedorNombreInput.value = proveedor.nombre;//
-//           this.proveedorDireccionInput.value = proveedor.direccion;
-//           this.proveedorTelefonoInput.value = proveedor.telefono;
-//           // Establecer el estado del toggle en el formulario
-//           this.proveedorEstadoInput.checked = proveedor.estado;
-//           this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
-//           window.scrollTo(0, 0);
-//         }
-//       });
-//     });
-//     // Eliminar Proveedor
-//     this.tablaProveedores.querySelectorAll('.delete-proveedor').forEach(button => { // forEach para el boton eliminar
-//       button.addEventListener('click', async (e) => {               //
-//         const proveedorId = parseInt(e.target.dataset.id);     //
-//         // --- CONFIRMACION ---
-//         if (confirm("Esta seguro de eliminar?")) { //
-//
-//           //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-//           const result = await this.proveedorService.eliminarProveedor(proveedorId);  //
-//           //Actualiza
-//           if (result !== null) {
-//             await this.cargarProveedores();      // Vuelve a cargar proveedores
-//             // Para actualizar select de Productos.
-//             await this.cargarOpcionesProductoForm(); //   productos
-//
-//           }
-//         }
-//       });
-//     });
-//     // Nuevo: Toggle para cambiar estado en la tabla
-//     this.tablaProveedores.querySelectorAll('.estado-toggleProveedor').forEach(toggle => {
-//       toggle.addEventListener('change', async (e) => {
-//         const proveedorId = parseInt(e.target.dataset.id);
-//         const nuevoEstado = e.target.checked;
-//
-//         try {
-//           const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {
-//             estado: nuevoEstado
-//           });
-//           AdminController.googleSheetSyncProveedor.sync("update", resultado);
-//
-//
-//           if (resultado !== null) {
-//             // Actualizar la vista sin recargar toda la tabla
-//             const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProveedor');
-//             if (tdEstado) {
-//               tdEstado.innerHTML = nuevoEstado ?
-//                 '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
-//                 '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-//             }
-//           }
-//         } catch (error) {
-//           console.error('Error al actualizar estado:', error);
-//           // Revertir cambio en UI en caso de error
-//           e.target.checked = !nuevoEstado;
-//           alert("Error al actualizar el estado del proveedor.");
-//         }
-//       });
-//     });
-//   }
-//
-//   // Enviar Formulario Proveedor:  CREATE y UPDATE:
-//   async guardarProveedor(e) { // METODO, RECIBE EL EVENTO
-//     e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
-//     const proveedorId = this.proveedorIdInput.value;       //Desde elemento del DOM! -> HTML
-//     const nombre = this.proveedorNombreInput.value;       // Valor en la caja texto
-//     const direccion = this.proveedorDireccionInput.value;
-//     const telefono = this.proveedorTelefonoInput.value;
-//     const estado = this.proveedorEstadoInput.checked; // Obtener el estado del checkbox
-//
-//     if (!nombre || !direccion) {
-//       alert("Campos obligatorios");
-//       return;  // Salida temprana
-//     }
-//
-//     let resultado;
-//     try {
-//       if (proveedorId) {  // Si ya hay id, es para:  *ACTUALIZACION*:
-//         const proveedorExistente = await this.proveedorService.obtenerProveedorPorId(parseInt(proveedorId)); //Buscar
-//         //Cambiar nombre, segun  *NUEVO* VALOR:
-//         proveedorExistente.nombre = nombre;
-//         proveedorExistente.direccion = direccion;
-//         proveedorExistente.telefono = telefono;
-//         proveedorExistente.estado = estado; // Asegúrate de actualizar también el estado
-//
-//         // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
-//         resultado = await this.proveedorService.actualizarProveedor(parseInt(proveedorId), proveedorExistente); // Persistir cambios
-//
-//         // Importante: resultado ahora contiene el objeto completo del proveedor actualizado (ver el return en actualizarProveedor)
-//         if (resultado) {
-//           // Pasamos el objeto completo al método sync
-//           // AdminController.googleSheetSyncProveedor.sync("update", resultado);
-//           alert("Proveedor ACTUALIZADO"); //Feedback al usuario!
-//         }
-//       } else { // Si NO, ... CREAR
-//         const nuevoProveedor = new Proveedor(nombre, telefono, direccion, estado); // crea *INSTANCIA* Proveedor
-//
-//         //Asigna
-//         const proveedorId = await this.proveedorService.agregarProveedor(nuevoProveedor); //  await *RETORNA* id Generado.
-//
-//         //Solo Si id *EXISTE* despues de haber sido agregado
-//         if (proveedorId) {
-//           // Obtenemos el proveedor completo para sincronizar
-//           const proveedorCompleto = await this.proveedorService.obtenerProveedorPorId(proveedorId);
-//           // Pasamos el objeto completo al método sync
-//           // AdminController.googleSheetSyncProveedor.sync("create", proveedorCompleto);
-//
-//           resultado = proveedorId; // Mantenemos resultado para el código siguiente
-//           alert(`EXITO Agregando Proveedor, ID ${proveedorId}`);
-//         } else { // Fallo registro, por alguna razón
-//           throw new Error('Errores en Datos o Validacion.');
-//         } // cierra else
-//       } // Fin if-else
-//
-//       if (resultado) {
-//         this.resetFormProveedor();
-//         //Cargar Opciones actualizadas
-//         await this.cargarProveedores();// llama, volver cargar los datos, *ACTUALIZADOS*.
-//         await this.cargarOpcionesProductoForm();
-//         await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
-//       }
-//
-//     } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-//       console.error("Error :", error); // Programador
-//       alert("Revise consola"); // Feedback al Usuario
-//     } //Finaliza TRY-CATCH
-//   } //CIERRA METODO guardarProveedor()
-//
-//   // Reset
-//   resetFormProveedor() {
-//     this.proveedorIdInput.value = '';
-//     this.proveedorNombreInput.value = '';
-//     this.proveedorDireccionInput.value = '';
-//     this.proveedorTelefonoInput.value = '';
-//     this.proveedorEstadoInput.checked = true; // Resetear a activo por defecto
-//     this.estadoProveedorTextoSpan.textContent = 'Activo'; // Resetear texto del estado
-//   }
-
   //---------------------------------------------------
   // Métodos CRUD para Clientes
   //---------------------------------------------------
-  // formatearTelefono(telefono) {
-  //   // Elimina el "+" y todos los espacios
-  //   return telefono.replace(/\+/g, '').replace(/\s+/g, '');
-  // }
   formatearTelefono(telefono) {
     if (!telefono || typeof telefono !== 'string') return '';
     return telefono
       .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
       .replace(/\+/g, '');    // Elimina el "+"
   }
-
 
   async cargarClientes() {
     try {
@@ -1457,58 +1098,6 @@ async cargarProveedores(mostrarLoader = true) {
   } //cierra metodo
 
   // Enviar Formulario Cliente:  CREATE y UPDATE:
-  // async guardarCliente(e) { // METODO, RECIBE EL EVENTO
-  //   e.preventDefault(); // Prevenir comportamiento x defecto del Form, navegador,
-  //   const clienteId = this.clienteIdInput.value;       //Desde elemento del DOM! -> HTML
-  //   const nombre = this.clienteNombreInput.value;       // Valor en la caja texto
-  //   const telefono = this.clienteTelefonoInput.value;
-  //   const direccion = this.clienteDireccionInput.value
-  //
-  //   if (!nombre || !direccion || !telefono) {
-  //     alert("Campos obligatorios");
-  //     return;  // Salida temprana
-  //   }
-  //   let resultado;
-  //   try {
-  //     if (clienteId) {  // Si ya  id , es para:  *ACTUALIZACION*:
-  //
-  //       const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId)); //Buscar
-  //       //Cambiar nombre, segun  *NUEVO* VALOR:
-  //       clienteExistente.nombre = nombre;
-  //       clienteExistente.telefono = telefono;
-  //       clienteExistente.direccion = direccion;
-  //       resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente); // Persistir cambios
-  //       //Actualizar Vista:
-  //       // Pasamos el objeto completo al método sync
-  //       AdminController.googleSheetSyncCliente.sync("update", resultado);
-  //       alert("Cliente ACTUALIZADO") //Feedback al usuario!
-  //     } else { // Si NO, ... CREAR
-  //       const nuevoCliente = new Cliente(nombre, telefono, direccion); // crea *INSTANCIA* Cliente
-  //       //Asigna
-  //       resultado = await this.clienteService.agregarCliente(nuevoCliente); //  await *RETORNA* id Generado.
-  //       //Solo Si id *EXISTE* despues de haber sido agregado
-  //       if (resultado) {
-  //         //Añadir Fila
-  //         AdminController.googleSheetSyncCliente.sync("create", resultado);
-  //         alert(`EXITO Agregando Cliente, ID ${resultado} `);
-  //       } else { // Fallo registro,  por  razon
-  //         throw new Error('Errores en Datos o Validacion.');
-  //       } // cierra else
-  //     }
-  //     // Fin  if-else
-  //
-  //     if (resultado) {
-  //       this.resetFormCliente()
-  //       //Cargar Opciones actualizadas
-  //       await this.cargarClientes();// llama, volver cargar los datos, *ACTUALIZADOS*.
-  //       await appService.refreshCache(); //ACTUALIZAMOS CACHÉ
-  //     }
-  //
-  //   } catch (error) { // Registro de Excepciones:  Errores!  Avisar:
-  //     console.error("Error :", error); // Programador
-  //     alert("Revise consola") // Feedback al Usuario
-  //   } //Finaliza TRY-CATCH
-  // } //CIERRA METODO  guardarCliente()
   async guardarCliente(e) {
     e.preventDefault();
     const clienteId = this.clienteIdInput.value;
