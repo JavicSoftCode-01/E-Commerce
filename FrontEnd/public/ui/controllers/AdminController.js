@@ -9,6 +9,7 @@ import {appService} from '../services/UшымтаService.js';
 import {InvoiceTemplate} from './InvoicePlantilla.js';
 import {Factura} from '../../../../BackEnd/src/models/Factura.js';
 import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js';
+import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorService.js";
 
 class AdminController {
 
@@ -67,23 +68,26 @@ class AdminController {
     });
     // this.btnResetMarcaForm = document.getElementById('resetMarcaForm')//ya no es necesario
 
-    // Elementos Proveedores
+  // Elementos Proveedores con los IDs reales
     this.formProveedor = document.getElementById('formProveedor');
     this.proveedorIdInput = document.getElementById('proveedorId');
     this.proveedorNombreInput = document.getElementById('proveedorNombre');
     this.proveedorTelefonoInput = document.getElementById('proveedorTelefono');
     this.proveedorDireccionInput = document.getElementById('proveedorDireccion');
-
     this.proveedorEstadoInput = document.getElementById('proveedorEstado');
     this.estadoProveedorTextoSpan = document.getElementById('estadoProveedorTexto');
     this.tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
 
-    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
+    // Listener para el cambio de estado en el formulario (al editar)
     this.proveedorEstadoInput.addEventListener('change', () => {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
+
     // Configurar el listener para el formulario de proveedor
     this.setupFormListener();
+
+    // Instancia del servicio de proveedores
+    this.proveedorService = new ProveedorService();
 
     // Iniciar la carga de proveedores
     this.cargarProveedores();
@@ -779,7 +783,7 @@ class AdminController {
     });
   }
 
-  setupFormListener() {
+   setupFormListener() {
     this.formProveedor.addEventListener('submit', (e) => this.guardarProveedor(e));
   }
 
@@ -811,8 +815,9 @@ class AdminController {
             </a>
           </td>
           <td class="text-center">
-            <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" 
-              data-id="${proveedor.id}" onclick="adminController.openModalDetailsProveedor(${proveedor.id})"></i>
+            <button class="btn-details" data-id="${proveedor.id}">
+              <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue;"></i>
+            </button>
           </td>
           <td class="text-center">
             <div class="estado-cell">
@@ -823,37 +828,51 @@ class AdminController {
           </td>
           <td class="text-center">
             <div class="action-buttons">
-              <button class="action-button edit-button edit-proveedor" data-id="${proveedor.id}">
+              <button class="action-button edit-button" data-id="${proveedor.id}">
                 <i class="fa-solid fa-pencil fa-lg"></i>
               </button>
-              <button class="action-button delete-button delete-proveedor" data-id="${proveedor.id}">
+              <button class="action-button delete-button" data-id="${proveedor.id}">
                 <i class="fa-solid fa-trash-can fa-lg"></i>
               </button>
             </div>
           </td>
         `;
 
+        // Listener para abrir el modal de detalles (uso de currentTarget)
+        tr.querySelector('.btn-details').addEventListener('click', async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          await this.openModalDetailsProveedor(id);
+        });
+
         // Listener para editar proveedor
-        tr.querySelector('.edit-proveedor').addEventListener('click', async (e) => {
-          const proveedorId = parseInt(e.target.dataset.id);
-          const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorId);
-          if (proveedor) {
-            this.proveedorIdInput.value = proveedor.id;
-            this.proveedorNombreInput.value = proveedor.nombre;
-            this.proveedorDireccionInput.value = proveedor.direccion;
-            this.proveedorTelefonoInput.value = proveedor.telefono;
-            this.proveedorEstadoInput.checked = proveedor.estado;
-            this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
-            window.scrollTo(0, 0);
+        tr.querySelector('.edit-button').addEventListener('click', async (e) => {
+          // Deshabilitar temporalmente el botón para evitar múltiples clicks
+          const btn = e.currentTarget;
+          btn.disabled = true;
+          try {
+            const id = parseInt(btn.dataset.id);
+            const proveedor = await this.proveedorService.obtenerProveedorPorId(id);
+            if (proveedor) {
+              this.proveedorIdInput.value = proveedor.id;
+              this.proveedorNombreInput.value = proveedor.nombre;
+              this.proveedorDireccionInput.value = proveedor.direccion;
+              this.proveedorTelefonoInput.value = proveedor.telefono;
+              this.proveedorEstadoInput.checked = proveedor.estado;
+              this.estadoProveedorTextoSpan.textContent = proveedor.estado ? 'Activo' : 'Inactivo';
+              window.scrollTo(0, 0);
+            }
+          } finally {
+            // Habilitar el botón después de la acción
+            btn.disabled = false;
           }
         });
 
-        // Listener para eliminar proveedor
-        tr.querySelector('.delete-proveedor').addEventListener('click', async (e) => {
-          const proveedorId = parseInt(e.target.dataset.id);
+        // Listener para eliminar proveedor (uso de currentTarget)
+        tr.querySelector('.delete-button').addEventListener('click', async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
           if (confirm("¿Está seguro de eliminar?")) {
             this.showLoader();
-            const result = await this.proveedorService.eliminarProveedor(proveedorId);
+            const result = await this.proveedorService.eliminarProveedor(id);
             if (result !== null) {
               await this.cargarProveedores();
             }
@@ -865,13 +884,13 @@ class AdminController {
         const toggleEstado = tr.querySelector('.estado-toggleProveedor');
         if (toggleEstado) {
           toggleEstado.addEventListener('change', async (e) => {
-            const proveedorId = parseInt(e.target.dataset.id);
-            const nuevoEstado = e.target.checked;
+            const id = parseInt(e.currentTarget.dataset.id);
+            const nuevoEstado = e.currentTarget.checked;
             try {
               this.showLoader();
-              const resultado = await this.proveedorService.actualizarProveedor(proveedorId, {estado: nuevoEstado});
+              const resultado = await this.proveedorService.actualizarProveedor(id, { estado: nuevoEstado });
               if (resultado !== null) {
-                const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProveedor');
+                const tdEstado = e.currentTarget.closest('td').querySelector('.estado-indicatorProveedor');
                 if (tdEstado) {
                   tdEstado.innerHTML = nuevoEstado ?
                     '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
@@ -880,13 +899,14 @@ class AdminController {
               }
             } catch (error) {
               console.error('Error al actualizar estado:', error);
-              e.target.checked = !nuevoEstado;
+              e.currentTarget.checked = !nuevoEstado;
               alert("Error al actualizar el estado del proveedor.");
             } finally {
               this.hideLoader();
             }
           });
         }
+
         this.tablaProveedores.appendChild(tr);
       });
     } catch (error) {
@@ -915,6 +935,7 @@ class AdminController {
       const modalDetails = document.getElementById('proveedorModal');
       modalDetails.classList.remove('hidden');
       document.body.classList.add('modal-open');
+      // Agregamos un retardo para asegurar la animación
       requestAnimationFrame(() => {
         modalDetails.classList.add('show');
       });
