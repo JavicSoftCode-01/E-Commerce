@@ -736,11 +736,11 @@ class AdminController {
       tr.innerHTML = `
         <td class="text-center">${proveedor.nombre}</td>
         <td class="text-center">
-          <a href="tel:${telefonoFormateado}" title="Llamar ${telefonoFormateado}" style="font-size: 22px;">
+          <a href="tel:${telefonoFormateado}" title="Llamar +${telefonoFormateado}" style="font-size: 22px;">
             <i class="fa fa-phone fa-lg"></i>
           </a>
           <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
-             href="whatsapp://send?phone=${telefonoFormateado}&text=Hola, ${proveedor.nombre}">
+             href="whatsapp://send?phone=+${telefonoFormateado}&text=Hola, ${proveedor.nombre}">
             <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
           </a>
         </td>
