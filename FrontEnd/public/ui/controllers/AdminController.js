@@ -117,7 +117,7 @@ class AdminController {
       await this.proveedorService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarProveedores(false);
-    }, 50);
+    }, 3000);
 
   // Envio de formularios
     this.setupEventListeners();
@@ -714,7 +714,7 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Proveedores
   //---------------------------------------------------
-  
+
   // adminController.js
   // Cargar la tabla de Proveedores
   async cargarProveedores(mostrarLoader = true) {
