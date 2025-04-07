@@ -990,7 +990,7 @@ class AdminController {
         tr.innerHTML = `
           <td class="text-center">${cliente.nombre}</td>
           <td class="text-center">
-            <a href="tel:${llamar}" title="Llamar ${llamar}" style="font-size: 22px;">
+            <a href="tel:${cliente.telefono}" title="Llamar ${llamar}" style="font-size: 22px;">
               <i class="fa fa-phone fa-lg"></i>
             </a>
             <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
