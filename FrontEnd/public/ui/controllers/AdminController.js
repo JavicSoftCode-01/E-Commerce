@@ -135,7 +135,7 @@ class AdminController {
       await this.clienteService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarClientes(false);
-    }, 3000);
+    }, 5000);
 
     // Envio de formularios
     this.setupEventListeners();

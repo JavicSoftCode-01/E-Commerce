@@ -24,8 +24,9 @@ class Cliente extends BasePersona {
    * Incrementa el contador de compras.
    */
   incrementarContador() {
-    this.contador += 1;
-    this.prepareForUpdate(); // Actualiza la fecha de actualización
+    this.contador = (this.contador || 0) + 1;
+    this.fechaActualizacion = new Date().toISOString();
+    return this.contador;
   }
 }
 

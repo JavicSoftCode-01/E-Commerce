@@ -181,17 +181,17 @@ class Validar {
     }
 
     // Verificar duplicados *excluyendo* el elemento actual que se está editando (si lo hay)
-    // try {
-    //   const allItems = await service.getAll();
-    //   const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
-    //   if (isDuplicate) {
-    //     console.error("Error: El número de teléfono ya está registrado.");
-    //     return false;
-    //   }
-    // } catch (error) {
-    //   console.error(`Error al validar teléfono ${telefono}:`, error);
-    //   return false; // Falso en caso de error de DB.
-    // }
+    try {
+      const allItems = await service.getAll();
+      const isDuplicate = allItems.some(item => item.telefono === formatoFinal && item.id !== id);
+      if (isDuplicate) {
+        console.error("Error: El número de teléfono ya está registrado.");
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error al validar teléfono ${telefono}:`, error);
+      return false; // Falso en caso de error de DB.
+    }
 
     console.info(`Teléfono validado y formateado: ${formatoFinal}`);
     return formatoFinal;

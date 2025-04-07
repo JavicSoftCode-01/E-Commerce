@@ -11,7 +11,7 @@ class IndexedDB {
    * @param {string} storeName - Nombre del almacén de objetos.
    * @param {number} [version=1] - Versión de la base de datos.
    */
-  constructor(dbName, storeName, version = 2) {
+  constructor(dbName, storeName, version = 3) {
     this.dbName = dbName;
     this.storeName = storeName;
     this.version = version;
@@ -124,6 +124,17 @@ async add(item) {
         throw error;
     }
 }
+
+ // async add(data) {
+ //    const db = await this.dbPromise;
+ //    const transaction = db.transaction([this.storeName], 'readwrite');
+ //    const store = transaction.objectStore(this.storeName);
+ //    return new Promise((resolve, reject) => {
+ //      const request = store.add(data);
+ //      request.onsuccess = (event) => resolve(event.target.result); // Returns the auto-incremented localId
+ //      request.onerror = (event) => reject(event.target.error);
+ //    });
+ //  }
 
   /**
    * Actualiza un registro existente en el almacén de objetos.
