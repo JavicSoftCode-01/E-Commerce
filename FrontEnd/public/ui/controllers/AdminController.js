@@ -10,6 +10,7 @@ import {InvoiceTemplate} from './InvoicePlantilla.js';
 import {Factura} from '../../../../BackEnd/src/models/Factura.js';
 import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js';
 import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorService.js";
+import {ClienteService} from "../../../../BackEnd/src/services/ClienteService.js";
 
 class AdminController {
 
@@ -54,7 +55,6 @@ class AdminController {
 
     this.marcaEstadoInput = document.getElementById('marcaEstado');
     this.estadoMarcaTextoSpan = document.getElementById('estadoMarcaTexto');
-    this.tablaMarcas = document.getElementById('tablaMarcas').querySelector('tbody');
 
     // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
     this.marcaEstadoInput.addEventListener('change', () => {
@@ -87,7 +87,21 @@ class AdminController {
     this.clienteNombreInput = document.getElementById('clienteNombre');
     this.clienteTelefonoInput = document.getElementById('clienteTelefono');
     this.clienteDireccionInput = document.getElementById('clienteDireccion');
+    this.clienteEstadoInput = document.getElementById('clienteEstado');
+    this.estadoClienteTextoSpan = document.getElementById('estadoClienteTexto');
     this.tablaClientes = document.getElementById('tablaClientes').querySelector('tbody');
+
+    // Listener para el cambio de estado en el formulario (al editar)
+    this.clienteEstadoInput.addEventListener('change', () => {
+      this.estadoClienteTextoSpan.textContent = this.clienteEstadoInput.checked ? 'Activo' : 'Inactivo';
+    });
+
+    // Instancia del servicio de clientes
+    this.clienteService = new ClienteService();
+// Cargar clientes de inmediato
+    this.cargarClientes();
+
+    // ======================================================================
 
     // Elementos Productos
     this.formProducto = document.getElementById('formProducto');
@@ -117,9 +131,13 @@ class AdminController {
       await this.proveedorService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarProveedores(false);
+
+      await this.clienteService.forceSyncNow();
+      // Actualizamos la tabla sin usar el loader
+      this.cargarClientes(false);
     }, 3000);
 
-  // Envio de formularios
+    // Envio de formularios
     this.setupEventListeners();
   }
 
@@ -211,6 +229,13 @@ class AdminController {
         break;
     }
   }
+
+  // formatearTelefono(telefono) {
+  //   if (!telefono || typeof telefono !== 'string') return '';
+  //   return telefono
+  //     .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
+  //     .replace(/\+/g, '');    // Elimina el "+"
+  // }
 
 
   //---------------------------------------------------
@@ -718,22 +743,22 @@ class AdminController {
   // adminController.js
   // Cargar la tabla de Proveedores
   async cargarProveedores(mostrarLoader = true) {
-  try {
-    if (mostrarLoader) this.showLoader();
-    // Si se requiere forzar la sincronización, se puede llamar previamente a forceSyncNow en el polling
-    const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
-    this.tablaProveedores.innerHTML = ""; // Limpiar la tabla
+    try {
+      if (mostrarLoader) this.showLoader();
+      // Si se requiere forzar la sincronización, se puede llamar previamente a forceSyncNow en el polling
+      const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
+      this.tablaProveedores.innerHTML = ""; // Limpiar la tabla
 
-    if (!Array.isArray(proveedores)) {
-      console.error("Error: proveedores no es un array.");
-      return;
-    }
+      if (!Array.isArray(proveedores)) {
+        console.error("Error: proveedores no es un array.");
+        return;
+      }
 
-    proveedores.forEach((proveedor) => {
-      const tr = document.createElement("tr");
-      // Formatear el teléfono removiendo caracteres no numéricos
-      const telefonoFormateado = proveedor.telefono.replace(/[^0-9]/g, "");
-      tr.innerHTML = `
+      proveedores.forEach((proveedor) => {
+        const tr = document.createElement("tr");
+        // Formatear el teléfono removiendo caracteres no numéricos
+        const telefonoFormateado = proveedor.telefono.replace(/[^0-9]/g, "");
+        tr.innerHTML = `
         <td class="text-center">${proveedor.nombre}</td>
         <td class="text-center">
           <a href="tel:${telefonoFormateado}" title="Llamar +${telefonoFormateado}" style="font-size: 22px;">
@@ -766,83 +791,83 @@ class AdminController {
         </td>
       `;
 
-      // Listener para abrir el modal de detalles
-      tr.querySelector(".btn-details").addEventListener("click", async (e) => {
-        const id = parseInt(e.currentTarget.dataset.id);
-        await this.openModalDetailsProveedor(id);
-      });
-
-      // Listener para editar proveedor
-      tr.querySelector(".edit-button").addEventListener("click", async (e) => {
-        const btn = e.currentTarget;
-        btn.disabled = true;
-        try {
-          const id = parseInt(btn.dataset.id);
-          const proveedor = await this.proveedorService.obtenerProveedorPorId(id);
-          if (proveedor) {
-            this.proveedorIdInput.value = proveedor.id;
-            this.proveedorNombreInput.value = proveedor.nombre;
-            this.proveedorDireccionInput.value = proveedor.direccion;
-            this.proveedorTelefonoInput.value = proveedor.telefono;
-            this.proveedorEstadoInput.checked = proveedor.estado;
-            this.estadoProveedorTextoSpan.textContent = proveedor.estado ? "Activo" : "Inactivo";
-            window.scrollTo(0, 0);
-          }
-        } finally {
-          btn.disabled = false;
-        }
-      });
-
-      // Listener para eliminar proveedor
-      tr.querySelector(".delete-button").addEventListener("click", async (e) => {
-        const id = parseInt(e.currentTarget.dataset.id);
-        if (confirm("¿Está seguro de eliminar?")) {
-          this.showLoader();
-          const result = await this.proveedorService.eliminarProveedor(id);
-          if (result !== null) {
-            // Llamada sin bloquear (loader ya se muestra antes de la operación)
-            await this.cargarProveedores(mostrarLoader);
-          }
-          this.hideLoader();
-        }
-      });
-
-      // Listener para el cambio de estado en la tabla
-      const toggleEstado = tr.querySelector(".estado-toggleProveedor");
-      if (toggleEstado) {
-        toggleEstado.addEventListener("change", async (e) => {
+        // Listener para abrir el modal de detalles
+        tr.querySelector(".btn-details").addEventListener("click", async (e) => {
           const id = parseInt(e.currentTarget.dataset.id);
-          const nuevoEstado = e.currentTarget.checked;
+          await this.openModalDetailsProveedor(id);
+        });
+
+        // Listener para editar proveedor
+        tr.querySelector(".edit-button").addEventListener("click", async (e) => {
+          const btn = e.currentTarget;
+          btn.disabled = true;
           try {
-            this.showLoader();
-            const resultado = await this.proveedorService.actualizarProveedor(id, { estado: nuevoEstado });
-            if (resultado !== null) {
-              const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicatorProveedor");
-              if (tdEstado) {
-                tdEstado.innerHTML = nuevoEstado
-                  ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
-                  : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-              }
+            const id = parseInt(btn.dataset.id);
+            const proveedor = await this.proveedorService.obtenerProveedorPorId(id);
+            if (proveedor) {
+              this.proveedorIdInput.value = proveedor.id;
+              this.proveedorNombreInput.value = proveedor.nombre;
+              this.proveedorDireccionInput.value = proveedor.direccion;
+              this.proveedorTelefonoInput.value = proveedor.telefono;
+              this.proveedorEstadoInput.checked = proveedor.estado;
+              this.estadoProveedorTextoSpan.textContent = proveedor.estado ? "Activo" : "Inactivo";
+              window.scrollTo(0, 0);
             }
-          } catch (error) {
-            console.error("Error al actualizar estado:", error);
-            e.currentTarget.checked = !nuevoEstado;
-            alert("Error al actualizar el estado del proveedor.");
           } finally {
+            btn.disabled = false;
+          }
+        });
+
+        // Listener para eliminar proveedor
+        tr.querySelector(".delete-button").addEventListener("click", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          if (confirm("¿Está seguro de eliminar?")) {
+            this.showLoader();
+            const result = await this.proveedorService.eliminarProveedor(id);
+            if (result !== null) {
+              // Llamada sin bloquear (loader ya se muestra antes de la operación)
+              await this.cargarProveedores(mostrarLoader);
+            }
             this.hideLoader();
           }
         });
-      }
 
-      this.tablaProveedores.appendChild(tr);
-    });
-  } catch (error) {
-    console.error("Error al cargar los Proveedores:", error);
-    alert("Error al cargar los Proveedores.");
-  } finally {
-    if (mostrarLoader) this.hideLoader();
+        // Listener para el cambio de estado en la tabla
+        const toggleEstado = tr.querySelector(".estado-toggleProveedor");
+        if (toggleEstado) {
+          toggleEstado.addEventListener("change", async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const nuevoEstado = e.currentTarget.checked;
+            try {
+              this.showLoader();
+              const resultado = await this.proveedorService.actualizarProveedor(id, {estado: nuevoEstado});
+              if (resultado !== null) {
+                const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicatorProveedor");
+                if (tdEstado) {
+                  tdEstado.innerHTML = nuevoEstado
+                    ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+                    : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+                }
+              }
+            } catch (error) {
+              console.error("Error al actualizar estado:", error);
+              e.currentTarget.checked = !nuevoEstado;
+              alert("Error al actualizar el estado del proveedor.");
+            } finally {
+              this.hideLoader();
+            }
+          });
+        }
+
+        this.tablaProveedores.appendChild(tr);
+      });
+    } catch (error) {
+      console.error("Error al cargar los Proveedores:", error);
+      alert("Error al cargar los Proveedores.");
+    } finally {
+      if (mostrarLoader) this.hideLoader();
+    }
   }
-}
 
   // Abrir modal de detalles del proveedor
   async openModalDetailsProveedor(proveedorId) {
@@ -945,215 +970,503 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Clientes
   //---------------------------------------------------
-  formatearTelefono(telefono) {
-    if (!telefono || typeof telefono !== 'string') return '';
-    return telefono
-      .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
-      .replace(/\+/g, '');    // Elimina el "+"
-  }
 
-  async cargarClientes() {
+  //adminController.js
+  async cargarClientes(mostrarLoader = true) {
     try {
+      if (mostrarLoader) this.showLoader();
       const clientes = await this.clienteService.obtenerTodosLosClientes();
-      this.tablaClientes.innerHTML = ''; // Limpiar
+      this.tablaClientes.innerHTML = ''; // Limpiar la tabla
 
       if (!Array.isArray(clientes)) {
-        console.error("Error: clientes is not an array.");
+        console.error("Error: clientes no es un array.");
         return;
       }
-      clientes.forEach(cliente => {
-        const telefonoFormateado = this.formatearTelefono(cliente.telefono);
-        const tr = document.createElement('tr');   // row
+
+      clientes.forEach((cliente) => {
+        const tr = document.createElement("tr");
+        const telefonoFormateado = cliente.telefono.replace(/[^0-9]/g, "");
         tr.innerHTML = `
-                 <td class="text-center">${cliente.nombre}</td>
+          <td class="text-center">${cliente.nombre}</td>
+          <td class="text-center">
+            <a href="tel:${telefonoFormateado}" title="Llamar +${telefonoFormateado}" style="font-size: 22px;">
+              <i class="fa fa-phone fa-lg"></i>
+            </a>
+            <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
+               href="whatsapp://send?phone=+${telefonoFormateado}&text=Hola, ${cliente.nombre}">
+              <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
+            </a>
+          </td>
+          <td class="text-center">
+            <i type="button" class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${cliente.id}"></i>
+          </td>
+          <td class="text-center">
+            <div class="estado-cell">
+              <span class="estado-indicatorCliente hidden">${cliente.iconTrueFalse()}</span>
+              <input type="checkbox" id="clienteEstadoToggle${cliente.id}" class="toggle-input estado-toggleCliente" data-id="${cliente.id}" ${cliente.estado ? "checked" : ""}>
+              <label for="clienteEstadoToggle${cliente.id}" class="toggle-label"></label>
+            </div>
+          </td>
+          <td class="text-center">
+            <div class="action-buttons">
+              <button class="action-button edit-button" data-id="${cliente.id}">
+                <i class="fa-solid fa-pencil fa-lg" data-id="${cliente.id}"></i>
+              </button>
+              <button class="action-button delete-button" data-id="${cliente.id}">
+                <i class="fa-solid fa-trash-can fa-lg" data-id="${cliente.id}"></i>
+              </button>
+            </div>
+          </td>
+        `;
 
-              <td class="text-center">
-                <!-- Llamada telefónica -->
-                <a href="tel:${cliente.telefono}" title="Llamar vía telefónica ${cliente.telefono}" style="font-size: 22px;">
-                  <i class="fa fa-phone fa-lg"></i>
-                </a>
+        // Listener para abrir el modal de detalles
+        tr.querySelector(".btn-details").addEventListener("click", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          await this.openModalDetailsCliente(id);
+        });
 
-                &nbsp;&nbsp;&nbsp; 
+        // Listener para editar cliente
+        tr.querySelector(".edit-button").addEventListener("click", async (e) => {
+          const btn = e.currentTarget;
+          btn.disabled = true;
+          try {
+            const id = parseInt(btn.dataset.id);
+            const cliente = await this.clienteService.obtenerClientePorId(id);
+            if (cliente) {
+              this.clienteIdInput.value = cliente.id;
+              this.clienteNombreInput.value = cliente.nombre;
+              this.clienteDireccionInput.value = cliente.direccion;
+              this.clienteTelefonoInput.value = cliente.telefono;
+              this.clienteEstadoInput.checked = cliente.estado;
+              this.estadoClienteTextoSpan.textContent = cliente.estado ? "Activo" : "Inactivo";
+              window.scrollTo(0, 0);
+            }
+          } finally {
+            btn.disabled = false;
+          }
+        });
 
-                <!-- WhatsApp -->
-<a type="button" title="Chatear por WhatsApp ${cliente.telefono}" 
-        href="whatsapp://send?phone=${telefonoFormateado}&text=¡Hola%20${cliente.nombre}!%20💫%20En%20Lunaire%20tenemos%20novedades%20para%20ti.%20Acaban%20de%20llegar%20productos%20exclusivos%20que%20sabemos%20que%20te%20van%20a%20encantar.%20Pásate%20a%20verlos%20antes%20de%20que%20se%20agoten.%20✨%20Gracias%20por%20ser%20parte%20de%20nuestra%20comunidad%20Lunaire%20🌙"
-        target="_blank">
-        <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
-      </a>
+        // Listener para eliminar cliente
+        tr.querySelector(".delete-button").addEventListener("click", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          if (confirm("¿Está seguro de eliminar?")) {
+            this.showLoader();
+            const result = await this.clienteService.eliminarCliente(id);
+            if (result !== null) {
+              await this.cargarClientes(mostrarLoader);
+            }
+            this.hideLoader();
+          }
+        });
+        // Listener para el cambio de estado en la tabla
+        const toggleEstado = tr.querySelector(".estado-toggleCliente");
+        if (toggleEstado) {
+          toggleEstado.addEventListener("change", async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const nuevoEstado = e.currentTarget.checked;
 
+            // Guardamos el estado original para restaurarlo en caso de error
+            const estadoOriginal = !nuevoEstado;
 
-              </td>
+            try {
+              this.showLoader();
 
-               <!-- <td class="text-center">${cliente.direccion}</td> -->
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsCliente" data-id="${cliente.id}"></i></td>
-               
-                  <td class="text-center">
-                  <div class="estado-cell">
-                    <span class="estado-indicatorCliente hidden">${cliente.iconTrueFalse()}</span>
-                    <input type="checkbox" id="clienteEstadoToggle${cliente.id}" class="toggle-input estado-toggleCliente" data-id="${cliente.id}" ${cliente.estado ? 'checked' : ''}>
-                    <label for="clienteEstadoToggle${cliente.id}" class="toggle-label"></label>
-                  </div>
+              // Agregamos un log para depurar
+              console.log(`Intentando actualizar cliente ID ${id} a estado: ${nuevoEstado}`);
 
-                <td class"text-center">
-                <div class="action-buttons" >
-                 <button class="action-button edit-button edit-cliente" data-id="${cliente.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${cliente.id}"></i></button>
-                 <button class="action-button delete-button delete-cliente" data-id="${cliente.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${cliente.id}"></i></button>
-                </div>
-                </td>
-               
-                `;
-        const btnOpenModal = tr.querySelector('#btnOpenModalDetailsCliente');
-        if (btnOpenModal) {
-          btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsCli(cliente.id); // Pasar ID de la categoría seleccionada
+              // Intentar la actualización con un manejo de excepciones más específico
+              const resultado = await this.clienteService.actualizarCliente(id, {estado: nuevoEstado})
+                .catch(err => {
+                  console.error("Error específico en actualizarCliente:", err);
+                  return null;
+                });
+
+              if (resultado !== null) {
+                console.log(`Cliente ID ${id} actualizado correctamente a estado: ${nuevoEstado}`);
+
+                // Verificamos que el elemento exista antes de manipularlo
+                try {
+                  const parentTd = e.currentTarget.closest("td");
+                  if (parentTd) {
+                    const tdEstado = parentTd.querySelector(".estado-indicatorCliente");
+                    if (tdEstado) {
+                      tdEstado.innerHTML = nuevoEstado
+                        ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+                        : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+                    }
+                  } else {
+                    console.log("No se pudo encontrar el elemento TD padre, recargando tabla...");
+                    await this.cargarClientes(false);
+                  }
+                } catch (domError) {
+                  console.error("Error al manipular el DOM:", domError);
+                  // En caso de error manipulando el DOM, recargamos la tabla
+                  await this.cargarClientes(false);
+                }
+              } else {
+                console.error(`No se pudo actualizar el estado del cliente ID ${id}`);
+                // Si no se actualizó el estado, restauramos el toggle
+                e.currentTarget.checked = estadoOriginal;
+              }
+            } catch (error) {
+              console.error(`Error completo al actualizar estado de cliente ID ${id}:`, error);
+              // Restaurar el estado del toggle
+              try {
+                if (e && e.currentTarget) {
+                  e.currentTarget.checked = estadoOriginal;
+                }
+              } catch (toggleError) {
+                console.error("Error al restaurar el toggle:", toggleError);
+              }
+              alert("Error al actualizar el estado del cliente.");
+            } finally {
+              this.hideLoader();
+            }
           });
         }
-        this.tablaClientes.appendChild(tr);  // Append, al tbody!
+        // // Listener para el cambio de estado en la tabla
+        // const toggleEstado = tr.querySelector(".estado-toggleCliente");
+        // if (toggleEstado) {
+        //   toggleEstado.addEventListener("change", async (e) => {
+        //     const id = parseInt(e.currentTarget.dataset.id);
+        //     const nuevoEstado = e.currentTarget.checked;
+        //     try {
+        //       this.showLoader();
+        //       const resultado = await this.clienteService.actualizarCliente(id, {estado: nuevoEstado});
+        //       if (resultado !== null) {
+        //         // Verificamos que el elemento exista antes de manipularlo
+        //         const parentTd = e.currentTarget.closest("td");
+        //         if (parentTd) {
+        //           const tdEstado = parentTd.querySelector(".estado-indicatorCliente");
+        //           if (tdEstado) {
+        //             tdEstado.innerHTML = nuevoEstado
+        //               ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+        //               : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+        //           }
+        //         } else {
+        //           // Si no podemos actualizar el indicador visual, recargamos la tabla completa
+        //           await this.cargarClientes(false);
+        //         }
+        //       }
+        //     } catch (error) {
+        //       console.error("Error al actualizar estado:", error);
+        //       // Restaurar el estado del toggle
+        //       if (e && e.currentTarget) {
+        //         e.currentTarget.checked = !nuevoEstado;
+        //       }
+        //       alert("Error al actualizar el estado del cliente.");
+        //     } finally {
+        //       this.hideLoader();
+        //     }
+        //   });
+        // }
+        this.tablaClientes.appendChild(tr);
       });
-
-      // Configurar listeners para los botones de editar y eliminar
-      this.setupClienteListeners();
-
     } catch (error) {
       console.error("Error al cargar los Clientes:", error);
-      alert("Error al cargar los Clientes."); // Mejor feedback al usuario
+      alert("Error al cargar los Clientes.");
+    } finally {
+      if (mostrarLoader) this.hideLoader();
     }
   }
 
-  async openModalDetailsCli(clienteId) {
-    const cliente = await this.clienteService.obtenerClientePorId(clienteId); // Obtener solo el cliente seleccionado
-    const modalDetails = document.getElementById('clienteModal');
-    if (!cliente) {
-      console.error("No se encontró el cliente");
-      return;
+  async openModalDetailsCliente(clienteId) {
+    try {
+      this.showLoader();
+      const cliente = await this.clienteService.obtenerClientePorId(clienteId);
+      if (!cliente) {
+        console.error("No se encontró el cliente");
+        return;
+      }
+      document.getElementById('modalNombreCliente').textContent = cliente.nombre;
+      document.getElementById('modalTelefonoCliente').textContent = cliente.telefono;
+      document.getElementById('modalDireccionCliente').textContent = cliente.direccion;
+      document.getElementById('modalContadorCliente').textContent = cliente.contador + ' veces';
+      document.getElementById('modalEstadoCliente').innerHTML = cliente.iconTrueFalse();
+      document.getElementById('modalFechaCreacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaCreacion);
+      document.getElementById('modalFechaActualizacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaActualizacion);
+      const modalDetails = document.getElementById('clienteModal');
+      modalDetails.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      requestAnimationFrame(() => {
+        modalDetails.classList.add('show');
+      });
+    } catch (error) {
+      console.error("Error abriendo el modal de detalles:", error);
+    } finally {
+      this.hideLoader();
     }
-    // Llenar el modal con la información correcta
-    document.getElementById('modalNombreCliente').textContent = cliente.nombre;
-    document.getElementById('modalTelefonoCliente').textContent = cliente.telefono;
-    document.getElementById('modalDireccionCliente').textContent = cliente.direccion;
-    document.getElementById('modalContadorCliente').textContent = cliente.contador + ' veces';
-    document.getElementById('modalEstadoCliente').innerHTML = cliente.iconTrueFalse();
-    document.getElementById('modalFechaCreacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaCreacion);
-    document.getElementById('modalFechaActualizacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaActualizacion);
-
-    // Mostrar el modal
-    modalDetails.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-    requestAnimationFrame(() => {
-      modalDetails.classList.add('show');
-    });
   }
 
-  closeModalDetailsCli() {
+  closeModalDetailsCliente() {
     const modalDetails = document.getElementById('clienteModal');
-
     modalDetails.classList.remove('show');
     document.body.classList.remove('modal-open');
-
     setTimeout(() => {
       modalDetails.classList.add('hidden');
     }, 300);
   }
 
-  // setupClienteListeners
-  setupClienteListeners() {
-    // Editar
-    this.tablaClientes.querySelectorAll('.edit-cliente').forEach(button => {
-      button.addEventListener('click', async (e) => { // Pone Evento click
-
-        const clienteId = parseInt(e.target.dataset.id);        // Obtiene
-
-        const cliente = await this.clienteService.obtenerClientePorId(clienteId); // cliente por ID
-
-        if (cliente) { // cliente existe!
-          // Cargar  form
-          this.clienteIdInput.value = cliente.id;   // carga de datos
-          this.clienteNombreInput.value = cliente.nombre;//
-          this.clienteTelefonoInput.value = cliente.telefono;
-          this.clienteDireccionInput.value = cliente.direccion;
-        }
-      });
-    });
-
-    // Eliminar Cliente
-    this.tablaClientes.querySelectorAll('.delete-cliente').forEach(button => { // forEach para el boton eliminar
-      button.addEventListener('click', async (e) => {               //
-        const clienteId = parseInt(e.target.dataset.id);     //
-
-        // --- CONFIRMACION ---
-        if (confirm("Esta seguro de eliminar?")) { //
-
-          //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-          const result = await this.clienteService.eliminarCliente(clienteId);  //
-
-          if (result !== null) {
-            //Actualiza
-            await this.cargarClientes();      // Vuelve a cargar clientes
-
-          }
-        }  //Cierra confirm()
-      }); //cierra Listener
-    });  // cierra forEach, setupClienteListeners
-  } //cierra metodo
-
-  // Enviar Formulario Cliente:  CREATE y UPDATE:
   async guardarCliente(e) {
     e.preventDefault();
     const clienteId = this.clienteIdInput.value;
     const nombre = this.clienteNombreInput.value;
-    const telefono = this.clienteTelefonoInput.value;
     const direccion = this.clienteDireccionInput.value;
-
+    const telefono = this.clienteTelefonoInput.value;
+    const estado = this.clienteEstadoInput.checked;
     if (!nombre || !direccion || !telefono) {
       alert("Campos obligatorios");
       return;
     }
-
-    let resultado;
     try {
-      if (clienteId) {  // Actualización
+      this.showLoader();
+      let resultado;
+      if (clienteId) {
         const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId));
         clienteExistente.nombre = nombre;
-        clienteExistente.telefono = telefono;
         clienteExistente.direccion = direccion;
+        clienteExistente.telefono = telefono;
+        clienteExistente.estado = estado;
         resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente);
-
-        // Eliminar esta línea ya que ahora la sincronización se hace dentro del servicio
-        // AdminController.googleSheetSyncCliente.sync("update", resultado);
-
-        alert("Cliente ACTUALIZADO");
-      } else { // Crear nuevo
-        const nuevoCliente = new Cliente(nombre, telefono, direccion);
-        resultado = await this.clienteService.agregarCliente(nuevoCliente);
-
         if (resultado) {
-          // Aquí también podrías considerar mover esta sincronización al método agregarCliente
-          // AdminController.googleSheetSyncCliente.sync("create", resultado);
-          alert(`EXITO Agregando Cliente, ID ${resultado.id}`);
+          // Esperar explícitamente a que se complete la sincronización
+          await this.clienteService.forceSyncNow();
+          alert("Cliente ACTUALIZADO");
+        }
+      } else {
+        const nuevoCliente = new Cliente(nombre, telefono, direccion, estado);
+        const clienteCreado = await this.clienteService.agregarCliente(nuevoCliente);
+        if (clienteCreado) {
+          alert(`Éxito al agregar Cliente, ID ${clienteCreado.id}`);
+          resultado = clienteCreado;
         } else {
-          throw new Error('Errores en Datos o Validacion.');
+          throw new Error('Errores en datos o validación.');
         }
       }
-
       if (resultado) {
         this.resetFormCliente();
         await this.cargarClientes();
         await appService.refreshCache();
       }
     } catch (error) {
-      console.error("Error :", error);
+      console.error("Error en guardarCliente:", error);
       alert("Revise consola");
+    } finally {
+      this.hideLoader();
     }
   }
 
-  // Reset
   resetFormCliente() {
     this.clienteIdInput.value = '';
     this.clienteNombreInput.value = '';
     this.clienteTelefonoInput.value = '';
     this.clienteDireccionInput.value = '';
+    this.clienteEstadoInput.checked = true;
+    this.estadoClienteTextoSpan.textContent = 'Activo';
   }
+
+//   async cargarClientes() {
+//     try {
+//       const clientes = await this.clienteService.obtenerTodosLosClientes();
+//       this.tablaClientes.innerHTML = ''; // Limpiar
+//
+//       if (!Array.isArray(clientes)) {
+//         console.error("Error: clientes is not an array.");
+//         return;
+//       }
+//       clientes.forEach(cliente => {
+//         const telefonoFormateado = this.formatearTelefono(cliente.telefono);
+//         const tr = document.createElement('tr');   // row
+//         tr.innerHTML = `
+//                  <td class="text-center">${cliente.nombre}</td>
+//
+//               <td class="text-center">
+//                 <!-- Llamada telefónica -->
+//                 <a href="tel:${cliente.telefono}" title="Llamar vía telefónica ${cliente.telefono}" style="font-size: 22px;">
+//                   <i class="fa fa-phone fa-lg"></i>
+//                 </a>
+//
+//                 &nbsp;&nbsp;&nbsp;
+//
+//                 <!-- WhatsApp -->
+// <a type="button" title="Chatear por WhatsApp ${cliente.telefono}"
+//         href="whatsapp://send?phone=${telefonoFormateado}&text=¡Hola%20${cliente.nombre}!%20💫%20En%20Lunaire%20tenemos%20novedades%20para%20ti.%20Acaban%20de%20llegar%20productos%20exclusivos%20que%20sabemos%20que%20te%20van%20a%20encantar.%20Pásate%20a%20verlos%20antes%20de%20que%20se%20agoten.%20✨%20Gracias%20por%20ser%20parte%20de%20nuestra%20comunidad%20Lunaire%20🌙"
+//         target="_blank">
+//         <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
+//       </a>
+//
+//
+//               </td>
+//
+//                <!-- <td class="text-center">${cliente.direccion}</td> -->
+//                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsCliente" data-id="${cliente.id}"></i></td>
+//
+//                   <td class="text-center">
+//                   <div class="estado-cell">
+//                     <span class="estado-indicatorCliente hidden">${cliente.iconTrueFalse()}</span>
+//                     <input type="checkbox" id="clienteEstadoToggle${cliente.id}" class="toggle-input estado-toggleCliente" data-id="${cliente.id}" ${cliente.estado ? 'checked' : ''}>
+//                     <label for="clienteEstadoToggle${cliente.id}" class="toggle-label"></label>
+//                   </div>
+//
+//                 <td class"text-center">
+//                 <div class="action-buttons" >
+//                  <button class="action-button edit-button edit-cliente" data-id="${cliente.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${cliente.id}"></i></button>
+//                  <button class="action-button delete-button delete-cliente" data-id="${cliente.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${cliente.id}"></i></button>
+//                 </div>
+//                 </td>
+//
+//                 `;
+//         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsCliente');
+//         if (btnOpenModal) {
+//           btnOpenModal.addEventListener('click', () => {
+//             this.openModalDetailsCli(cliente.id); // Pasar ID de la categoría seleccionada
+//           });
+//         }
+//         this.tablaClientes.appendChild(tr);  // Append, al tbody!
+//       });
+//
+//       // Configurar listeners para los botones de editar y eliminar
+//       this.setupClienteListeners();
+//
+//     } catch (error) {
+//       console.error("Error al cargar los Clientes:", error);
+//       alert("Error al cargar los Clientes."); // Mejor feedback al usuario
+//     }
+//   }
+//
+//   async openModalDetailsCli(clienteId) {
+//     const cliente = await this.clienteService.obtenerClientePorId(clienteId); // Obtener solo el cliente seleccionado
+//     const modalDetails = document.getElementById('clienteModal');
+//     if (!cliente) {
+//       console.error("No se encontró el cliente");
+//       return;
+//     }
+//     // Llenar el modal con la información correcta
+//     document.getElementById('modalNombreCliente').textContent = cliente.nombre;
+//     document.getElementById('modalTelefonoCliente').textContent = cliente.telefono;
+//     document.getElementById('modalDireccionCliente').textContent = cliente.direccion;
+//     document.getElementById('modalContadorCliente').textContent = cliente.contador + ' veces';
+//     document.getElementById('modalEstadoCliente').innerHTML = cliente.iconTrueFalse();
+//     document.getElementById('modalFechaCreacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaCreacion);
+//     document.getElementById('modalFechaActualizacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaActualizacion);
+//
+//     // Mostrar el modal
+//     modalDetails.classList.remove('hidden');
+//     document.body.classList.add('modal-open');
+//     requestAnimationFrame(() => {
+//       modalDetails.classList.add('show');
+//     });
+//   }
+//
+//   closeModalDetailsCli() {
+//     const modalDetails = document.getElementById('clienteModal');
+//
+//     modalDetails.classList.remove('show');
+//     document.body.classList.remove('modal-open');
+//
+//     setTimeout(() => {
+//       modalDetails.classList.add('hidden');
+//     }, 300);
+//   }
+//
+//   // setupClienteListeners
+//   setupClienteListeners() {
+//     // Editar
+//     this.tablaClientes.querySelectorAll('.edit-cliente').forEach(button => {
+//       button.addEventListener('click', async (e) => { // Pone Evento click
+//
+//         const clienteId = parseInt(e.target.dataset.id);        // Obtiene
+//
+//         const cliente = await this.clienteService.obtenerClientePorId(clienteId); // cliente por ID
+//
+//         if (cliente) { // cliente existe!
+//           // Cargar  form
+//           this.clienteIdInput.value = cliente.id;   // carga de datos
+//           this.clienteNombreInput.value = cliente.nombre;//
+//           this.clienteTelefonoInput.value = cliente.telefono;
+//           this.clienteDireccionInput.value = cliente.direccion;
+//         }
+//       });
+//     });
+//
+//     // Eliminar Cliente
+//     this.tablaClientes.querySelectorAll('.delete-cliente').forEach(button => { // forEach para el boton eliminar
+//       button.addEventListener('click', async (e) => {               //
+//         const clienteId = parseInt(e.target.dataset.id);     //
+//
+//         // --- CONFIRMACION ---
+//         if (confirm("Esta seguro de eliminar?")) { //
+//
+//           //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
+//           const result = await this.clienteService.eliminarCliente(clienteId);  //
+//
+//           if (result !== null) {
+//             //Actualiza
+//             await this.cargarClientes();      // Vuelve a cargar clientes
+//
+//           }
+//         }  //Cierra confirm()
+//       }); //cierra Listener
+//     });  // cierra forEach, setupClienteListeners
+//   } //cierra metodo
+//
+//   // Enviar Formulario Cliente:  CREATE y UPDATE:
+//   async guardarCliente(e) {
+//     e.preventDefault();
+//     const clienteId = this.clienteIdInput.value;
+//     const nombre = this.clienteNombreInput.value;
+//     const telefono = this.clienteTelefonoInput.value;
+//     const direccion = this.clienteDireccionInput.value;
+//
+//     if (!nombre || !direccion || !telefono) {
+//       alert("Campos obligatorios");
+//       return;
+//     }
+//
+//     let resultado;
+//     try {
+//       if (clienteId) {  // Actualización
+//         const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId));
+//         clienteExistente.nombre = nombre;
+//         clienteExistente.telefono = telefono;
+//         clienteExistente.direccion = direccion;
+//         resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente);
+//
+//         // Eliminar esta línea ya que ahora la sincronización se hace dentro del servicio
+//         // AdminController.googleSheetSyncCliente.sync("update", resultado);
+//
+//         alert("Cliente ACTUALIZADO");
+//       } else { // Crear nuevo
+//         const nuevoCliente = new Cliente(nombre, telefono, direccion);
+//         resultado = await this.clienteService.agregarCliente(nuevoCliente);
+//
+//         if (resultado) {
+//           // Aquí también podrías considerar mover esta sincronización al método agregarCliente
+//           // AdminController.googleSheetSyncCliente.sync("create", resultado);
+//           alert(`EXITO Agregando Cliente, ID ${resultado.id}`);
+//         } else {
+//           throw new Error('Errores en Datos o Validacion.');
+//         }
+//       }
+//
+//       if (resultado) {
+//         this.resetFormCliente();
+//         await this.cargarClientes();
+//         await appService.refreshCache();
+//       }
+//     } catch (error) {
+//       console.error("Error :", error);
+//       alert("Revise consola");
+//     }
+//   }
+//
+//   // Reset
+//   resetFormCliente() {
+//     this.clienteIdInput.value = '';
+//     this.clienteNombreInput.value = '';
+//     this.clienteTelefonoInput.value = '';
+//     this.clienteDireccionInput.value = '';
+//   }
 
   //---------------------------------------------------
   // Métodos CRUD para Productos
@@ -1585,7 +1898,7 @@ class AdminController {
 
       if (!invoiceModal || !invoiceDetails) throw new Error('Modal de factura no encontrado');
 
-      invoiceDetails.innerHTML = await InvoiceTemplate.generarHTML(factura, false);
+      invoiceDetails.innerHTML = InvoiceTemplate.generarHTML(factura, false);
       invoiceModal.classList.remove('hidden');
       document.body.classList.add('modal-open');
       requestAnimationFrame(() => invoiceModal.classList.add('show'));

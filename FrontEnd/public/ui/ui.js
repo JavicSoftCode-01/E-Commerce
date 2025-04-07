@@ -274,7 +274,7 @@ function addAdminSpecificListeners() {
         { id: 'btnCloseModalDetails', action: () => adminController.closeModalDetailsCat() },
         { id: 'btnCloseModalMarDetails', action: () => adminController.closeModalDetailsMar() },
         { id: 'btnCloseModalProdDetails', action: () => adminController.closeModalDetailsProd() },
-        { id: 'btnCloseModalDetailsCliente', action: () => adminController.closeModalDetailsCli() },
+        { id: 'btnCloseModalDetailsCliente', action: () => adminController.closeModalDetailsCliente() },
         { id: 'btnCloseModalDetailsProveedor', action: () => adminController.closeModalDetailsProveedor() },
         { id: 'btnCloseInvoice', action: () => adminController.cerrarFactura() },
         { id: 'btnCloseModalDetailsHistorial', action: () => adminController.cerrarDetallesFactura() }

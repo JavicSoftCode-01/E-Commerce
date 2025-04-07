@@ -14,7 +14,7 @@ class ProveedorService extends IndexedDB {
   static googleSheetSyncProveedor = new GoogleSheetSync('https://script.google.com/macros/s/AKfycbw2HqffG73garOu-4_0Bbv8Qw0iylYAKhQZmehlOzz_2BEZqv3iUxoTcIa6RyfkvK1N/exec');
   static googleSheetReaderProveedor = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbxJ3QMI3GgkmLmYGYIu_JuRqKKU0J5Er5Bzq6UXR9osUGnnkj0JZEVBLO2eJSteZQWg/exec');
 
-  // Intervalo de sincronización (5 segundos)
+  // Intervalo de sincronización (3 segundos)
   static SYNC_INTERVAL = 3 * 1000;
 
   constructor() {

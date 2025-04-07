@@ -1,177 +1,99 @@
-import { IndexedDB } from '../database/indexdDB.js';
-import { Validar } from '../utils/validar.js';
-import { Cliente } from '../models/Cliente.js';
-import GoogleSheetSync from "../database/syncGoogleSheet.js";
+// BackEnd/src/services/ClienteService.js
+import {IndexedDB} from '../database/indexdDB.js';
+import {Validar} from '../utils/validar.js';
+import {Cliente} from '../models/Cliente.js';
+import GoogleSheetSync from '../database/syncGoogleSheet.js';
+import GoogleSheetReader from '../database/GoogleSheetReader.js';
 
 class ClienteService extends IndexedDB {
-    static googleSheetSyncCliente = new GoogleSheetSync(
-    'https://script.google.com/macros/s/AKfycbz3HgLCJkEZ3-NUZ-fCPUbJLwpfnuR_80DiijfuJSooFSueIBORx-4lWc5pMt-5Taqh/exec'
+  static googleSheetSyncCliente = new GoogleSheetSync(
+    'https://script.google.com/macros/s/AKfycbyFGaN_Hzq5ycyPXjvNChKDSsftjtyo5fg9Rq9AcrDgA87oO0JjES5ZgbZeyNHZQ0mh/exec'
   );
-  constructor(idGeneratorService) {
+  static googleSheetReaderCliente = new GoogleSheetReader(
+    'https://script.google.com/macros/s/AKfycbyFGaN_Hzq5ycyPXjvNChKDSsftjtyo5fg9Rq9AcrDgA87oO0JjES5ZgbZeyNHZQ0mh/exec'
+  );
+
+  static SYNC_INTERVAL = 3 * 1000;
+
+  constructor() {
     super('mydb', 'clientes');
-    this.idGeneratorService = idGeneratorService;
+    this.lastSyncTime = null;
+    this.startPeriodicSync();
   }
 
-  async agregarCliente(clienteData) {
+  startPeriodicSync() {
+    this.syncWithGoogleSheets();
+    setInterval(() => {
+      this.syncWithGoogleSheets();
+    }, ClienteService.SYNC_INTERVAL);
+  }
+
+  async syncWithGoogleSheets() {
     try {
-      const nombre = Validar.nombreBP(clienteData.nombre);
-      const telefono = await Validar.telefonoBP(clienteData.telefono, this);
-      const direccion = Validar.direccionBP(clienteData.direccion);
-
-      if (!nombre || !telefono || !direccion) {
-        console.error('Validation failed for cliente data');
-        return null;
+      console.log('Iniciando sincronización con Google Sheets para Clientes...');
+      const clientesData = await ClienteService.googleSheetReaderCliente.getData('Cliente');
+      console.log(`Recibidos ${clientesData.length} registros.`);
+      const clientesInstancias = clientesData.map(cData => {
+        const instancia = new Cliente(
+          cData.nombre,
+          cData.telefono,
+          cData.direccion,
+          cData.estado,
+          cData.fechaCreacion,
+          cData.fechaActualizacion,
+          cData.contador
+        );
+        instancia.id = cData.id;
+        return instancia;
+      });
+      await this.clearAll();
+      for (const cliente of clientesInstancias) {
+        await super.add(cliente);
       }
-
-      // Verificar si el teléfono ya existe
-      const clienteExistente = await this.obtenerClientePorTelefono(telefono);
-      if (clienteExistente) {
-        console.error('Error: El número de teléfono ya está registrado.');
-        return null; // No permitir duplicados en registro manual
-      }
-
-      const nuevoCliente = new Cliente(nombre, telefono, direccion);
-      const clientes = await this.obtenerTodosLosClientes();
-      const lastId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) : 0;
-      const nextId = lastId + 1;
-
-      nuevoCliente.id = nextId;
-      await super.add(nuevoCliente);
-      ClienteService.googleSheetSyncCliente.sync("create", nuevoCliente);
-
-
-      if (this.idGeneratorService) {
-        await this.idGeneratorService.setLastId('clientes', nextId);
-      }
-
-      console.log('Cliente agregado exitosamente:', nuevoCliente);
-      return nuevoCliente;
+      this.lastSyncTime = new Date();
+      console.info(`Sincronización exitosa: ${clientesInstancias.length} registros a las ${this.lastSyncTime}`);
+      return true;
     } catch (error) {
-      console.error('Error al agregar cliente:', error);
-      return null;
+      console.error('Error en sincronización:', error);
+      return false;
     }
   }
 
-  // async actualizarCliente(id, clienteActualizado) {
-  //   try {
-  //     const nombreValidado = Validar.nombreBP(clienteActualizado.nombre);
-  //     const direccionValidada = Validar.direccionBP(clienteActualizado.direccion);
-  //     const telefonoValidado = await Validar.telefonoBP(clienteActualizado.telefono, this, id);
-  //
-  //     if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-  //       return null;
-  //     }
-  //
-  //     const clienteExistente = await this.obtenerClientePorId(id);
-  //     if (!clienteExistente) {
-  //       return null;
-  //     }
-  //
-  //     // Verificar si el teléfono ya está en uso por otro cliente
-  //     const otroCliente = await this.obtenerClientePorTelefono(telefonoValidado);
-  //     if (otroCliente && otroCliente.id !== id) {
-  //       console.error('Error: El número de teléfono ya está registrado por otro cliente.');
-  //       return null;
-  //     }
-  //
-  //     let huboCambios = false;
-  //     if (clienteExistente.nombre !== nombreValidado) {
-  //       clienteExistente.nombre = nombreValidado;
-  //       huboCambios = true;
-  //     }
-  //     if (clienteExistente.direccion !== direccionValidada) {
-  //       clienteExistente.direccion = direccionValidada;
-  //       huboCambios = true;
-  //     }
-  //     if (clienteExistente.telefono !== telefonoValidado) {
-  //       clienteExistente.telefono = telefonoValidado;
-  //       huboCambios = true;
-  //     }
-  //
-  //     if (huboCambios) {
-  //       clienteExistente.prepareForUpdate();
-  //       const updatedId = await super.update(id, clienteExistente);
-  //       console.info(`Cliente con ID ${id} actualizado correctamente porque hubo cambios.`);
-  //       return updatedId;
-  //     } else {
-  //       console.info(`Cliente con ID ${id} no tuvo cambios.`);
-  //       return id;
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error al actualizar cliente con ID ${id}:`, error);
-  //     return null;
-  //   }
-  // }
-             async actualizarCliente(id, clienteActualizado) {
-  try {
-    const nombreValidado = Validar.nombreBP(clienteActualizado.nombre);
-    const direccionValidada = Validar.direccionBP(clienteActualizado.direccion);
-    const telefonoValidado = await Validar.telefonoBP(clienteActualizado.telefono, this, id);
-
-    if (!nombreValidado || !direccionValidada || !telefonoValidado) {
-      return null;
-    }
-
-    const clienteExistente = await this.obtenerClientePorId(id);
-    if (!clienteExistente) {
-      return null;
-    }
-
-    // Verificar si el teléfono ya está en uso por otro cliente
-    const otroCliente = await this.obtenerClientePorTelefono(telefonoValidado);
-    if (otroCliente && otroCliente.id !== id) {
-      console.error('Error: El número de teléfono ya está registrado por otro cliente.');
-      return null;
-    }
-
-    let huboCambios = false;
-    if (clienteExistente.nombre !== nombreValidado) {
-      clienteExistente.nombre = nombreValidado;
-      huboCambios = true;
-    }
-    if (clienteExistente.direccion !== direccionValidada) {
-      clienteExistente.direccion = direccionValidada;
-      huboCambios = true;
-    }
-    if (clienteExistente.telefono !== telefonoValidado) {
-      clienteExistente.telefono = telefonoValidado;
-      huboCambios = true;
-    }
-
-    if (huboCambios) {
-      clienteExistente.prepareForUpdate();
-      const updatedId = await super.update(id, clienteExistente);
-
-      // Añadir la sincronización con Google Sheets
-      ClienteService.googleSheetSyncCliente.sync("update", clienteExistente);
-
-      console.info(`Cliente con ID ${id} actualizado correctamente porque hubo cambios.`);
-      return clienteExistente; // Retornar el objeto completo en lugar de solo el ID
-    } else {
-      console.info(`Cliente con ID ${id} no tuvo cambios.`);
-      return clienteExistente; // Retornar el objeto completo en lugar de solo el ID
-    }
-  } catch (error) {
-    console.error(`Error al actualizar cliente con ID ${id}:`, error);
-    return null;
+  async forceSyncNow() {
+    this.lastSyncTime = null;
+    return await this.syncWithGoogleSheets();
   }
-}
+
   async obtenerTodosLosClientes() {
     try {
-      const clientes = await super.getAll();
-      return clientes.map(cliente => {
-        const nuevoCliente = new Cliente(cliente.nombre, cliente.telefono, cliente.direccion, cliente.estado, cliente.fechaCreacion, cliente.fechaActualizacion, cliente.contador);
-        nuevoCliente.id = cliente.id;
-        return nuevoCliente;
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > ClienteService.SYNC_INTERVAL) {
+        await this.syncWithGoogleSheets();
+      }
+      const clientesData = await super.getAll();
+      return clientesData.map(cData => {
+        const instancia = new Cliente(
+          cData.nombre,
+          cData.telefono,
+          cData.direccion,
+          cData.estado,
+          cData.fechaCreacion,
+          cData.fechaActualizacion,
+          cData.contador
+        );
+        instancia.id = cData.id;
+        return instancia;
       });
     } catch (error) {
-      console.error('Error al obtener todos los clientes:', error);
+      console.error('Error al obtener clientes:', error);
       return [];
     }
   }
 
   async obtenerClientePorId(id) {
     try {
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > ClienteService.SYNC_INTERVAL) {
+        await this.syncWithGoogleSheets();
+      }
       const clienteData = await super.getById(id);
       if (clienteData) {
         const instanciaCliente = new Cliente(
@@ -193,43 +115,136 @@ class ClienteService extends IndexedDB {
     }
   }
 
-  async obtenerClientePorTelefono(telefono) {
+  async agregarCliente(cliente) {
     try {
-      const clientes = await this.obtenerTodosLosClientes();
-      return clientes.find(cliente => cliente.telefono === telefono) || null;
+      await this.forceSyncNow();
+      const nombreValidado = Validar.nombreBP(cliente.nombre);
+      const direccionValidada = Validar.direccionBP(cliente.direccion);
+      const telefonoValidado = await Validar.telefonoBPT(cliente.telefono, this);
+      if (!nombreValidado || !direccionValidada || !telefonoValidado) {
+        return null;
+      }
+      const lastId = await this.getAll().then(clientes => {
+        if (clientes.length === 0) return 0;
+        return Math.max(...clientes.map(c => c.id));
+      });
+      const nextId = lastId + 1;
+      const nuevoCliente = new Cliente(nombreValidado, telefonoValidado, direccionValidada, cliente.estado, null, null, 0);
+      nuevoCliente.id = nextId;
+      await super.add(nuevoCliente);
+      console.log(`Cliente creado localmente con ID: ${nextId}. Sincronizando...`);
+      await ClienteService.googleSheetSyncCliente.sync("create", nuevoCliente);
+      console.info(`Cliente con ID: ${nextId} sincronizado.`);
+      await this.forceSyncNow();
+      return nuevoCliente;
     } catch (error) {
-      console.error(`Error al buscar cliente por teléfono ${telefono}:`, error);
+      console.error('Error al agregar cliente:', error);
       return null;
     }
   }
 
-  async incrementarContadorCliente(id) {
+  async actualizarCliente(id, datosActualizados) {
     try {
-      const cliente = await this.obtenerClientePorId(id);
-      if (!cliente) {
-        console.error(`Cliente con ID ${id} no encontrado`);
+      console.log(`Comenzando actualización de cliente ID ${id}`, datosActualizados);
+      await this.forceSyncNow();
+      const clienteExistente = await this.obtenerClientePorId(id);
+      if (!clienteExistente) return null;
+
+       // Si solo estamos actualizando el estado, hacemos un proceso simplificado
+    if (Object.keys(datosActualizados).length === 1 && datosActualizados.estado !== undefined) {
+      console.log(`Actualizando solo estado a ${datosActualizados.estado} para cliente ID ${id}`);
+
+      // Solo actualizamos el estado
+      clienteExistente.estado = datosActualizados.estado;
+      clienteExistente.prepareForUpdate();
+
+      try {
+        await super.update(id, clienteExistente);
+        console.log(`Cliente con ID ${id} (solo estado) actualizado localmente.`);
+
+        try {
+          await ClienteService.googleSheetSyncCliente.sync("update", clienteExistente);
+          console.info(`Cliente con ID ${id} sincronizado con Google Sheets.`);
+        } catch (syncError) {
+          console.error(`Error al sincronizar con Google Sheets:`, syncError);
+          // Continuamos aunque haya error de sincronización
+        }
+
+        await this.forceSyncNow();
+        return clienteExistente;
+      } catch (updateError) {
+        console.error(`Error al actualizar en IndexedDB:`, updateError);
+        throw updateError;
+      }
+    }
+      let nombreValidado = datosActualizados.nombre !== undefined ? Validar.nombreBP(datosActualizados.nombre) : clienteExistente.nombre;
+      let direccionValidada = datosActualizados.direccion !== undefined ? Validar.direccionBP(datosActualizados.direccion) : clienteExistente.direccion;
+      let telefonoValidado = datosActualizados.telefono !== undefined ? await Validar.telefonoBPT(datosActualizados.telefono, this, id) : clienteExistente.telefono;
+      if ((datosActualizados.nombre !== undefined && !nombreValidado) ||
+        (datosActualizados.direccion !== undefined && !direccionValidada) ||
+        (datosActualizados.telefono !== undefined && !telefonoValidado)) {
         return null;
       }
-      cliente.incrementarContador();
-      const updatedId = await super.update(id, cliente);
-      console.info(`Contador incrementado para cliente con ID ${id}. Nuevo valor: ${cliente.contador}`);
-      return updatedId;
+      let huboCambios = false;
+      if (clienteExistente.nombre !== nombreValidado) {
+        clienteExistente.nombre = nombreValidado;
+        huboCambios = true;
+      }
+      if (clienteExistente.direccion !== direccionValidada) {
+        clienteExistente.direccion = direccionValidada;
+        huboCambios = true;
+      }
+      if (clienteExistente.telefono !== telefonoValidado) {
+        clienteExistente.telefono = telefonoValidado;
+        huboCambios = true;
+      }
+      if (datosActualizados.estado !== undefined && clienteExistente.estado !== datosActualizados.estado) {
+        clienteExistente.estado = datosActualizados.estado;
+        huboCambios = true;
+      }
+      if (huboCambios) {
+        clienteExistente.prepareForUpdate();
+        await super.update(id, clienteExistente);
+        console.log(`Cliente con ID ${id} actualizado localmente.`);
+        await ClienteService.googleSheetSyncCliente.sync("update", clienteExistente);
+        console.info(`Cliente con ID ${id} sincronizado.`);
+        await this.forceSyncNow();
+        return clienteExistente;
+      }
+      console.info(`Cliente con ID ${id} sin cambios.`);
+      return clienteExistente;
     } catch (error) {
-      console.error(`Error al incrementar contador para cliente con ID ${id}:`, error);
+      console.error(`Error al actualizar cliente con ID ${id}:`, error);
       return null;
     }
   }
 
   async eliminarCliente(id) {
     try {
+      await this.forceSyncNow();
       await super.delete(id);
-      ClienteService.googleSheetSyncCliente.sync("delete", {id: id});
-      console.info(`Cliente con ID ${id} eliminado correctamente.`);
+      console.log(`Cliente con ID ${id} eliminado localmente.`);
+      await ClienteService.googleSheetSyncCliente.sync("delete", {id: id});
+      console.info(`Cliente con ID ${id} eliminado y sincronizado.`);
+      await this.forceSyncNow();
+      return true;
     } catch (error) {
       console.error(`Error al eliminar cliente con ID ${id}:`, error);
       return null;
     }
   }
+
+  async clearAll() {
+    try {
+      const db = await this.dbPromise;
+      const transaction = db.transaction([this.storeName], 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      store.clear();
+      console.info('IndexedDB limpiado.');
+    } catch (error) {
+      console.error('Error al limpiar IndexedDB:', error);
+    }
+  }
 }
 
-export { ClienteService };
+export {ClienteService};

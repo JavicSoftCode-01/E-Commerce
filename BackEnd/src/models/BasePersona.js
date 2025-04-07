@@ -23,51 +23,51 @@ class BasePersona {
     this.direccion = direccion;
     this.estado = estado; // true = activo, false = inactivo
 
-     // --- Procesamiento robusto de fechaCreacion ---
-     let creacionDate = null;
-     // 1. Si ya es un objeto Date válido, usarlo.
-     if (fechaCreacionInput instanceof Date && !isNaN(fechaCreacionInput)) {
-         creacionDate = fechaCreacionInput;
-     }
-     // 2. Si no es Date pero existe, intentar convertirlo (desde ISO string o timestamp)
-     else if (fechaCreacionInput) {
-         try {
-             const parsedDate = new Date(fechaCreacionInput);
-             if (!isNaN(parsedDate)) { // Verificar si la conversión fue exitosa
-                 creacionDate = parsedDate;
-             }
-         } catch (e) {
-             console.warn("Error al parsear fechaCreacionInput, se usará fecha actual:", fechaCreacionInput, e);
-         }
-     }
-     // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fecha/hora actual.
-     //    Esto SÓLO debería pasar en la creación inicial si no se pasa nada.
-     this.fechaCreacion = creacionDate instanceof Date ? creacionDate : new Date();
- 
- 
-     // --- Procesamiento robusto de fechaActualizacion ---
-     let actualizacionDate = null;
-     // 1. Si ya es un objeto Date válido, usarlo.
-     if (fechaActualizacionInput instanceof Date && !isNaN(fechaActualizacionInput)) {
-         actualizacionDate = fechaActualizacionInput;
-     }
-     // 2. Si no es Date pero existe, intentar convertirlo.
-     else if (fechaActualizacionInput) {
-         try {
-             const parsedDate = new Date(fechaActualizacionInput);
-             if (!isNaN(parsedDate)) {
-                 actualizacionDate = parsedDate;
-             }
-         } catch (e) {
-             console.warn("Error al parsear fechaActualizacionInput, se usará fecha de creación:", fechaActualizacionInput, e);
-         }
-     }
-     // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fechaCreacion (ya procesada).
-     //    Esto pasa en la creación inicial o si la fecha guardada era inválida.
-     this.fechaActualizacion = actualizacionDate instanceof Date ? actualizacionDate : this.fechaCreacion;
- 
-     // El método prepareForUpdate() se encargará de poner la fecha actual CUANDO se actualice.
-   
+    // --- Procesamiento robusto de fechaCreacion ---
+    let creacionDate = null;
+    // 1. Si ya es un objeto Date válido, usarlo.
+    if (fechaCreacionInput instanceof Date && !isNaN(fechaCreacionInput)) {
+      creacionDate = fechaCreacionInput;
+    }
+    // 2. Si no es Date pero existe, intentar convertirlo (desde ISO string o timestamp)
+    else if (fechaCreacionInput) {
+      try {
+        const parsedDate = new Date(fechaCreacionInput);
+        if (!isNaN(parsedDate)) { // Verificar si la conversión fue exitosa
+          creacionDate = parsedDate;
+        }
+      } catch (e) {
+        console.warn("Error al parsear fechaCreacionInput, se usará fecha actual:", fechaCreacionInput, e);
+      }
+    }
+    // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fecha/hora actual.
+    //    Esto SÓLO debería pasar en la creación inicial si no se pasa nada.
+    this.fechaCreacion = creacionDate instanceof Date ? creacionDate : new Date();
+
+
+    // --- Procesamiento robusto de fechaActualizacion ---
+    let actualizacionDate = null;
+    // 1. Si ya es un objeto Date válido, usarlo.
+    if (fechaActualizacionInput instanceof Date && !isNaN(fechaActualizacionInput)) {
+      actualizacionDate = fechaActualizacionInput;
+    }
+    // 2. Si no es Date pero existe, intentar convertirlo.
+    else if (fechaActualizacionInput) {
+      try {
+        const parsedDate = new Date(fechaActualizacionInput);
+        if (!isNaN(parsedDate)) {
+          actualizacionDate = parsedDate;
+        }
+      } catch (e) {
+        console.warn("Error al parsear fechaActualizacionInput, se usará fecha de creación:", fechaActualizacionInput, e);
+      }
+    }
+    // 3. Si no se pudo obtener una fecha válida de la entrada, usar la fechaCreacion (ya procesada).
+    //    Esto pasa en la creación inicial o si la fecha guardada era inválida.
+    this.fechaActualizacion = actualizacionDate instanceof Date ? actualizacionDate : this.fechaCreacion;
+
+    // El método prepareForUpdate() se encargará de poner la fecha actual CUANDO se actualice.
+
   }
 
   /**
@@ -75,11 +75,21 @@ class BasePersona {
    * asegurando que la fecha de actualización se establezca.
    * Este método debería llamarse desde los servicios ANTES de actualizar en la BD.
    */
+  // prepareForUpdate() {
+  //   this.fechaActualizacion = new Date();
+  // }
+  // En la clase Cliente
   prepareForUpdate() {
-    this.fechaActualizacion = new Date();
+    try {
+      this.fechaActualizacion = new Date().toISOString();
+      console.log(`Cliente preparado para actualización: ${this.id}, fecha: ${this.fechaActualizacion}`);
+      return true;
+    } catch (error) {
+      console.error("Error al preparar cliente para actualización:", error);
+      return false;
+    }
   }
 
-  
   /**
    * NUEVO MÉTODO: Genera el HTML para un icono visual que representa el estado (activo/inactivo).
    * Utiliza Font Awesome para los iconos.
@@ -96,11 +106,11 @@ class BasePersona {
   }
 
   /**
- * Formatea un valor de fecha/hora al formato local de Ecuador (Guayaquil, UTC-5).
- * Muestra fecha (DD/MM/AAAA) y hora (HH:MM AM/PM).
- * @param {Date | string | number} dateValue - El valor de fecha a formatear (puede ser objeto Date, string ISO, o timestamp).
- * @returns {string} La fecha y hora formateadas como string, o un placeholder si la fecha es inválida/nula.
- */
+   * Formatea un valor de fecha/hora al formato local de Ecuador (Guayaquil, UTC-5).
+   * Muestra fecha (DD/MM/AAAA) y hora (HH:MM AM/PM).
+   * @param {Date | string | number} dateValue - El valor de fecha a formatear (puede ser objeto Date, string ISO, o timestamp).
+   * @returns {string} La fecha y hora formateadas como string, o un placeholder si la fecha es inválida/nula.
+   */
   formatEcuadorDateTime(dateValue) {
     // Si no hay valor, retorna un placeholder
     if (!dateValue) {
@@ -109,13 +119,13 @@ class BasePersona {
 
     try {
       // Convierte a objeto Date (maneja strings ISO o timestamps)
-       // *** Importante: Asegurarse que dateValue sea un objeto Date antes de formatear ***
-       // La lógica del constructor ahora debería asegurar esto, pero una doble verificación no hace daño.
+      // *** Importante: Asegurarse que dateValue sea un objeto Date antes de formatear ***
+      // La lógica del constructor ahora debería asegurar esto, pero una doble verificación no hace daño.
       const dateObject = dateValue instanceof Date ? dateValue : new Date(dateValue);
 
       // Verifica si la conversión resultó en una fecha válida
       if (isNaN(dateObject.getTime())) {
-         console.warn("Intentando formatear fecha inválida:", dateValue);
+        console.warn("Intentando formatear fecha inválida:", dateValue);
         return 'Fecha inválida';
       }
 
@@ -142,4 +152,4 @@ class BasePersona {
   }
 }
 
-export { BasePersona };
+export {BasePersona};
