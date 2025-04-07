@@ -761,7 +761,7 @@ class AdminController {
         tr.innerHTML = `
         <td class="text-center">${proveedor.nombre}</td>
         <td class="text-center">
-          <a href="tel:${telefonoFormateado}" title="Llamar +${telefonoFormateado}" style="font-size: 22px;">
+          <a href="tel:${proveedor.telefono}" title="Llamar +${proveedor.telefono}" style="font-size: 22px;">
             <i class="fa fa-phone fa-lg"></i>
           </a>
           <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
@@ -986,11 +986,10 @@ class AdminController {
       clientes.forEach((cliente) => {
         const tr = document.createElement("tr");
         const telefonoFormateado = cliente.telefono.replace(/[^0-9]/g, "");
-        const llamar = `+${telefonoFormateado}`;
         tr.innerHTML = `
           <td class="text-center">${cliente.nombre}</td>
           <td class="text-center">
-            <a href="tel:${cliente.telefono}" title="Llamar ${llamar}" style="font-size: 22px;">
+            <a href="tel:${cliente.telefono}" title="Llamar ${cliente.telefono}" style="font-size: 22px;">
               <i class="fa fa-phone fa-lg"></i>
             </a>
             <a style="font-size: 25px;" title="Chatear por Whatsapp ${telefonoFormateado}"
