@@ -13,6 +13,7 @@ import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorServic
 import {ClienteService} from "../../../../BackEnd/src/services/ClienteService.js";
 import {MarcaService} from "../../../../BackEnd/src/services/MarcaService.js";
 import {CategoriaService} from "../../../../BackEnd/src/services/CategoriaService.js";
+import {ProductoService} from "../../../../BackEnd/src/services/ProductoService.js";
 
 class AdminController {
 
@@ -36,7 +37,7 @@ class AdminController {
     this.adminTabs = document.querySelectorAll('.admin-tab');
     this.adminSections = document.querySelectorAll('.admin-section');
 
-    // Elementos Categorias
+    // Elementos Categorias   =========================================================================
     this.formCategoria = document.getElementById('formCategoria');
     this.categoriaIdInput = document.getElementById('categoriaId');
     this.categoriaNombreInput = document.getElementById('categoriaNombre');
@@ -121,6 +122,12 @@ class AdminController {
     this.productoEstadoInput.addEventListener('change', () => {
       this.estadoProductoTextoSpan.textContent = this.productoEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
+    // Instancia del servicio de productos
+    this.productoService = new ProductoService();
+    // Iniciar la carga de productos
+    this.cargarProductos();
+    // Cargar opciones de formularios
+    this.cargarOpcionesProductoForm();
 
     // =====================================================================
     // Forzamos la sincronización sin mostrar el overlay completo
@@ -141,6 +148,10 @@ class AdminController {
       await this.clienteService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarClientes(false);
+
+      await this.productoService.forceSyncNow();
+      // Actualizamos la tabla sin usar el loader
+      this.cargarProductos(false);
     }, 5000);
 
     // Envio de formularios
@@ -1191,66 +1202,161 @@ closeModalDetailsCat() {
   //---------------------------------------------------
   // Métodos CRUD para Productos
   //---------------------------------------------------
-  async cargarProductos() {
+ async cargarProductos(mostrarLoader = true) {
     try {
+      if (mostrarLoader) this.showLoader();
       const productos = await this.productoService.obtenerProductos();
-
-      // Asegurarse de que tablaProductos existe
-      if (!this.tablaProductos) {
-        console.error('Error: tablaProductos no encontrada');
-        return;
-      }
-
       this.tablaProductos.innerHTML = '';
-
-      if (!Array.isArray(productos)) {
-        console.error('Error: El resultado de obtenerProductos no es un array.');
-        return;
-      }
 
       productos.forEach(producto => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-                <td class="text-center">${producto.nombre}</td>
-                <td class="text-center">${producto.proveedorNombre}</td>
-                <td class="text-center">${producto.stock}</td>
-                <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsProd" data-id="${producto.id}"></i></td>
-        
-                 <td class="text-center">
+          <td class="text-center">${producto.nombre}</td>
+          <td class="text-center">${producto.proveedorNombre}</td>
+          <td class="text-center">${producto.stock}</td>
+          <td class="text-center"><i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${producto.id}"></i></td>
+          <td class="text-center">
             <div class="estado-cell">
               <input type="checkbox" id="productoEstadoToggle${producto.id}" class="toggle-input estado-toggleProducto" data-id="${producto.id}" ${producto.estado ? 'checked' : ''}>
               <label for="productoEstadoToggle${producto.id}" class="toggle-label"></label>
             </div>
-          </td> 
-     
-<td class="text-center">
-                <div class="action-buttons">
-                    <button class="action-button edit-button edit-producto" data-id="${producto.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${producto.id}"></i></button>
-                    <button class="action-button delete-button delete-producto" data-id="${producto.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${producto.id}"></i></button>
-                </div>
-                </td>
-            `;
-        const btnOpenModal = tr.querySelector('#btnOpenModalDetailsProd');
-        if (btnOpenModal) {
-          btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsProd(producto.id); // Pasar ID de la  seleccionada
-          });
-        }
+          </td>
+          <td class="text-center">
+            <div class="action-buttons">
+              <button class="action-button edit-button" data-id="${producto.id}"><i class="fa-solid fa-pencil fa-lg"></i></button>
+              <button class="action-button delete-button" data-id="${producto.id}"><i class="fa-solid fa-trash-can fa-lg"></i></button>
+            </div>
+          </td>
+        `;
+
+        tr.querySelector(".btn-details").addEventListener("click", () => this.openModalDetailsProd(producto.id));
+        tr.querySelector(".edit-button").addEventListener("click", async () => {
+          const producto = await this.productoService.obtenerProductoPorId(producto.id);
+          if (producto) {
+            this.productoIdInput.value = producto.id;
+            this.productoNombreInput.value = producto.nombre;
+            this.productoPrecioInput.value = producto.precio;
+            this.productoCategoriaSelect.value = producto.categoriaId;
+            this.productoMarcaSelect.value = producto.marcaId;
+            this.productoProveedorSelect.value = producto.proveedorId;
+            this.productoStockInput.value = producto.stock;
+            this.productoPVPInput.value = producto.pvp;
+            this.productoDescripcionInput.value = producto.descripcion;
+            this.productoImagenInput.value = producto.imagen;
+            this.productoEstadoInput.checked = producto.estado;
+            this.estadoProductoTextoSpan.textContent = producto.estado ? "Activo" : "Inactivo";
+            window.scrollTo(0, 0);
+          }
+        });
+        tr.querySelector(".delete-button").addEventListener("click", async () => {
+          if (confirm("¿Está seguro de eliminar?")) {
+            this.showLoader();
+            await this.productoService.eliminarProducto(producto.id);
+            await this.cargarProductos(false);
+            if (app.tiendaController) await app.tiendaController.cargarProductos();
+            this.hideLoader();
+          }
+        });
+        tr.querySelector(".estado-toggleProducto").addEventListener("change", async (e) => {
+          const nuevoEstado = e.currentTarget.checked;
+          this.showLoader();
+          await this.productoService.actualizarProducto(producto.id, { estado: nuevoEstado });
+          this.hideLoader();
+        });
+
         this.tablaProductos.appendChild(tr);
       });
-
-      // Configurar los listeners después de cargar los productos
-      this.setupProductoListeners();
-
-      // Actualizar la vista de la tienda si está visible
-      if (!document.getElementById('tienda').classList.contains('hidden')) {
-        await app.tiendaController.cargarProductos();
-      }
-
     } catch (error) {
-      console.error("Hubo un error obteniendo los productos:", error);
-      alert("Error al cargar los productos");
+      console.error("Error loading products:", error);
+      alert("Error al cargar los productos.");
+    } finally {
+      if (mostrarLoader) this.hideLoader();
     }
+  }
+
+  async guardarProducto(e) {
+    e.preventDefault();
+    const productoId = this.productoIdInput.value;
+    const nombre = this.productoNombreInput.value.trim();
+    const precio = parseFloat(this.productoPrecioInput.value);
+    const categoriaId = parseInt(this.productoCategoriaSelect.value);
+    const marcaId = parseInt(this.productoMarcaSelect.value);
+    const proveedorId = parseInt(this.productoProveedorSelect.value);
+    const stock = parseInt(this.productoStockInput.value);
+    const pvp = parseFloat(this.productoPVPInput.value);
+    const descripcion = this.productoDescripcionInput.value.trim();
+    const imagen = this.productoImagenInput.value.trim();
+    const estado = this.productoEstadoInput.checked;
+
+    if (!nombre || isNaN(precio) || isNaN(categoriaId) || isNaN(marcaId) || isNaN(proveedorId) || isNaN(stock) || isNaN(pvp)) {
+      alert("Todos los campos marcados con (*) son obligatorios y deben ser válidos.");
+      return;
+    }
+
+    if (precio < 0 || pvp < 0 || stock < 0) {
+      alert('No se permiten números negativos');
+      return;
+    }
+
+    try {
+      this.showLoader();
+      let resultado;
+      if (productoId) {
+        const datosParaActualizar = { nombre, precio, categoriaId, marcaId, proveedorId, cantidad: stock, pvp, descripcion, imagen, estado };
+        resultado = await this.productoService.actualizarProducto(parseInt(productoId), datosParaActualizar);
+        if (resultado) alert("Producto ACTUALIZADO");
+      } else {
+        const nuevoProducto = new Producto(nombre, estado, new Date(), new Date(), categoriaId, '', marcaId, '', proveedorId, '', precio, pvp, stock, descripcion, imagen);
+        resultado = await this.productoService.agregarProducto(nuevoProducto);
+        if (resultado) alert(`Éxito al agregar Producto, ID ${resultado.id}`);
+      }
+      if (resultado) {
+        this.resetFormProducto();
+        await this.cargarProductos(false);
+        await this.cargarOpcionesProductoForm();
+        await this.appService.refreshCache();
+        if (app.tiendaController) await app.tiendaController.cargarProductos();
+      }
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Revise consola");
+    } finally {
+      this.hideLoader();
+    }
+  }
+
+  async cargarOpcionesProductoForm() {
+    try {
+      const categorias = await this.appService.getCategorias();
+      const marcas = await this.appService.getMarcas();
+      const proveedores = await this.appService.getProveedores();
+
+      this.productoCategoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>';
+      this.productoMarcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';
+      this.productoProveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';
+
+      if (Array.isArray(categorias)) categorias.forEach(c => this.productoCategoriaSelect.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+      if (Array.isArray(marcas)) marcas.forEach(m => this.productoMarcaSelect.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
+      if (Array.isArray(proveedores)) proveedores.forEach(p => this.productoProveedorSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`);
+    } catch (error) {
+      console.error("Error loading form options:", error);
+      alert("Hubo Error al cargar opciones para Formulario");
+    }
+  }
+
+  resetFormProducto() {
+    this.productoIdInput.value = '';
+    this.productoNombreInput.value = '';
+    this.productoPrecioInput.value = '';
+    this.productoCategoriaSelect.value = '';
+    this.productoMarcaSelect.value = '';
+    this.productoProveedorSelect.value = '';
+    this.productoStockInput.value = '';
+    this.productoPVPInput.value = '';
+    this.productoDescripcionInput.value = '';
+    this.productoImagenInput.value = '';
+    this.productoEstadoInput.checked = true;
+    this.estadoProductoTextoSpan.textContent = 'Activo';
   }
 
   async openModalDetailsProd(productoId) {
@@ -1304,263 +1410,6 @@ closeModalDetailsCat() {
     setTimeout(() => {
       modalDetails.classList.add('hidden');
     }, 300);
-  }
-
-
-  setupProductoListeners() {
-    // Editar
-    this.tablaProductos.querySelectorAll('.edit-producto').forEach(button => {
-      button.addEventListener('click', async (e) => { // Pone Evento click
-
-        const productoId = parseInt(e.target.dataset.id);        // Obtiene
-
-        const producto = await this.productoService.obtenerProductoPorId(productoId); // producto por ID
-
-        if (producto) { // producto existe!
-          // Cargar  form
-          this.productoIdInput.value = producto.id;
-          this.productoNombreInput.value = producto.nombre;
-          this.productoPrecioInput.value = producto.precio;
-          this.productoCategoriaSelect.value = producto.categoriaId;
-          this.productoMarcaSelect.value = producto.marcaId;
-          this.productoProveedorSelect.value = producto.proveedorId;
-          this.productoStockInput.value = producto.stock;
-          this.productoPVPInput.value = producto.pvp;
-          this.productoDescripcionInput.value = producto.descripcion;
-          this.productoImagenInput.value = producto.imagen;
-          this.productoEstadoInput.checked = producto.estado; // Asignar estado al checkbox
-          this.estadoProductoTextoSpan.textContent = producto.estado ? 'Activo' : 'Inactivo'; // Cambiar texto del estado
-          window.scrollTo(0, 0); // Desplazar la ventana hacia arriba
-        }
-      });
-    });
-    // Eliminar Producto
-    this.tablaProductos.querySelectorAll('.delete-producto').forEach(button => { // forEach para el boton eliminar
-      button.addEventListener('click', async (e) => {               //
-        const productoId = parseInt(e.target.dataset.id);     //
-
-        // --- CONFIRMACION ---
-        if (confirm("Esta seguro de eliminar?")) { //
-
-          //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-          const result = await this.productoService.eliminarProducto(productoId);  //
-          //Actualiza
-          if (result !== null) {
-            await this.cargarProductos();      // Vuelve a cargar productos
-            //Verifica que tiendaController esté definido antes de usarlo
-            await app.tiendaController.cargarProductos();
-
-          }
-
-        }  //Cierra confirm()
-      }); //cierra Listener
-
-    });  // cierra forEach, setupProductoListeners
-    // Nuevo: Toggle para cambiar estado en la tabla
-    this.tablaProductos.querySelectorAll('.estado-toggleProducto').forEach(toggle => {
-      toggle.addEventListener('change', async (e) => {
-        const productoId = parseInt(e.target.dataset.id);
-        const nuevoEstado = e.target.checked;
-
-        try {
-          const resultado = await this.productoService.actualizarProducto(productoId, {
-            estado: nuevoEstado
-          });
-
-          if (resultado !== null) {
-            // Actualizar la vista sin recargar toda la tabla
-            const tdEstado = e.target.closest('td').querySelector('.estado-indicatorProducto');
-            if (tdEstado) {
-              tdEstado.innerHTML = nuevoEstado ?
-                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
-                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-            }
-          }
-        } catch (error) {
-          console.error('Error al actualizar estado:', error);
-          // Revertir cambio en UI en caso de error
-          e.target.checked = !nuevoEstado;
-          alert("Error al actualizar el estado del producto.");
-        }
-      });
-    });
-  } //cierra metodo
-
-  // Enviar Formulario Producto:  CREATE y UPDATE:
-  async guardarProducto(e) {
-    e.preventDefault();
-    const productoId = this.productoIdInput.value;
-    const nombre = this.productoNombreInput.value;
-    const precio = this.productoPrecioInput.value;
-    const categoriaId = this.productoCategoriaSelect.value;
-    const marcaId = this.productoMarcaSelect.value;
-    const proveedorId = this.productoProveedorSelect.value;
-    const stock = this.productoStockInput.value;
-    const pvp = this.productoPVPInput.value;
-    const descripcion = this.productoDescripcionInput.value;
-    const imagen = this.productoImagenInput.value;
-    const estado = this.productoEstadoInput.checked; // Obtener el estado del checkbox
-
-    // 1. Validaciones previas:
-    if (!nombre || !precio || !categoriaId || !marcaId || !proveedorId || !stock || !pvp) {
-      alert("Todos los campos marcados con (*) son obligatorios");
-      return;  // Salida temprana si faltan campos
-    }
-
-    // 2. Conversión de datos:
-    const precioNumerico = parseFloat(precio);
-    const pvpNumerico = parseFloat(pvp);
-    const stockNumerico = parseInt(stock, 10);
-    const categoriaIdNumerico = parseInt(categoriaId, 10);
-    const marcaIdNumerico = parseInt(marcaId, 10);
-    const proveedorIdNumerico = parseInt(proveedorId, 10);
-
-    // Comprobaciones adicionales:
-    if (isNaN(precioNumerico) || isNaN(pvpNumerico) || isNaN(stockNumerico) ||
-      isNaN(categoriaIdNumerico) || isNaN(marcaIdNumerico) || isNaN(proveedorIdNumerico)) {
-      alert("Error: Valores numéricos inválidos.");
-      return;
-    }
-    if (precioNumerico < 0 || pvpNumerico < 0 || stockNumerico < 0) {
-      alert('No se permiten números negativos');
-      return;
-    }
-
-    let resultado;
-    try {
-      if (productoId) {
-        // ACTUALIZAR
-        const productoExistente = await this.productoService.obtenerProductoPorId(parseInt(productoId));
-        if (!productoExistente) {
-          alert("Error: Producto no encontrado.");
-          return;
-        }
-
-        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaIdNumerico);
-        const marca = await this.marcaService.obtenerMarcaPorId(marcaIdNumerico);
-        const proveedor = await this.proveedorService.obtenerProveedorPorId(proveedorIdNumerico);
-
-        const productoActualizado = {
-          ...productoExistente,
-          nombre: nombre,
-          precio: precioNumerico,
-          categoriaId: categoriaIdNumerico,
-          categoriaNombre: categoria.nombre,
-          marcaId: marcaIdNumerico,
-          marcaNombre: marca.nombre,
-          proveedorId: proveedorIdNumerico,
-          proveedorNombre: proveedor.nombre,
-          stock: stockNumerico,
-          pvp: pvpNumerico,
-          descripcion: descripcion,
-          imagen: imagen,
-          id: parseInt(productoId),
-          estado: estado, // Actualizar el estado
-        };
-
-        resultado = await this.productoService.actualizarProducto(parseInt(productoId), productoActualizado);
-        if (resultado !== null) {
-          alert("Producto ACTUALIZADO");
-        }
-      } else {
-        // CREAR
-        const nuevoProducto = new Producto(
-          nombre,                  // nombre
-          true,                    // estado (activo)
-          new Date(),              // fechaCreacion
-          new Date(),              // fechaActualizacion
-          categoriaIdNumerico,     // categoriaId
-          '',                      // categoriaNombre (temporal)
-          marcaIdNumerico,         // marcaId
-          '',                      // marcaNombre (temporal)
-          proveedorIdNumerico,     // proveedorId
-          '',                      // proveedorNombre (temporal)
-          precioNumerico,          // precio
-          pvpNumerico,             // pvp
-          stockNumerico,           // cantidad
-          descripcion,             // descripcion
-          imagen                   // imagen
-        );
-        resultado = await this.productoService.agregarProducto(nuevoProducto);
-        if (resultado) {
-          alert(`EXITO Agregando Producto, ID ${resultado} `);
-        }
-      }
-
-      if (resultado !== null && resultado !== undefined) {
-        this.resetFormProducto();
-        await this.cargarProductos();
-        await this.cargarOpcionesProductoForm();
-        await appService.refreshCache();
-      } else {
-        throw new Error('Errores en Datos o Validacion.');
-      }
-    } catch (error) {
-      console.error("Error :", error);
-      alert("Revise consola");
-    }
-  }
-
-
-  // Reset
-  resetFormProducto() {
-    this.productoIdInput.value = ''
-    this.productoNombreInput.value = ''
-    this.productoPrecioInput.value = ''
-    this.productoCategoriaSelect.value = ''
-    this.productoMarcaSelect.value = ''
-    this.productoProveedorSelect.value = ''
-    this.productoStockInput.value = ''
-    this.productoPVPInput.value = ''
-    this.productoDescripcionInput.value = ''
-    this.productoImagenInput.value = ''
-    this.productoEstadoInput.checked = true; // Resetear a activo por defecto
-    this.estadoProductoTextoSpan.textContent = 'Activo'; // Resetear texto del estado
-  }
-
-  async cargarOpcionesProductoForm() {
-    try {
-      const categorias = await appService.getCategorias(); //  await
-      const marcas = await appService.getMarcas(); //  await
-      const proveedores = await appService.getProveedores(); //  await
-      // Limpiar antes (por precaucion)
-
-      this.productoCategoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>'; // reset
-      this.productoMarcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';       //
-      this.productoProveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';     //
-
-      // Verificar que sean arrays antes de iterar
-      if (Array.isArray(categorias)) {
-        categorias.forEach(categoria => {
-          this.productoCategoriaSelect.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
-        });
-      } else {
-        console.error("Error: categorias no es un array");
-      }
-
-      if (Array.isArray(marcas)) {
-        marcas.forEach(marca => {
-          this.productoMarcaSelect.innerHTML += `<option value="${marca.id}">${marca.nombre}</option>`;
-        });
-      } else {
-        console.error("Error: marcas no es un array");
-      }
-
-
-      if (Array.isArray(proveedores)) {
-        proveedores.forEach(proveedor => {
-          this.productoProveedorSelect.innerHTML += `<option value="${proveedor.id}">${proveedor.nombre}</option>`;
-        });
-      } else {
-        console.error('proveedores no es un array')
-      }
-
-
-    } catch (error) {     // Errores
-      //Feedback, si falla.
-      console.error("Error:", error);
-      alert("Hubo Error al cargar opciones para Formulario"); //
-    }
   }
 
   //-------------------------
