@@ -12,6 +12,7 @@ import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js
 import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorService.js";
 import {ClienteService} from "../../../../BackEnd/src/services/ClienteService.js";
 import {MarcaService} from "../../../../BackEnd/src/services/MarcaService.js";
+import {CategoriaService} from "../../../../BackEnd/src/services/CategoriaService.js";
 
 class AdminController {
 
@@ -39,29 +40,32 @@ class AdminController {
     this.formCategoria = document.getElementById('formCategoria');
     this.categoriaIdInput = document.getElementById('categoriaId');
     this.categoriaNombreInput = document.getElementById('categoriaNombre');
-
     this.categoriaEstadoInput = document.getElementById('categoriaEstado');
     this.estadoTextoSpan = document.getElementById('estadoTexto');
     this.tablaCategorias = document.getElementById('tablaCategorias').querySelector('tbody');
-    // Agregar listener para el cambio de estado
     this.categoriaEstadoInput.addEventListener('change', () => {
       this.estadoTextoSpan.textContent = this.categoriaEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
-    // this.btnResetCategoriaForm = document.getElementById('resetCategoriaForm') //ya no es necesario
+
+    // Instancia del servicio de categorías
+    this.categoriaService = new CategoriaService();
+    // Iniciar la carga de categorías
+    this.cargarCategorias();
 
     // Elementos Marcas       ========================================================================0
-    this.marcaService = new MarcaService()
     this.formMarca = document.getElementById('formMarca');
     this.marcaIdInput = document.getElementById('marcaId');
     this.marcaNombreInput = document.getElementById('marcaNombre');
-
     this.marcaEstadoInput = document.getElementById('marcaEstado');
     this.estadoMarcaTextoSpan = document.getElementById('estadoMarcaTexto');
-
-    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
     this.marcaEstadoInput.addEventListener('change', () => {
       this.estadoMarcaTextoSpan.textContent = this.marcaEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
+    // Instancia del servicio de marca
+    this.marcaService = new MarcaService()
+    // Iniciar la carga de marcas
+    this.cargarMarcas();
+
 
     // Elementos Proveedores con los IDs reales  =======================================
     this.formProveedor = document.getElementById('formProveedor');
@@ -72,8 +76,6 @@ class AdminController {
     this.proveedorEstadoInput = document.getElementById('proveedorEstado');
     this.estadoProveedorTextoSpan = document.getElementById('estadoProveedorTexto');
     this.tablaProveedores = document.getElementById('tablaProveedores').querySelector('tbody');
-
-    // Listener para el cambio de estado en el formulario (al editar)
     this.proveedorEstadoInput.addEventListener('change', () => {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
@@ -92,19 +94,15 @@ class AdminController {
     this.clienteEstadoInput = document.getElementById('clienteEstado');
     this.estadoClienteTextoSpan = document.getElementById('estadoClienteTexto');
     this.tablaClientes = document.getElementById('tablaClientes').querySelector('tbody');
-
-    // Listener para el cambio de estado en el formulario (al editar)
     this.clienteEstadoInput.addEventListener('change', () => {
       this.estadoClienteTextoSpan.textContent = this.clienteEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
-
     // Instancia del servicio de clientes
     this.clienteService = new ClienteService();
 // Cargar clientes de inmediato
     this.cargarClientes();
 
     // ======================================================================
-
     // Elementos Productos
     this.formProducto = document.getElementById('formProducto');
     this.productoIdInput = document.getElementById('productoId');
@@ -117,12 +115,9 @@ class AdminController {
     this.productoPVPInput = document.getElementById('productoPVP');
     this.productoDescripcionInput = document.getElementById('productoDescripcion');
     this.productoImagenInput = document.getElementById('productoImagen');
-
     this.productoEstadoInput = document.getElementById('productoEstado');
     this.estadoProductoTextoSpan = document.getElementById('estadoProductoTexto');
     this.tablaProductos = document.getElementById('tablaProductos').querySelector('tbody');
-
-    // Agregar listener para el cambio de estado en el formulario (para cuando se edita)
     this.productoEstadoInput.addEventListener('change', () => {
       this.estadoProductoTextoSpan.textContent = this.productoEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
@@ -130,6 +125,10 @@ class AdminController {
     // =====================================================================
     // Forzamos la sincronización sin mostrar el overlay completo
     setInterval(async () => {
+
+      await this.categoriaService.forceSyncNow();
+      // Actualizamos la tabla sin usar el loader
+      this.cargarCategorias(false);
 
       await this.marcaService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
@@ -244,18 +243,18 @@ class AdminController {
   //     .replace(/\+/g, '');    // Elimina el "+"
   // }
 
-
   //---------------------------------------------------
   // Métodos CRUD para Categorías
   //---------------------------------------------------
   // adminController.js
-  async cargarCategorias() {
+  async cargarCategorias(mostrarLoader = true) {
     try {
-      const categorias = await appService.getCategorias();
+      if (mostrarLoader) this.showLoader();
+      const categorias = await this.categoriaService.obtenerTodasLasCategorias();
       this.tablaCategorias.innerHTML = '';
 
       if (!Array.isArray(categorias)) {
-        console.error("Error: categorias is not an array.");
+        console.error("Error: categorias no es un array.");
         return;
       }
 
@@ -264,7 +263,7 @@ class AdminController {
         tr.innerHTML = `
         <td class="text-center">${categoria.nombre}</td>
         <td class="text-center">
-          <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer;" id="btnOpenModalDetails" data-id="${categoria.id}"></i>
+          <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${categoria.id}"></i>
         </td>
         <td class="text-center">
           <div class="estado-cell">
@@ -275,217 +274,178 @@ class AdminController {
         </td>
         <td class="text-center">
           <div class="action-buttons">
-            <button class="action-button edit-button edit-categoria" data-id="${categoria.id}">
+            <button class="action-button edit-button" data-id="${categoria.id}">
               <i class="fa-solid fa-pencil fa-lg" data-id="${categoria.id}"></i>
             </button>
-            <button class="action-button delete-button delete-categoria" data-id="${categoria.id}">
+            <button class="action-button delete-button" data-id="${categoria.id}">
               <i class="fa-solid fa-trash-can fa-lg" data-id="${categoria.id}"></i>
             </button>
           </div>
         </td>
       `;
 
-        const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
-        if (btnOpenModal) {
-          btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsCat(categoria.id);
+        // Listener para abrir el modal de detalles
+        tr.querySelector(".btn-details").addEventListener("click", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          await this.openModalDetailsCat(id);
+        });
+
+        // Listener para editar categoría
+        tr.querySelector(".edit-button").addEventListener("click", async (e) => {
+          const btn = e.currentTarget;
+          btn.disabled = true;
+          try {
+            const id = parseInt(btn.dataset.id);
+            const categoria = await this.categoriaService.obtenerCategoriaPorId(id);
+            if (categoria) {
+              this.categoriaIdInput.value = categoria.id;
+              this.categoriaNombreInput.value = categoria.nombre;
+              this.categoriaEstadoInput.checked = categoria.estado;
+              this.estadoTextoSpan.textContent = categoria.estado ? "Activo" : "Inactivo";
+              window.scrollTo(0, 0);
+            }
+          } finally {
+            btn.disabled = false;
+          }
+        });
+
+        // Listener para eliminar categoría
+        tr.querySelector(".delete-button").addEventListener("click", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          if (confirm("¿Está seguro de eliminar?")) {
+            this.showLoader();
+            const result = await this.categoriaService.eliminarCategoria(id);
+            if (result !== null) {
+              await this.cargarCategorias(mostrarLoader);
+              await this.cargarOpcionesProductoForm();
+            }
+            this.hideLoader();
+          }
+        });
+
+        // Listener para el cambio de estado en la tabla
+        const toggleEstado = tr.querySelector(".estado-toggle");
+        if (toggleEstado) {
+          toggleEstado.addEventListener("change", async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const nuevoEstado = e.currentTarget.checked;
+            try {
+              this.showLoader();
+              const resultado = await this.categoriaService.actualizarCategoria(id, {estado: nuevoEstado});
+              if (resultado !== null) {
+                const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicator");
+                if (tdEstado) {
+                  tdEstado.innerHTML = nuevoEstado
+                    ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+                    : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+                }
+              }
+            } catch (error) {
+              console.error("Error al actualizar estado:", error);
+              e.currentTarget.checked = !nuevoEstado;
+              alert("Error al actualizar el estado de la categoría.");
+            } finally {
+              this.hideLoader();
+            }
           });
         }
 
         this.tablaCategorias.appendChild(tr);
       });
-
-      // Configurar listeners para los botones y toggles
-      this.setupCategoriaListeners();
-
     } catch (error) {
       console.error("Error al cargar las categorías:", error);
       alert("Error al cargar las categorías.");
+    } finally {
+      if (mostrarLoader) this.hideLoader();
     }
   }
 
-  async openModalDetailsCat(categoriaId) {
-    const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId); // Obtener solo la categoría seleccionada
-    const modalDetails = document.getElementById('categoriaModal');
+  async guardarCategoria(e) {
+    e.preventDefault();
+    const categoriaId = this.categoriaIdInput.value;
+    const nombre = this.categoriaNombreInput.value.trim();
+    const estado = this.categoriaEstadoInput.checked;
 
+    if (!nombre) {
+      alert("El nombre de la categoría es obligatorio.");
+      return;
+    }
+
+    try {
+      this.showLoader();
+      let resultado;
+      if (categoriaId) {
+        // Actualización
+        const datosParaActualizar = {nombre, estado};
+        resultado = await this.categoriaService.actualizarCategoria(parseInt(categoriaId), datosParaActualizar);
+        if (resultado) {
+          alert("Categoría ACTUALIZADA");
+        }
+      } else {
+        // Creación
+        const nuevaCategoria = new Categoria(nombre, estado);
+        const categoriaCreada = await this.categoriaService.agregarCategoria(nuevaCategoria);
+        if (categoriaCreada) {
+          alert(`Éxito al agregar Categoría, ID ${categoriaCreada.id}`);
+          resultado = categoriaCreada;
+        } else {
+          throw new Error('Errores en datos o validación.');
+        }
+      }
+      if (resultado) {
+        this.resetFormCategoria();
+        await this.cargarCategorias();
+        await this.cargarOpcionesProductoForm();
+        await appService.refreshCache();
+      }
+    } catch (error) {
+      console.error("Error en guardarCategoria:", error);
+      alert("Revise consola");
+    } finally {
+      this.hideLoader();
+    }
+  }
+
+  resetFormCategoria() {
+    this.categoriaIdInput.value = '';
+    this.categoriaNombreInput.value = '';
+    this.categoriaEstadoInput.checked = true;
+    this.estadoTextoSpan.textContent = 'Activo';
+  }
+
+  async openModalDetailsCat(categoriaId) {
+  try {
+    this.showLoader();
+    const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId);
     if (!categoria) {
       console.error("No se encontró la categoría");
       return;
     }
-
-    // Llenar el modal con la información correcta
     document.getElementById('modalNombre').textContent = categoria.nombre;
     document.getElementById('modalEstado').innerHTML = categoria.iconTrueFalse();
     document.getElementById('modalFechaCreacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaCreacion);
     document.getElementById('modalFechaActualizacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaActualizacion);
-
-    // Mostrar el modal
+    const modalDetails = document.getElementById('categoriaModal');
     modalDetails.classList.remove('hidden');
     document.body.classList.add('modal-open');
-
     requestAnimationFrame(() => {
       modalDetails.classList.add('show');
     });
+  } catch (error) {
+    console.error("Error abriendo el modal de detalles:", error);
+  } finally {
+    this.hideLoader();
   }
+}
 
-  closeModalDetailsCat() {
-    const modalDetails = document.getElementById('categoriaModal');
-
-    modalDetails.classList.remove('show');
-    document.body.classList.remove('modal-open');
-
-    setTimeout(() => {
-      modalDetails.classList.add('hidden');
-    }, 300);
-  }
-
-  setupCategoriaListeners() {
-    // Editar
-    this.tablaCategorias.querySelectorAll('.edit-categoria').forEach(button => {
-      button.addEventListener('click', async (e) => {
-        const categoriaId = parseInt(e.target.dataset.id);
-        const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId);
-
-        if (categoria) {
-          this.categoriaIdInput.value = categoria.id;
-          this.categoriaNombreInput.value = categoria.nombre;
-
-          // Establecer el estado del toggle
-          this.categoriaEstadoInput.checked = categoria.estado;
-          this.estadoTextoSpan.textContent = categoria.estado ? 'Activo' : 'Inactivo';
-          window.scrollTo(0, 0);
-
-        }
-      });
-    });
-    // Eliminar Categoria
-    this.tablaCategorias.querySelectorAll('.delete-categoria').forEach(button => { // forEach para el boton eliminar
-      button.addEventListener('click', async (e) => {               //
-        const categoriaId = parseInt(e.target.dataset.id);     //
-
-        // --- CONFIRMACION ---
-        if (confirm("Esta seguro de eliminar?")) { //
-          //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-          const result = await this.categoriaService.eliminarCategoria(categoriaId);  //
-
-          // Verificar si la eliminación fue exitosa
-          if (result !== null) {
-            //Actualiza
-            await this.cargarCategorias();      // Vuelve a cargar categorias
-            // Para actualizar select de Productos.
-            await this.cargarOpcionesProductoForm(); //   productos
-          }
-        }  //Cierra confirm()
-      }); //cierra Listener
-    });  // cierra forEach, setupCategoriaListeners
-    // Nuevo: Toggle para cambiar estado en la tabla
-    this.tablaCategorias.querySelectorAll('.estado-toggle').forEach(toggle => {
-      toggle.addEventListener('change', async (e) => {
-        const categoriaId = parseInt(e.target.dataset.id);
-        const nuevoEstado = e.target.checked;
-
-        try {
-          const resultado = await this.categoriaService.actualizarCategoria(categoriaId, {
-            estado: nuevoEstado
-          });
-          AdminController.googleSheetSync.sync("update", resultado);
-
-          if (resultado !== null) {
-            // Actualizar la vista sin recargar toda la tabla
-            const tdEstado = e.target.closest('td').querySelector('.estado-indicator');
-            if (tdEstado) {
-              tdEstado.innerHTML = nuevoEstado ?
-                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
-                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-            }
-          }
-        } catch (error) {
-          console.error('Error al actualizar estado:', error);
-          // Revertir cambio en UI en caso de error
-          e.target.checked = !nuevoEstado;
-          alert("Error al actualizar el estado de la categoría.");
-        }
-      });
-    });
-  } //cierra metodo
-
-  // Enviar Formulario Categoria:  CREATE y UPDATE:  (categorias)
-  async guardarCategoria(e) {
-    e.preventDefault();
-    const categoriaId = this.categoriaIdInput.value; // Puede ser string vacío o un ID
-    const nombre = this.categoriaNombreInput.value.trim(); // Quitar espacios extra
-    const estado = this.categoriaEstadoInput.checked; // Obtener el estado del checkbox
-
-    if (!nombre) {
-      alert("El nombre es obligatorio.");
-      return;
-    }
-
-    let resultado;
-    try {
-      if (categoriaId) {
-        // --- ACTUALIZACIÓN ---
-        console.log(`Intentando actualizar categoría ID: ${categoriaId} con nombre: ${nombre}`);
-        // Preparamos solo los datos que queremos cambiar
-        const datosParaActualizar = {
-          nombre: nombre,
-          estado: estado // Actualiza el estado también
-        };
-
-        // Llamamos al servicio de actualización pasando el ID y los NUEVOS datos
-        resultado = await this.categoriaService.actualizarCategoria(parseInt(categoriaId), datosParaActualizar);
-
-        if (resultado === null) {
-          // El servicio retornó null, indicando un error (probablemente de validación o BD)
-          alert("Error al actualizar la categoría. Revisa la consola para más detalles.");
-          // No reseteamos el form para que el usuario pueda corregir
-        } else {
-          // El servicio retornó el objeto de categoría actualizado
-          // IMPORTANTE: Sincronizar con Google Sheets
-          AdminController.googleSheetSync.sync("update", resultado);
-
-          alert("Categoría ACTUALIZADA exitosamente.");
-          this.resetFormCategoria(); // Resetea el formulario
-          await this.cargarCategorias(); // Recarga la tabla
-          await this.cargarOpcionesProductoForm(); // Actualiza selects dependientes
-          await appService.refreshCache(); // Actualiza caché si es necesario
-        }
-
-      } else {
-        // --- CREACIÓN ---
-        console.log(`Intentando agregar nueva categoría con nombre: ${nombre}`);
-        const nuevaCategoria = new Categoria(nombre, estado); // El constructor se encarga de las fechas iniciales
-        resultado = await this.categoriaService.agregarCategoria(nuevaCategoria);
-
-        if (resultado !== null) { // Si agregarCategoria retorna el nuevo ID
-          // CORRECCIÓN: Solo sincroniza una vez
-          // AdminController.googleSheetSync.sync("create", resultado); // Envía el objeto
-
-          alert(`Categoría agregada exitosamente con ID: ${resultado.id}`); // Accede al id del objeto
-          this.resetFormCategoria();
-          await this.cargarCategorias();
-          await this.cargarOpcionesProductoForm();
-          await appService.refreshCache();
-        } else {
-          // agregarCategoria retornó null, indicando un error (validación, BD, etc.)
-          alert("Error al agregar la categoría. Revisa la consola.");
-          // No reseteamos el form
-        }
-      }
-
-    } catch (error) {
-      console.error("Error en guardarCategoria:", error);
-      alert("Ocurrió un error inesperado al guardar. Revisa la consola.");
-    }
-  }
-
-  // Reset
-  resetFormCategoria() {
-    this.categoriaIdInput.value = '';       // Reset ID (oculto)
-    this.categoriaNombreInput.value = ''; // Reset Nombre (visible)
-    this.categoriaEstadoInput.checked = true; // Resetear a activo por defecto
-    this.estadoTextoSpan.textContent = 'Activo';
-  }
+closeModalDetailsCat() {
+  const modalDetails = document.getElementById('categoriaModal');
+  modalDetails.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  setTimeout(() => {
+    modalDetails.classList.add('hidden');
+  }, 300);
+}
 
   //---------------------------------------------------
   // Métodos CRUD para Marcas
