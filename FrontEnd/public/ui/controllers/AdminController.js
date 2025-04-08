@@ -48,7 +48,7 @@ class AdminController {
     });
     // this.btnResetCategoriaForm = document.getElementById('resetCategoriaForm') //ya no es necesario
 
-    // Elementos Marcas
+    // Elementos Marcas       ========================================================================0
     this.formMarca = document.getElementById('formMarca');
     this.marcaIdInput = document.getElementById('marcaId');
     this.marcaNombreInput = document.getElementById('marcaNombre');
@@ -483,258 +483,210 @@ class AdminController {
   //---------------------------------------------------
   // Métodos CRUD para Marcas
   //---------------------------------------------------
-// In AdminController.js
-  async guardarMarca(e) {
-    e.preventDefault();
-    const marcaId = this.marcaIdInput.value;
-    const nombre = this.marcaNombreInput.value.trim();
-    const estado = this.marcaEstadoInput.checked;
+// AdminController.js
 
-    if (!nombre) {
-      alert("El nombre de la marca es obligatorio.");
+  async cargarMarcas(mostrarLoader = true) {
+  try {
+    if (mostrarLoader) this.showLoader();
+    const marcas = await this.marcaService.obtenerTodasLasMarcas();
+    const tabla = document.getElementById('tabla-marcas-body');
+    if (!tabla) {
+      console.error("Elemento tbody para marcas no encontrado");
+      return;
+    }
+    tabla.innerHTML = ''; // Limpiar tabla
+
+    if (!Array.isArray(marcas)) {
+      console.error("Error: marcas no es un array.");
       return;
     }
 
-    let resultado;
-    try {
-      if (marcaId) {
-        // --- ACTUALIZACIÓN ---
-        console.log(`Intentando actualizar marca ID: ${marcaId} con nombre: ${nombre}`);
-        const datosParaActualizar = {
-          nombre: nombre,
-          estado: estado
-        };
-
-        resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
-
-        if (resultado !== null) {
-          // Obtener la marca actualizada para asegurar sincronización
-          const marcaActualizada = await this.marcaService.obtenerMarcaPorId(parseInt(marcaId));
-          // Descomentar si necesitas sincronizar con Google Sheets:
-          // AdminController.googleSheetSyncMarca.sync("update", marcaActualizada);
-
-          alert("Marca guardada/actualizada exitosamente.");
-          this.resetFormMarca();
-          await this.cargarMarcas(); // Recarga las marcas en la UI
-          await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
-          await appService.refreshCache(); // Refresca el caché para la UI
-        } else {
-          alert("Error al actualizar la marca. Revisa la consola.");
-        }
-
-      } else {
-        // --- CREACIÓN ---
-        console.log(`Intentando agregar nueva marca con nombre: ${nombre}`);
-        const nuevaMarca = new Marca(nombre, estado);
-        resultado = await this.marcaService.agregarMarca(nuevaMarca);
-
-        if (resultado !== null) {
-          // Obtener la marca creada para sincronización
-          const marcaCreada = await this.marcaService.obtenerMarcaPorId(resultado);
-          // Descomentar si necesitas sincronizar con Google Sheets:
-          // AdminController.googleSheetSyncMarca.sync("create", marcaCreada);
-
-          alert(`Marca agregada exitosamente con ID: ${resultado}`);
-          this.resetFormMarca();
-          await this.cargarMarcas(); // Recarga las marcas en la UI
-          await this.cargarOpcionesProductoForm(); // Actualiza opciones relacionadas
-          await appService.refreshCache(); // Refresca el caché para la UI
-        } else {
-          alert("Error al agregar la marca. Revisa la consola.");
-        }
-      }
-
-    } catch (error) {
-      console.error("Error en guardarMarca:", error);
-      alert("Ocurrió un error inesperado al guardar la marca. Revisa la consola.");
-    }
-  }
-
-  // --- Asegúrate de tener el método resetFormMarca ---
-  resetFormMarca() {
-    this.marcaIdInput.value = '';       // Reset ID (oculto)
-    this.marcaNombreInput.value = ''; // Reset Nombre (visible)
-    // Resetea otros campos del form de marca si los tienes
-    this.marcaEstadoInput.checked = true; // Resetear a activo por defecto
-    this.estadoMarcaTextoSpan.textContent = 'Activo';
-  }
-
-  // --- Asegúrate de tener el método cargarMarcas ---
-  async cargarMarcas() {
-    try {
-      const marcas = await this.marcaService.obtenerTodasLasMarcas();
-      const tabla = document.getElementById('tabla-marcas-body');
-      if (!tabla) {
-        console.error("Elemento tbody para marcas no encontrado");
-        return;
-      }
-      tabla.innerHTML = ''; // Limpiar tabla
-
-      if (!Array.isArray(marcas)) {
-        console.error("Error: marcas no es un array.");
-        return;
-      }
-
-      marcas.forEach(marca => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="text-center">${marca.nombre}</td>
-          <td class="text-center">
-            <i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetails" data-id="${marca.id}" title="Ver Detalles"></i>
-          </td>
-        
-          <td class="text-center">
-            <div class="estado-cell">
+    marcas.forEach(marca => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center">${marca.nombre}</td>
+        <td class="text-center">
+          <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${marca.id}"></i>
+        </td>
+        <td class="text-center">
+          <div class="estado-cell">
             <span class="estado-indicatorMarca hidden">${marca.iconTrueFalse()}</span>
-              <input type="checkbox" id="marcaEstadoToggle${marca.id}" class="toggle-input estado-toggleMarca" data-id="${marca.id}" ${marca.estado ? 'checked' : ''}>
-              <label for="marcaEstadoToggle${marca.id}" class="toggle-label"></label>
-            </div>
-          </td>
-        
-          <td class="text-center">
-             <div class="action-buttons">
-               <button class="action-button edit-button edit-marca" data-id="${marca.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${marca.id}"></i></button>
-               <button class="action-button delete-button delete-marca" data-id="${marca.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${marca.id}"></i></button>
-             </div>
-            </td>
-        `;
-        const btnOpenModal = tr.querySelector('#btnOpenModalDetails');
-        if (btnOpenModal) {
-          btnOpenModal.addEventListener('click', () => {
-            this.openModalDetailsMar(marca.id);
-          });
-        }
-        tabla.appendChild(tr);
+            <input type="checkbox" id="marcaEstadoToggle${marca.id}" class="toggle-input estado-toggleMarca" data-id="${marca.id}" ${marca.estado ? 'checked' : ''}>
+            <label for="marcaEstadoToggle${marca.id}" class="toggle-label"></label>
+          </div>
+        </td>
+        <td class="text-center">
+          <div class="action-buttons">
+            <button class="action-button edit-button" data-id="${marca.id}">
+              <i class="fa-solid fa-pencil fa-lg" data-id="${marca.id}"></i>
+            </button>
+            <button class="action-button delete-button" data-id="${marca.id}">
+              <i class="fa-solid fa-trash-can fa-lg" data-id="${marca.id}"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      // Listener para abrir el modal de detalles
+      tr.querySelector(".btn-details").addEventListener("click", async (e) => {
+        const id = parseInt(e.currentTarget.dataset.id);
+        await this.openModalDetailsMar(id);
       });
 
-      // Reconfigura los listeners para botones y toggles
-      this.setupMarcaListeners();
-
-    } catch (error) {
-      console.error("Error al cargar las marcas:", error);
-      alert("Error al cargar las marcas.");
-    }
-  }
-
-  setupMarcaListeners() {
-    const tabla = document.getElementById('tabla-marcas-body'); // ID del tbody de marcas
-    if (!tabla) return;
-
-    // Editar Marca
-    tabla.querySelectorAll('.edit-marca').forEach(button => {
-      button.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const targetElement = e.target.closest('button');
-        if (!targetElement) return;
-
-        const marcaId = parseInt(targetElement.dataset.id);
-        const marca = await this.marcaService.obtenerMarcaPorId(marcaId);
-        if (marca) {
-          this.marcaIdInput.value = marca.id;
-          this.marcaNombreInput.value = marca.nombre;
-          // Establecer el estado del toggle en el formulario
-          this.marcaEstadoInput.checked = marca.estado;
-          this.estadoMarcaTextoSpan.textContent = marca.estado ? 'Activo' : 'Inactivo';
-          window.scrollTo(0, 0);
-        }
-      });
-    });
-
-    // Eliminar Marca
-    tabla.querySelectorAll('.delete-marca').forEach(button => {
-      button.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const targetElement = e.target.closest('button');
-        if (!targetElement) return;
-
-        const marcaId = parseInt(targetElement.dataset.id);
-        if (confirm(`¿Está seguro de eliminar la marca con ID ${marcaId}?`)) {
-          const result = await this.marcaService.eliminarMarca(marcaId);
-          if (result !== null) {
-            alert('Marca eliminada correctamente.');
-            await this.cargarMarcas();
-            await this.cargarOpcionesProductoForm();
-            await appService.refreshCache();
-            this.resetFormMarca();
-          } else {
-            alert('Error al eliminar la marca.');
-          }
-        }
-      });
-    });
-
-    // Toggle para cambiar estado desde la tabla (sin pasar por el formulario)
-    tabla.querySelectorAll('.estado-toggleMarca').forEach(toggle => {
-      toggle.addEventListener('change', async (e) => {
-        const marcaId = parseInt(e.target.dataset.id);
-        const nuevoEstado = e.target.checked;
-
+      // Listener para editar marca
+      tr.querySelector(".edit-button").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
         try {
-          const resultado = await this.marcaService.actualizarMarca(marcaId, {
-            estado: nuevoEstado
-          });
-          AdminController.googleSheetSyncMarca.sync("update", resultado);
-
-          if (resultado !== null) {
-            // Actualizar la vista sin recargar toda la tabla
-            const tdEstado = e.target.closest('td').querySelector('.estado-indicatorMarca');
-            if (tdEstado) {
-              tdEstado.innerHTML = nuevoEstado ?
-                '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>' :
-                '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-            }
+          const id = parseInt(btn.dataset.id);
+          const marca = await this.marcaService.obtenerMarcaPorId(id);
+          if (marca) {
+            this.marcaIdInput.value = marca.id;
+            this.marcaNombreInput.value = marca.nombre;
+            this.marcaEstadoInput.checked = marca.estado;
+            this.estadoMarcaTextoSpan.textContent = marca.estado ? "Activo" : "Inactivo";
+            window.scrollTo(0, 0);
           }
-        } catch (error) {
-          console.error('Error al actualizar estado:', error);
-          // Revertir cambio en UI en caso de error
-          e.target.checked = !nuevoEstado;
-          alert("Error al actualizar el estado de la marca.");
+        } finally {
+          btn.disabled = false;
         }
       });
+
+      // Listener para eliminar marca
+      tr.querySelector(".delete-button").addEventListener("click", async (e) => {
+        const id = parseInt(e.currentTarget.dataset.id);
+        if (confirm("¿Está seguro de eliminar?")) {
+          this.showLoader();
+          const result = await this.marcaService.eliminarMarca(id);
+          if (result !== null) {
+            await this.cargarMarcas(mostrarLoader);
+          }
+          this.hideLoader();
+        }
+      });
+
+      // Listener para el cambio de estado en la tabla
+      const toggleEstado = tr.querySelector(".estado-toggleMarca");
+      if (toggleEstado) {
+        toggleEstado.addEventListener("change", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          const nuevoEstado = e.currentTarget.checked;
+          try {
+            this.showLoader();
+            const resultado = await this.marcaService.actualizarMarca(id, { estado: nuevoEstado });
+            if (resultado !== null) {
+              const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicatorMarca");
+              if (tdEstado) {
+                tdEstado.innerHTML = nuevoEstado
+                  ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+                  : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+              }
+            }
+          } catch (error) {
+            console.error("Error al actualizar estado:", error);
+            e.currentTarget.checked = !nuevoEstado;
+            alert("Error al actualizar el estado de la marca.");
+          } finally {
+            this.hideLoader();
+          }
+        });
+      }
+
+      tabla.appendChild(tr);
     });
+  } catch (error) {
+    console.error("Error al cargar las marcas:", error);
+    alert("Error al cargar las marcas.");
+  } finally {
+    if (mostrarLoader) this.hideLoader();
+  }
+}
+
+async guardarMarca(e) {
+  e.preventDefault();
+  const marcaId = this.marcaIdInput.value;
+  const nombre = this.marcaNombreInput.value.trim();
+  const estado = this.marcaEstadoInput.checked;
+
+  if (!nombre) {
+    alert("El nombre de la marca es obligatorio.");
+    return;
   }
 
-  async openModalDetailsMar(marcaId) {
-    const marca = await this.marcaService.obtenerMarcaPorId(marcaId); // Usa el servicio de Marca
-    const modalDetails = document.getElementById('marcaModal'); // Asegúrate que tienes un modal con este ID
-
-    if (!modalDetails) {
-      console.error("Modal para detalles de Marca no encontrado (marcaModal)");
-      return;
+  try {
+    this.showLoader();
+    let resultado;
+    if (marcaId) {
+      // Actualización
+      const datosParaActualizar = { nombre, estado };
+      resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
+      if (resultado) {
+        alert("Marca ACTUALIZADA");
+      }
+    } else {
+      // Creación
+      const nuevaMarca = new Marca(nombre, estado);
+      const marcaCreada = await this.marcaService.agregarMarca(nuevaMarca);
+      if (marcaCreada) {
+        alert(`Éxito al agregar Marca, ID ${marcaCreada.id}`);
+        resultado = marcaCreada;
+      } else {
+        throw new Error('Errores en datos o validación.');
+      }
     }
+    if (resultado) {
+      this.resetFormMarca();
+      await this.cargarMarcas();
+      await appService.refreshCache();
+    }
+  } catch (error) {
+    console.error("Error en guardarMarca:", error);
+    alert("Revise consola");
+  } finally {
+    this.hideLoader();
+  }
+}
 
+resetFormMarca() {
+  this.marcaIdInput.value = '';
+  this.marcaNombreInput.value = '';
+  this.marcaEstadoInput.checked = true;
+  this.estadoMarcaTextoSpan.textContent = 'Activo';
+}
+
+async openModalDetailsMar(marcaId) {
+  try {
+    this.showLoader();
+    const marca = await this.marcaService.obtenerMarcaPorId(marcaId);
     if (!marca) {
-      console.error("No se encontró la marca con ID:", marcaId);
-      alert("No se pudo cargar la información de la marca.");
+      console.error("No se encontró la marca");
       return;
     }
-
-    // Llenar el modal con la información correcta - Adapta los IDs a tu modal de marca
     document.getElementById('modalMarcaNombre').textContent = marca.nombre;
     document.getElementById('modalMarcaEstado').innerHTML = marca.iconTrueFalse();
-    // Formatea las fechas usando el método de la instancia de Marca (heredado de BaseModel)
     document.getElementById('modalMarcaFechaCreacion').textContent = marca.formatEcuadorDateTime(marca.fechaCreacion);
     document.getElementById('modalMarcaFechaActualizacion').textContent = marca.formatEcuadorDateTime(marca.fechaActualizacion);
-
-    // Mostrar el modal (adapta las clases si usas otro framework/lógica CSS)
+    const modalDetails = document.getElementById('marcaModal');
     modalDetails.classList.remove('hidden');
     document.body.classList.add('modal-open');
     requestAnimationFrame(() => {
       modalDetails.classList.add('show');
     });
+  } catch (error) {
+    console.error("Error abriendo el modal de detalles:", error);
+  } finally {
+    this.hideLoader();
   }
+}
 
-  closeModalDetailsMar() {
-    const modalDetails = document.getElementById('marcaModal'); // ID del modal de marca
-    if (!modalDetails) return;
-
-    modalDetails.classList.remove('show');
-    document.body.classList.remove('modal-open');
-
-    setTimeout(() => {
-      modalDetails.classList.add('hidden');
-    }, 300); // Tiempo de la transición CSS
-  }
+closeModalDetailsMar() {
+  const modalDetails = document.getElementById('marcaModal');
+  modalDetails.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  setTimeout(() => {
+    modalDetails.classList.add('hidden');
+  }, 300);
+}
 
   //---------------------------------------------------
   // Métodos CRUD para Proveedores
@@ -1264,209 +1216,6 @@ class AdminController {
     this.clienteEstadoInput.checked = true;
     this.estadoClienteTextoSpan.textContent = 'Activo';
   }
-
-//   async cargarClientes() {
-//     try {
-//       const clientes = await this.clienteService.obtenerTodosLosClientes();
-//       this.tablaClientes.innerHTML = ''; // Limpiar
-//
-//       if (!Array.isArray(clientes)) {
-//         console.error("Error: clientes is not an array.");
-//         return;
-//       }
-//       clientes.forEach(cliente => {
-//         const telefonoFormateado = this.formatearTelefono(cliente.telefono);
-//         const tr = document.createElement('tr');   // row
-//         tr.innerHTML = `
-//                  <td class="text-center">${cliente.nombre}</td>
-//
-//               <td class="text-center">
-//                 <!-- Llamada telefónica -->
-//                 <a href="tel:${cliente.telefono}" title="Llamar vía telefónica ${cliente.telefono}" style="font-size: 22px;">
-//                   <i class="fa fa-phone fa-lg"></i>
-//                 </a>
-//
-//                 &nbsp;&nbsp;&nbsp;
-//
-//                 <!-- WhatsApp -->
-// <a type="button" title="Chatear por WhatsApp ${cliente.telefono}"
-//         href="whatsapp://send?phone=${telefonoFormateado}&text=¡Hola%20${cliente.nombre}!%20💫%20En%20Lunaire%20tenemos%20novedades%20para%20ti.%20Acaban%20de%20llegar%20productos%20exclusivos%20que%20sabemos%20que%20te%20van%20a%20encantar.%20Pásate%20a%20verlos%20antes%20de%20que%20se%20agoten.%20✨%20Gracias%20por%20ser%20parte%20de%20nuestra%20comunidad%20Lunaire%20🌙"
-//         target="_blank">
-//         <i class="fa-brands fa-whatsapp fa-lg" style="font-size:1.8rem;"></i>
-//       </a>
-//
-//
-//               </td>
-//
-//                <!-- <td class="text-center">${cliente.direccion}</td> -->
-//                 <td class="text-center"><i class="fa-solid fa-eye fa-lg" style="color: deepskyblue; cursor: pointer" id="btnOpenModalDetailsCliente" data-id="${cliente.id}"></i></td>
-//
-//                   <td class="text-center">
-//                   <div class="estado-cell">
-//                     <span class="estado-indicatorCliente hidden">${cliente.iconTrueFalse()}</span>
-//                     <input type="checkbox" id="clienteEstadoToggle${cliente.id}" class="toggle-input estado-toggleCliente" data-id="${cliente.id}" ${cliente.estado ? 'checked' : ''}>
-//                     <label for="clienteEstadoToggle${cliente.id}" class="toggle-label"></label>
-//                   </div>
-//
-//                 <td class"text-center">
-//                 <div class="action-buttons" >
-//                  <button class="action-button edit-button edit-cliente" data-id="${cliente.id}"><i class="fa-solid fa-pencil fa-lg edit" data-id="${cliente.id}"></i></button>
-//                  <button class="action-button delete-button delete-cliente" data-id="${cliente.id}"><i class="fa-solid fa-trash-can fa-lg delete" data-id="${cliente.id}"></i></button>
-//                 </div>
-//                 </td>
-//
-//                 `;
-//         const btnOpenModal = tr.querySelector('#btnOpenModalDetailsCliente');
-//         if (btnOpenModal) {
-//           btnOpenModal.addEventListener('click', () => {
-//             this.openModalDetailsCli(cliente.id); // Pasar ID de la categoría seleccionada
-//           });
-//         }
-//         this.tablaClientes.appendChild(tr);  // Append, al tbody!
-//       });
-//
-//       // Configurar listeners para los botones de editar y eliminar
-//       this.setupClienteListeners();
-//
-//     } catch (error) {
-//       console.error("Error al cargar los Clientes:", error);
-//       alert("Error al cargar los Clientes."); // Mejor feedback al usuario
-//     }
-//   }
-//
-//   async openModalDetailsCli(clienteId) {
-//     const cliente = await this.clienteService.obtenerClientePorId(clienteId); // Obtener solo el cliente seleccionado
-//     const modalDetails = document.getElementById('clienteModal');
-//     if (!cliente) {
-//       console.error("No se encontró el cliente");
-//       return;
-//     }
-//     // Llenar el modal con la información correcta
-//     document.getElementById('modalNombreCliente').textContent = cliente.nombre;
-//     document.getElementById('modalTelefonoCliente').textContent = cliente.telefono;
-//     document.getElementById('modalDireccionCliente').textContent = cliente.direccion;
-//     document.getElementById('modalContadorCliente').textContent = cliente.contador + ' veces';
-//     document.getElementById('modalEstadoCliente').innerHTML = cliente.iconTrueFalse();
-//     document.getElementById('modalFechaCreacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaCreacion);
-//     document.getElementById('modalFechaActualizacionCliente').textContent = cliente.formatEcuadorDateTime(cliente.fechaActualizacion);
-//
-//     // Mostrar el modal
-//     modalDetails.classList.remove('hidden');
-//     document.body.classList.add('modal-open');
-//     requestAnimationFrame(() => {
-//       modalDetails.classList.add('show');
-//     });
-//   }
-//
-//   closeModalDetailsCli() {
-//     const modalDetails = document.getElementById('clienteModal');
-//
-//     modalDetails.classList.remove('show');
-//     document.body.classList.remove('modal-open');
-//
-//     setTimeout(() => {
-//       modalDetails.classList.add('hidden');
-//     }, 300);
-//   }
-//
-//   // setupClienteListeners
-//   setupClienteListeners() {
-//     // Editar
-//     this.tablaClientes.querySelectorAll('.edit-cliente').forEach(button => {
-//       button.addEventListener('click', async (e) => { // Pone Evento click
-//
-//         const clienteId = parseInt(e.target.dataset.id);        // Obtiene
-//
-//         const cliente = await this.clienteService.obtenerClientePorId(clienteId); // cliente por ID
-//
-//         if (cliente) { // cliente existe!
-//           // Cargar  form
-//           this.clienteIdInput.value = cliente.id;   // carga de datos
-//           this.clienteNombreInput.value = cliente.nombre;//
-//           this.clienteTelefonoInput.value = cliente.telefono;
-//           this.clienteDireccionInput.value = cliente.direccion;
-//         }
-//       });
-//     });
-//
-//     // Eliminar Cliente
-//     this.tablaClientes.querySelectorAll('.delete-cliente').forEach(button => { // forEach para el boton eliminar
-//       button.addEventListener('click', async (e) => {               //
-//         const clienteId = parseInt(e.target.dataset.id);     //
-//
-//         // --- CONFIRMACION ---
-//         if (confirm("Esta seguro de eliminar?")) { //
-//
-//           //Llamar al service, el metodo de indexeddb eliminar, pasamos  id
-//           const result = await this.clienteService.eliminarCliente(clienteId);  //
-//
-//           if (result !== null) {
-//             //Actualiza
-//             await this.cargarClientes();      // Vuelve a cargar clientes
-//
-//           }
-//         }  //Cierra confirm()
-//       }); //cierra Listener
-//     });  // cierra forEach, setupClienteListeners
-//   } //cierra metodo
-//
-//   // Enviar Formulario Cliente:  CREATE y UPDATE:
-//   async guardarCliente(e) {
-//     e.preventDefault();
-//     const clienteId = this.clienteIdInput.value;
-//     const nombre = this.clienteNombreInput.value;
-//     const telefono = this.clienteTelefonoInput.value;
-//     const direccion = this.clienteDireccionInput.value;
-//
-//     if (!nombre || !direccion || !telefono) {
-//       alert("Campos obligatorios");
-//       return;
-//     }
-//
-//     let resultado;
-//     try {
-//       if (clienteId) {  // Actualización
-//         const clienteExistente = await this.clienteService.obtenerClientePorId(parseInt(clienteId));
-//         clienteExistente.nombre = nombre;
-//         clienteExistente.telefono = telefono;
-//         clienteExistente.direccion = direccion;
-//         resultado = await this.clienteService.actualizarCliente(parseInt(clienteId), clienteExistente);
-//
-//         // Eliminar esta línea ya que ahora la sincronización se hace dentro del servicio
-//         // AdminController.googleSheetSyncCliente.sync("update", resultado);
-//
-//         alert("Cliente ACTUALIZADO");
-//       } else { // Crear nuevo
-//         const nuevoCliente = new Cliente(nombre, telefono, direccion);
-//         resultado = await this.clienteService.agregarCliente(nuevoCliente);
-//
-//         if (resultado) {
-//           // Aquí también podrías considerar mover esta sincronización al método agregarCliente
-//           // AdminController.googleSheetSyncCliente.sync("create", resultado);
-//           alert(`EXITO Agregando Cliente, ID ${resultado.id}`);
-//         } else {
-//           throw new Error('Errores en Datos o Validacion.');
-//         }
-//       }
-//
-//       if (resultado) {
-//         this.resetFormCliente();
-//         await this.cargarClientes();
-//         await appService.refreshCache();
-//       }
-//     } catch (error) {
-//       console.error("Error :", error);
-//       alert("Revise consola");
-//     }
-//   }
-//
-//   // Reset
-//   resetFormCliente() {
-//     this.clienteIdInput.value = '';
-//     this.clienteNombreInput.value = '';
-//     this.clienteTelefonoInput.value = '';
-//     this.clienteDireccionInput.value = '';
-//   }
 
   //---------------------------------------------------
   // Métodos CRUD para Productos

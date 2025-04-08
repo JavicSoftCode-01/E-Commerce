@@ -1,5 +1,4 @@
-
-//BackEnd/src/services/MarcaService.js
+// BackEnd/src/services/MarcaService.js
 import { IndexedDB } from '../database/indexdDB.js';
 import { Validar } from '../utils/validar.js';
 import { Marca } from '../models/Marca.js';
@@ -8,24 +7,38 @@ import GoogleSheetSync from '../database/syncGoogleSheet.js';
 import GoogleSheetReader from '../database/GoogleSheetReader.js';
 
 /**
- * 🔰🔰Servicio para la gestión de marcas.
- * Extiende de IndexedDB para interactuar con la base de datos y optimiza el rendimiento con caché local.🔰🔰
+ * Servicio para la gestión de marcas.
+ * Extiende de IndexedDB y sincroniza con Google Sheets de manera directa y rápida.
  */
 class MarcaService extends IndexedDB {
   static googleSheetSyncMarca = new GoogleSheetSync('https://script.google.com/macros/s/AKfycbzrQBaqY-DyXEiKSd_BZQjrRCwGX2Q-mehjcjucQQUm2SWoDOdzu6ZJ5bbk9ubEid_i/exec');
-  static googleSheetReaderMarca = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbyOIePOl8psxtBOu9qieznAeueE6DtknxgHnAVzwHNldw4vdCMBke7oxkAzIn9NGYW8/exec');
+  static googleSheetReaderMarca = new GoogleSheetReader('https://script.google.com/macros/s/AKfycbwqaxjZHu5YcUaQ4wKCV-tR36fvmSMmnnJMJ2LTzoMYkmyxNsuzSv0jS_J1eRIumaGZ/exec');
+
+  // Intervalo de sincronización (3 segundos, igual que ProveedorService)
+  static SYNC_INTERVAL = 3 * 1000;
 
   constructor() {
     super('mydb', 'marcas');
-    this.lastSyncTime = null; // Marca de tiempo de la última sincronización
+    this.lastSyncTime = null;
+    this.startPeriodicSync();
   }
 
   /**
-   * Sincroniza los datos de marcas desde Google Sheets a IndexedDB.
+   * Inicia la sincronización periódica con Google Sheets.
+   */
+  startPeriodicSync() {
+    this.syncWithGoogleSheets();
+    setInterval(() => this.syncWithGoogleSheets(), MarcaService.SYNC_INTERVAL);
+  }
+
+  /**
+   * Sincroniza los datos desde Google Sheets a IndexedDB de manera directa.
    */
   async syncWithGoogleSheets() {
     try {
+      console.log('Iniciando sincronización de marcas con Google Sheets...');
       const marcasData = await MarcaService.googleSheetReaderMarca.getData('Marca');
+      console.log(`Recibidos ${marcasData.length} registros de marcas.`);
       const marcasInstancias = marcasData.map(mData => {
         const instancia = new Marca(
           mData.nombre,
@@ -36,33 +49,35 @@ class MarcaService extends IndexedDB {
         instancia.id = mData.id;
         return instancia;
       });
-
-      // Limpiar datos existentes en IndexedDB
       await this.clearAll();
-
-      // Agregar nuevos datos a IndexedDB
       for (const marca of marcasInstancias) {
         await super.add(marca);
       }
-
       this.lastSyncTime = new Date();
-      console.info('Datos de marcas sincronizados con Google Sheets y almacenados en IndexedDB.');
+      console.info(`Sincronización de marcas exitosa: ${marcasInstancias.length} registros a las ${this.lastSyncTime}`);
+      return true;
     } catch (error) {
-      console.error('Error al sincronizar marcas con Google Sheets:', error);
+      console.error('Error en sincronización de marcas:', error);
+      return false;
     }
   }
 
   /**
-   * Obtiene todas las marcas, usando caché en IndexedDB y sincronizando con Google Sheets si es necesario.
-   * @returns {Promise<Array<Marca>>} - Un array con todas las instancias de Marca.
+   * Fuerza una sincronización inmediata.
+   */
+  async forceSyncNow() {
+    this.lastSyncTime = null;
+    return await this.syncWithGoogleSheets();
+  }
+
+  /**
+   * Obtiene todas las marcas, sincronizando si es necesario.
    */
   async obtenerTodasLasMarcas() {
     try {
-      // Sincronizar si no hay datos recientes (cada 2 minutos)
-      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > 2 * 60 * 1000) {
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > MarcaService.SYNC_INTERVAL) {
         await this.syncWithGoogleSheets();
       }
-
       const marcasData = await super.getAll();
       const marcasInstancias = marcasData.map(mData => {
         const instancia = new Marca(
@@ -82,12 +97,13 @@ class MarcaService extends IndexedDB {
   }
 
   /**
-   * Obtiene una marca por su ID desde IndexedDB.
-   * @param {number} id - ID de la marca a obtener.
-   * @returns {Promise<Marca|null>} - La instancia de Marca encontrada o null.
+   * Obtiene una marca por ID.
    */
   async obtenerMarcaPorId(id) {
     try {
+      if (!this.lastSyncTime || (new Date() - this.lastSyncTime) > MarcaService.SYNC_INTERVAL) {
+        await this.syncWithGoogleSheets();
+      }
       const marcaData = await super.getById(id);
       if (marcaData) {
         const instanciaMarca = new Marca(
@@ -107,27 +123,27 @@ class MarcaService extends IndexedDB {
   }
 
   /**
-   * Agrega una nueva marca a IndexedDB y sincroniza con Google Sheets.
-   * @param {Marca} marca - Objeto marca a agregar.
-   * @returns {Promise<Marca|null>} - La marca agregada o null si falla.
+   * Agrega una nueva marca y sincroniza con Google Sheets.
    */
   async agregarMarca(marca) {
     try {
+      await this.forceSyncNow();
       const nombreValidado = await Validar.nombreBM(marca.nombre, this);
       if (!nombreValidado) return null;
 
       const lastId = await this.getAll().then(marcas => {
-        if (marcas.length === 0) return 0;
-        return Math.max(...marcas.map(m => m.id));
+        return marcas.length === 0 ? 0 : Math.max(...marcas.map(m => m.id));
       });
       const nextId = lastId + 1;
 
-      const nuevaMarca = new Marca(nombreValidado);
+      const nuevaMarca = new Marca(nombreValidado, marca.estado);
       nuevaMarca.id = nextId;
 
       await super.add(nuevaMarca);
+      console.log(`Marca creada localmente con ID: ${nextId}. Sincronizando...`);
       await MarcaService.googleSheetSyncMarca.sync("create", nuevaMarca);
-      console.info(`Marca agregada con ID: ${nextId}`);
+      console.info(`Marca con ID: ${nextId} sincronizada.`);
+      await this.forceSyncNow();
       return nuevaMarca;
     } catch (error) {
       console.error('Error al agregar marca:', error);
@@ -136,21 +152,18 @@ class MarcaService extends IndexedDB {
   }
 
   /**
-   * Actualiza una marca existente en IndexedDB y sincroniza con Google Sheets si hay cambios.
-   * @param {number} id - ID de la marca a actualizar.
-   * @param {object} datosActualizados - Objeto con los campos a actualizar.
-   * @returns {Promise<Marca|null>} - La marca actualizada o null si falla.
+   * Actualiza una marca existente y sincroniza con Google Sheets.
    */
   async actualizarMarca(id, datosActualizados) {
     try {
-      let nombreValidado = datosActualizados.nombre;
-      if (nombreValidado) {
-        nombreValidado = await Validar.nombreBM(nombreValidado, this, id);
-        if (!nombreValidado) return null;
-      }
-
+      await this.forceSyncNow();
       const marcaExistente = await this.obtenerMarcaPorId(id);
       if (!marcaExistente) return null;
+
+      let nombreValidado = datosActualizados.nombre !== undefined
+        ? await Validar.nombreBM(datosActualizados.nombre, this, id)
+        : marcaExistente.nombre;
+      if (datosActualizados.nombre !== undefined && !nombreValidado) return null;
 
       let huboCambios = false;
       if (nombreValidado && marcaExistente.nombre !== nombreValidado) {
@@ -165,11 +178,13 @@ class MarcaService extends IndexedDB {
       if (huboCambios) {
         marcaExistente.prepareForUpdate();
         await super.update(id, marcaExistente);
+        console.log(`Marca con ID ${id} actualizada localmente.`);
         await MarcaService.googleSheetSyncMarca.sync("update", marcaExistente);
-        console.info(`Marca con ID ${id} actualizada correctamente.`);
+        console.info(`Marca con ID ${id} sincronizada.`);
+        await this.forceSyncNow();
         return marcaExistente;
       }
-      console.info(`Marca con ID ${id} no tuvo cambios detectados.`);
+      console.info(`Marca con ID ${id} sin cambios.`);
       return marcaExistente;
     } catch (error) {
       console.error(`Error al actualizar marca con ID ${id}:`, error);
@@ -178,22 +193,22 @@ class MarcaService extends IndexedDB {
   }
 
   /**
-   * Elimina una marca de IndexedDB y sincroniza con Google Sheets.
-   * @param {number} id - ID de la marca a eliminar.
-   * @returns {Promise<boolean|null>} - True si se elimina, false si hay dependencias, null si falla.
+   * Elimina una marca y sincroniza con Google Sheets.
    */
   async eliminarMarca(id) {
     try {
+      await this.forceSyncNow();
       const productoService = new ProductoService(null, this, null);
       const dependencias = await productoService.verificarDependencias('marca', id);
       if (dependencias && dependencias.hasDependencies) {
-        alert(`No se puede eliminar la marca porque está siendo utilizada por ${dependencias.count} producto(s).`);
+        alert(`No se puede eliminar la marca por ${dependencias.count} dependencias.`);
         return false;
       }
-
       await super.delete(id);
+      console.log(`Marca con ID ${id} eliminada localmente.`);
       await MarcaService.googleSheetSyncMarca.sync("delete", { id: id });
-      console.info(`Marca con ID ${id} eliminada correctamente.`);
+      console.info(`Marca con ID ${id} eliminada y sincronizada.`);
+      await this.forceSyncNow();
       return true;
     } catch (error) {
       console.error(`Error al eliminar marca con ID ${id}:`, error);
@@ -210,9 +225,9 @@ class MarcaService extends IndexedDB {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       store.clear();
-      console.info('Todos los registros de marcas en IndexedDB han sido eliminados.');
+      console.info('IndexedDB de marcas limpiado.');
     } catch (error) {
-      console.error('Error al limpiar IndexedDB para marcas:', error);
+      console.error('Error al limpiar IndexedDB de marcas:', error);
     }
   }
 }

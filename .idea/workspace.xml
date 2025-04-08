@@ -6,12 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/database/indexdDB.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/database/indexdDB.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/models/Cliente.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/models/Cliente.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ClienteService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ClienteService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/utils/validar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/MarcaService.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,6 +120,7 @@
       <workItem from="1743089413186" duration="9460000" />
       <workItem from="1743353954118" duration="6071000" />
       <workItem from="1743904787812" duration="26470000" />
+      <workItem from="1744072630882" duration="1140000" />
     </task>
     <servers />
   </component>

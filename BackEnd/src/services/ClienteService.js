@@ -773,7 +773,7 @@ class ClienteService extends IndexedDB {
                            if (newValue !== currentValue && ['Activo', 'Inactivo'].includes(newValue)) {
                              updatesToApply[key] = newValue; huboCambios = true;
                            }
-                     } 
+                     }
                  }
              }
 
