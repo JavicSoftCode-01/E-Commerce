@@ -11,6 +11,7 @@ import {Factura} from '../../../../BackEnd/src/models/Factura.js';
 import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js';
 import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorService.js";
 import {ClienteService} from "../../../../BackEnd/src/services/ClienteService.js";
+import {MarcaService} from "../../../../BackEnd/src/services/MarcaService";
 
 class AdminController {
 
@@ -49,6 +50,7 @@ class AdminController {
     // this.btnResetCategoriaForm = document.getElementById('resetCategoriaForm') //ya no es necesario
 
     // Elementos Marcas       ========================================================================0
+    this.marcaService = new MarcaService()
     this.formMarca = document.getElementById('formMarca');
     this.marcaIdInput = document.getElementById('marcaId');
     this.marcaNombreInput = document.getElementById('marcaNombre');
