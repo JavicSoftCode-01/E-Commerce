@@ -128,6 +128,11 @@ class AdminController {
     // =====================================================================
     // Forzamos la sincronización sin mostrar el overlay completo
     setInterval(async () => {
+
+      await  this.marcaService.forceSyncNow();
+      // Actualizamos la tabla sin usar el loader
+      this.cargarMarcas(false);
+
       await this.proveedorService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarProveedores(false);
