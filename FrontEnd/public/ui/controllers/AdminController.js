@@ -11,7 +11,7 @@ import {Factura} from '../../../../BackEnd/src/models/Factura.js';
 import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js';
 import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorService.js";
 import {ClienteService} from "../../../../BackEnd/src/services/ClienteService.js";
-import {MarcaService} from "../../../../BackEnd/src/services/MarcaService";
+import {MarcaService} from "../../../../BackEnd/src/services/MarcaService.js";
 
 class AdminController {
 
