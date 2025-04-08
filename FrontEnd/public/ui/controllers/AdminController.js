@@ -128,6 +128,7 @@ class AdminController {
     this.cargarProductos();
     // Cargar opciones de formularios
     this.cargarOpcionesProductoForm();
+    // const appServices = appService;
 
     // =====================================================================
     // Forzamos la sincronización sin mostrar el overlay completo
@@ -1325,25 +1326,66 @@ closeModalDetailsCat() {
     }
   }
 
-  async cargarOpcionesProductoForm() {
+  // async cargarOpcionesProductoForm() {
+  //   try {
+  //     const categorias = await this.appService.getCategorias();
+  //     const marcas = await this.appService.getMarcas();
+  //     const proveedores = await this.appService.getProveedores();
+  //
+  //     this.productoCategoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>';
+  //     this.productoMarcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';
+  //     this.productoProveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';
+  //
+  //     if (Array.isArray(categorias)) categorias.forEach(c => this.productoCategoriaSelect.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+  //     if (Array.isArray(marcas)) marcas.forEach(m => this.productoMarcaSelect.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
+  //     if (Array.isArray(proveedores)) proveedores.forEach(p => this.productoProveedorSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`);
+  //   } catch (error) {
+  //     console.error("Error loading form options:", error);
+  //     alert("Hubo Error al cargar opciones para Formulario");
+  //   }
+  // }
+                                                                                                                               async cargarOpcionesProductoForm() {
     try {
-      const categorias = await this.appService.getCategorias();
-      const marcas = await this.appService.getMarcas();
-      const proveedores = await this.appService.getProveedores();
+      this.showLoader();
 
+      // Forzar sincronización inicial si no se ha hecho
+      if (!this.categoriaService.lastSyncTime) await this.categoriaService.forceSyncNow();
+      if (!this.marcaService.lastSyncTime) await this.marcaService.forceSyncNow();
+      if (!this.proveedorService.lastSyncTime) await this.proveedorService.forceSyncNow();
+
+      // Obtener datos sincronizados
+      const categorias = await this.categoriaService.obtenerTodasLasCategorias();
+      const marcas = await this.marcaService.obtenerTodasLasMarcas();
+      const proveedores = await this.proveedorService.obtenerTodosLosProveedores();
+
+      // Verificar que los datos sean válidos
+      if (!Array.isArray(categorias) || !Array.isArray(marcas) || !Array.isArray(proveedores)) {
+        throw new Error('Los datos obtenidos no son arrays válidos');
+      }
+
+      // Limpiar y llenar selects
       this.productoCategoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>';
       this.productoMarcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';
       this.productoProveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';
 
-      if (Array.isArray(categorias)) categorias.forEach(c => this.productoCategoriaSelect.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
-      if (Array.isArray(marcas)) marcas.forEach(m => this.productoMarcaSelect.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
-      if (Array.isArray(proveedores)) proveedores.forEach(p => this.productoProveedorSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`);
+      categorias.forEach(categoria => {
+        this.productoCategoriaSelect.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
+      });
+      marcas.forEach(marca => {
+        this.productoMarcaSelect.innerHTML += `<option value="${marca.id}">${marca.nombre}</option>`;
+      });
+      proveedores.forEach(proveedor => {
+        this.productoProveedorSelect.innerHTML += `<option value="${proveedor.id}">${proveedor.nombre}</option>`;
+      });
+
+      console.log('Opciones cargadas correctamente:', { categorias: categorias.length, marcas: marcas.length, proveedores: proveedores.length });
     } catch (error) {
-      console.error("Error loading form options:", error);
-      alert("Hubo Error al cargar opciones para Formulario");
+      console.error("Error al cargar opciones para el formulario de productos:", error);
+      alert(`Error al cargar opciones: ${error.message}. Revise la consola para más detalles.`);
+    } finally {
+      this.hideLoader();
     }
   }
-
   resetFormProducto() {
     this.productoIdInput.value = '';
     this.productoNombreInput.value = '';
@@ -1625,6 +1667,6 @@ closeModalDetailsCat() {
 } //CIERRA CLASE AdminController
 
 // Instancia única para toda la aplicación.
-const adminController = new AdminController(app.categoriaService, app.marcaService, app.proveedorService, app.clienteService, app.productoService, app.facturaService);
+const adminController = new AdminController(app.categoriaService, app.marcaService, app.proveedorService, app.clienteService, app.productoService, app.facturaService, appService);
 
 export {adminController};
