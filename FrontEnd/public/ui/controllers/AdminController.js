@@ -131,7 +131,7 @@ class AdminController {
     // Forzamos la sincronización sin mostrar el overlay completo
     setInterval(async () => {
 
-      await  this.marcaService.forceSyncNow();
+      await this.marcaService.forceSyncNow();
       // Actualizamos la tabla sin usar el loader
       this.cargarMarcas(false);
 
@@ -491,26 +491,26 @@ class AdminController {
   // Métodos CRUD para Marcas
   //---------------------------------------------------
 // AdminController.js
-
+  // Cargar la tabla de Marcas
   async cargarMarcas(mostrarLoader = true) {
-  try {
-    if (mostrarLoader) this.showLoader();
-    const marcas = await this.marcaService.obtenerTodasLasMarcas();
-    const tabla = document.getElementById('tabla-marcas-body');
-    if (!tabla) {
-      console.error("Elemento tbody para marcas no encontrado");
-      return;
-    }
-    tabla.innerHTML = ''; // Limpiar tabla
+    try {
+      if (mostrarLoader) this.showLoader();
+      const marcas = await this.marcaService.obtenerTodasLasMarcas();
+      const tabla = document.getElementById('tabla-marcas-body');
+      if (!tabla) {
+        console.error("Elemento tbody para marcas no encontrado");
+        return;
+      }
+      tabla.innerHTML = ''; // Limpiar tabla
 
-    if (!Array.isArray(marcas)) {
-      console.error("Error: marcas no es un array.");
-      return;
-    }
+      if (!Array.isArray(marcas)) {
+        console.error("Error: marcas no es un array.");
+        return;
+      }
 
-    marcas.forEach(marca => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
+      marcas.forEach(marca => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
         <td class="text-center">${marca.nombre}</td>
         <td class="text-center">
           <i class="fa-solid fa-eye fa-lg btn-details" style="color: deepskyblue; cursor: pointer" data-id="${marca.id}"></i>
@@ -534,166 +534,170 @@ class AdminController {
         </td>
       `;
 
-      // Listener para abrir el modal de detalles
-      tr.querySelector(".btn-details").addEventListener("click", async (e) => {
-        const id = parseInt(e.currentTarget.dataset.id);
-        await this.openModalDetailsMar(id);
-      });
-
-      // Listener para editar marca
-      tr.querySelector(".edit-button").addEventListener("click", async (e) => {
-        const btn = e.currentTarget;
-        btn.disabled = true;
-        try {
-          const id = parseInt(btn.dataset.id);
-          const marca = await this.marcaService.obtenerMarcaPorId(id);
-          if (marca) {
-            this.marcaIdInput.value = marca.id;
-            this.marcaNombreInput.value = marca.nombre;
-            this.marcaEstadoInput.checked = marca.estado;
-            this.estadoMarcaTextoSpan.textContent = marca.estado ? "Activo" : "Inactivo";
-            window.scrollTo(0, 0);
-          }
-        } finally {
-          btn.disabled = false;
-        }
-      });
-
-      // Listener para eliminar marca
-      tr.querySelector(".delete-button").addEventListener("click", async (e) => {
-        const id = parseInt(e.currentTarget.dataset.id);
-        if (confirm("¿Está seguro de eliminar?")) {
-          this.showLoader();
-          const result = await this.marcaService.eliminarMarca(id);
-          if (result !== null) {
-            await this.cargarMarcas(mostrarLoader);
-          }
-          this.hideLoader();
-        }
-      });
-
-      // Listener para el cambio de estado en la tabla
-      const toggleEstado = tr.querySelector(".estado-toggleMarca");
-      if (toggleEstado) {
-        toggleEstado.addEventListener("change", async (e) => {
+        // Listener para abrir el modal de detalles
+        tr.querySelector(".btn-details").addEventListener("click", async (e) => {
           const id = parseInt(e.currentTarget.dataset.id);
-          const nuevoEstado = e.currentTarget.checked;
+          await this.openModalDetailsMar(id);
+        });
+
+        // Listener para editar marca
+        tr.querySelector(".edit-button").addEventListener("click", async (e) => {
+          const btn = e.currentTarget;
+          btn.disabled = true;
           try {
-            this.showLoader();
-            const resultado = await this.marcaService.actualizarMarca(id, { estado: nuevoEstado });
-            if (resultado !== null) {
-              const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicatorMarca");
-              if (tdEstado) {
-                tdEstado.innerHTML = nuevoEstado
-                  ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
-                  : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
-              }
+            const id = parseInt(btn.dataset.id);
+            const marca = await this.marcaService.obtenerMarcaPorId(id);
+            if (marca) {
+              this.marcaIdInput.value = marca.id;
+              this.marcaNombreInput.value = marca.nombre;
+              this.marcaEstadoInput.checked = marca.estado;
+              this.estadoMarcaTextoSpan.textContent = marca.estado ? "Activo" : "Inactivo";
+              window.scrollTo(0, 0);
             }
-          } catch (error) {
-            console.error("Error al actualizar estado:", error);
-            e.currentTarget.checked = !nuevoEstado;
-            alert("Error al actualizar el estado de la marca.");
           } finally {
+            btn.disabled = false;
+          }
+        });
+
+        // Listener para eliminar marca
+        tr.querySelector(".delete-button").addEventListener("click", async (e) => {
+          const id = parseInt(e.currentTarget.dataset.id);
+          if (confirm("¿Está seguro de eliminar?")) {
+            this.showLoader();
+            const result = await this.marcaService.eliminarMarca(id);
+            if (result !== null) {
+              await this.cargarMarcas(mostrarLoader);
+            }
             this.hideLoader();
           }
         });
-      }
 
-      tabla.appendChild(tr);
-    });
-  } catch (error) {
-    console.error("Error al cargar las marcas:", error);
-    alert("Error al cargar las marcas.");
-  } finally {
-    if (mostrarLoader) this.hideLoader();
-  }
-}
+        // Listener para el cambio de estado en la tabla
+        const toggleEstado = tr.querySelector(".estado-toggleMarca");
+        if (toggleEstado) {
+          toggleEstado.addEventListener("change", async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const nuevoEstado = e.currentTarget.checked;
+            try {
+              this.showLoader();
+              const resultado = await this.marcaService.actualizarMarca(id, {estado: nuevoEstado});
+              if (resultado !== null) {
+                const tdEstado = e.currentTarget.closest("td").querySelector(".estado-indicatorMarca");
+                if (tdEstado) {
+                  tdEstado.innerHTML = nuevoEstado
+                    ? '<i class="fa-solid fa-circle-check fa-lg" style="color: #28a745;" title="Activo"></i>'
+                    : '<i class="fa-solid fa-circle-xmark fa-lg" style="color: #dc3545;" title="Inactivo"></i>';
+                }
+              }
+            } catch (error) {
+              console.error("Error al actualizar estado:", error);
+              e.currentTarget.checked = !nuevoEstado;
+              alert("Error al actualizar el estado de la marca.");
+            } finally {
+              this.hideLoader();
+            }
+          });
+        }
 
-async guardarMarca(e) {
-  e.preventDefault();
-  const marcaId = this.marcaIdInput.value;
-  const nombre = this.marcaNombreInput.value.trim();
-  const estado = this.marcaEstadoInput.checked;
-
-  if (!nombre) {
-    alert("El nombre de la marca es obligatorio.");
-    return;
-  }
-
-  try {
-    this.showLoader();
-    let resultado;
-    if (marcaId) {
-      // Actualización
-      const datosParaActualizar = { nombre, estado };
-      resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
-      if (resultado) {
-        alert("Marca ACTUALIZADA");
-      }
-    } else {
-      // Creación
-      const nuevaMarca = new Marca(nombre, estado);
-      const marcaCreada = await this.marcaService.agregarMarca(nuevaMarca);
-      if (marcaCreada) {
-        alert(`Éxito al agregar Marca, ID ${marcaCreada.id}`);
-        resultado = marcaCreada;
-      } else {
-        throw new Error('Errores en datos o validación.');
-      }
+        tabla.appendChild(tr);
+      });
+    } catch (error) {
+      console.error("Error al cargar las marcas:", error);
+      alert("Error al cargar las marcas.");
+    } finally {
+      if (mostrarLoader) this.hideLoader();
     }
-    if (resultado) {
-      this.resetFormMarca();
-      await this.cargarMarcas();
-      await appService.refreshCache();
-    }
-  } catch (error) {
-    console.error("Error en guardarMarca:", error);
-    alert("Revise consola");
-  } finally {
-    this.hideLoader();
   }
-}
 
-resetFormMarca() {
-  this.marcaIdInput.value = '';
-  this.marcaNombreInput.value = '';
-  this.marcaEstadoInput.checked = true;
-  this.estadoMarcaTextoSpan.textContent = 'Activo';
-}
+  // Enviar Formulario Marca:  CREATE y UPDATE:  (marcas)
+  async guardarMarca(e) {
+    e.preventDefault();
+    const marcaId = this.marcaIdInput.value;
+    const nombre = this.marcaNombreInput.value.trim();
+    const estado = this.marcaEstadoInput.checked;
 
-async openModalDetailsMar(marcaId) {
-  try {
-    this.showLoader();
-    const marca = await this.marcaService.obtenerMarcaPorId(marcaId);
-    if (!marca) {
-      console.error("No se encontró la marca");
+    if (!nombre) {
+      alert("El nombre de la marca es obligatorio.");
       return;
     }
-    document.getElementById('modalMarcaNombre').textContent = marca.nombre;
-    document.getElementById('modalMarcaEstado').innerHTML = marca.iconTrueFalse();
-    document.getElementById('modalMarcaFechaCreacion').textContent = marca.formatEcuadorDateTime(marca.fechaCreacion);
-    document.getElementById('modalMarcaFechaActualizacion').textContent = marca.formatEcuadorDateTime(marca.fechaActualizacion);
-    const modalDetails = document.getElementById('marcaModal');
-    modalDetails.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-    requestAnimationFrame(() => {
-      modalDetails.classList.add('show');
-    });
-  } catch (error) {
-    console.error("Error abriendo el modal de detalles:", error);
-  } finally {
-    this.hideLoader();
-  }
-}
 
-closeModalDetailsMar() {
-  const modalDetails = document.getElementById('marcaModal');
-  modalDetails.classList.remove('show');
-  document.body.classList.remove('modal-open');
-  setTimeout(() => {
-    modalDetails.classList.add('hidden');
-  }, 300);
-}
+    try {
+      this.showLoader();
+      let resultado;
+      if (marcaId) {
+        // Actualización
+        const datosParaActualizar = {nombre, estado};
+        resultado = await this.marcaService.actualizarMarca(parseInt(marcaId), datosParaActualizar);
+        if (resultado) {
+          alert("Marca ACTUALIZADA");
+        }
+      } else {
+        // Creación
+        const nuevaMarca = new Marca(nombre, estado);
+        const marcaCreada = await this.marcaService.agregarMarca(nuevaMarca);
+        if (marcaCreada) {
+          alert(`Éxito al agregar Marca, ID ${marcaCreada.id}`);
+          resultado = marcaCreada;
+        } else {
+          throw new Error('Errores en datos o validación.');
+        }
+      }
+      if (resultado) {
+        this.resetFormMarca();
+        await this.cargarMarcas();
+        await appService.refreshCache();
+      }
+    } catch (error) {
+      console.error("Error en guardarMarca:", error);
+      alert("Revise consola");
+    } finally {
+      this.hideLoader();
+    }
+  }
+
+// Reset
+  resetFormMarca() {
+    this.marcaIdInput.value = '';
+    this.marcaNombreInput.value = '';
+    this.marcaEstadoInput.checked = true;
+    this.estadoMarcaTextoSpan.textContent = 'Activo';
+  }
+
+// Abrir modal de detalles de Marca
+  async openModalDetailsMar(marcaId) {
+    try {
+      this.showLoader();
+      const marca = await this.marcaService.obtenerMarcaPorId(marcaId);
+      if (!marca) {
+        console.error("No se encontró la marca");
+        return;
+      }
+      document.getElementById('modalMarcaNombre').textContent = marca.nombre;
+      document.getElementById('modalMarcaEstado').innerHTML = marca.iconTrueFalse();
+      document.getElementById('modalMarcaFechaCreacion').textContent = marca.formatEcuadorDateTime(marca.fechaCreacion);
+      document.getElementById('modalMarcaFechaActualizacion').textContent = marca.formatEcuadorDateTime(marca.fechaActualizacion);
+      const modalDetails = document.getElementById('marcaModal');
+      modalDetails.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      requestAnimationFrame(() => {
+        modalDetails.classList.add('show');
+      });
+    } catch (error) {
+      console.error("Error abriendo el modal de detalles:", error);
+    } finally {
+      this.hideLoader();
+    }
+  }
+
+// Cerrar modal de detalles de Marca
+  closeModalDetailsMar() {
+    const modalDetails = document.getElementById('marcaModal');
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300);
+  }
 
   //---------------------------------------------------
   // Métodos CRUD para Proveedores
@@ -1593,7 +1597,7 @@ closeModalDetailsMar() {
 
 
     } catch (error) {     // Errores
-                          //Feedback, si falla.
+      //Feedback, si falla.
       console.error("Error:", error);
       alert("Hubo Error al cargar opciones para Formulario"); //
     }

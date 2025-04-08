@@ -28,7 +28,9 @@ class MarcaService extends IndexedDB {
    */
   startPeriodicSync() {
     this.syncWithGoogleSheets();
-    setInterval(() => this.syncWithGoogleSheets(), MarcaService.SYNC_INTERVAL);
+    setInterval(() => {
+      this.syncWithGoogleSheets();
+    },  MarcaService.SYNC_INTERVAL);
   }
 
   /**
