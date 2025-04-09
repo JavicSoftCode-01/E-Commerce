@@ -24,12 +24,17 @@ class AdminController {
     'https://script.google.com/macros/s/AKfycbzrQBaqY-DyXEiKSd_BZQjrRCwGX2Q-mehjcjucQQUm2SWoDOdzu6ZJ5bbk9ubEid_i/exec'
   );
 
-  constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService) {
-    this.categoriaService = categoriaService;
-    this.marcaService = marcaService;
-    this.proveedorService = proveedorService;
-    this.clienteService = clienteService;
-    this.productoService = productoService;
+  constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService, appService) {
+    // this.categoriaService = categoriaService;
+    // this.marcaService = marcaService;
+    // this.proveedorService = proveedorService;
+    // this.clienteService = clienteService;
+    // this.productoService = productoService;
+    this.categoriaService = categoriaService || new CategoriaService();
+    this.marcaService = marcaService || new MarcaService();
+    this.proveedorService = proveedorService || new ProveedorService();
+    this.productoService = productoService || new ProductoService(this.categoriaService, this.marcaService, this.proveedorService);
+    this.appService = appService;
     this.facturaService = facturaService;
 
     // Elementos DOM comunes
@@ -49,7 +54,7 @@ class AdminController {
     });
 
     // Instancia del servicio de categorías
-    this.categoriaService = new CategoriaService();
+    // this.categoriaService = new CategoriaService();
     // Iniciar la carga de categorías
     this.cargarCategorias();
 
@@ -63,7 +68,7 @@ class AdminController {
       this.estadoMarcaTextoSpan.textContent = this.marcaEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
     // Instancia del servicio de marca
-    this.marcaService = new MarcaService()
+    // this.marcaService = new MarcaService()
     // Iniciar la carga de marcas
     this.cargarMarcas();
 
@@ -81,7 +86,7 @@ class AdminController {
       this.estadoProveedorTextoSpan.textContent = this.proveedorEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
     // Instancia del servicio de proveedores
-    this.proveedorService = new ProveedorService();
+    // this.proveedorService = new ProveedorService();
     // Iniciar la carga de proveedores
     this.cargarProveedores();
     //========================================================================
@@ -122,13 +127,11 @@ class AdminController {
     this.productoEstadoInput.addEventListener('change', () => {
       this.estadoProductoTextoSpan.textContent = this.productoEstadoInput.checked ? 'Activo' : 'Inactivo';
     });
-    // Instancia del servicio de productos
-    this.productoService = new ProductoService();
     // Iniciar la carga de productos
     this.cargarProductos();
     // Cargar opciones de formularios
     this.cargarOpcionesProductoForm();
-    // const appServices = appService;
+
 
     // =====================================================================
     // Forzamos la sincronización sin mostrar el overlay completo
@@ -173,37 +176,80 @@ class AdminController {
   }
 
   // Envio de formularios
+  // setupEventListeners() {
+  //   this.adminTabs.forEach(tab => {
+  //     tab.addEventListener('click', () => this.cargarSeccionAdmin(tab.dataset.tab));
+  //   });
+  //   // Eventos de los formularios usando delegación de eventos
+  //   this.adminSection.addEventListener('submit', async (e) => { //Se agrega async
+  //     if (e.target.id === 'formCategoria') {
+  //       await this.guardarCategoria(e); //Se agrega await
+  //     } else if (e.target.id === 'formMarca') {
+  //       await this.guardarMarca(e);//Se agrega await
+  //     } else if (e.target.id === 'formProveedor') {
+  //       await this.guardarProveedor(e)//Se agrega await
+  //     } else if (e.target.id === 'formCliente') {
+  //       await this.guardarCliente(e)//Se agrega await
+  //     } else if (e.target.id === 'formProducto') {
+  //       await this.guardarProducto(e)//Se agrega await
+  //     }
+  //   });
+  //
+  //   // Botones de reset (delegación de eventos también)
+  //   this.adminSection.addEventListener('click', (e) => {
+  //     if (e.target.id === 'resetCategoriaForm') {
+  //       this.resetFormCategoria();
+  //     } else if (e.target.id === 'resetMarcaForm') {
+  //       this.resetFormMarca();
+  //     } else if (e.target.id === 'resetProveedorForm') {
+  //       this.resetFormProveedor();
+  //     } else if (e.target.id === 'resetClienteForm') {
+  //       this.resetFormCliente();
+  //     } else if (e.target.id === 'resetProductoForm') {
+  //       this.resetFormProducto();
+  //     }
+  //   });
+  // }
   setupEventListeners() {
     this.adminTabs.forEach(tab => {
       tab.addEventListener('click', () => this.cargarSeccionAdmin(tab.dataset.tab));
     });
-    // Eventos de los formularios usando delegación de eventos
-    this.adminSection.addEventListener('submit', async (e) => { //Se agrega async
-      if (e.target.id === 'formCategoria') {
-        await this.guardarCategoria(e); //Se agrega await
-      } else if (e.target.id === 'formMarca') {
-        await this.guardarMarca(e);//Se agrega await
-      } else if (e.target.id === 'formProveedor') {
-        await this.guardarProveedor(e)//Se agrega await
-      } else if (e.target.id === 'formCliente') {
-        await this.guardarCliente(e)//Se agrega await
-      } else if (e.target.id === 'formProducto') {
-        await this.guardarProducto(e)//Se agrega await
+
+    // Delegación de eventos para todos los formularios
+    this.adminSection.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Asegura que el formulario no se envíe de forma predeterminada
+      const formId = e.target.id;
+
+      try {
+        if (formId === 'formCategoria') {
+          await this.guardarCategoria(e);
+        } else if (formId === 'formProducto') {
+          await this.guardarProducto(e);
+        } else if (formId === 'formMarca') {
+          await this.guardarMarca(e);
+        } else if (formId === 'formProveedor') {
+          await this.guardarProveedor(e);
+        } else if (formId === 'formCliente') {
+          await this.guardarCliente(e);
+        }
+      } catch (error) {
+        console.error(`Error en el envío del formulario ${formId}:`, error);
+        alert("Ocurrió un error al guardar. Revisa la consola.");
       }
     });
 
-    // Botones de reset (delegación de eventos también)
+    // Delegación de eventos para botones de reset
     this.adminSection.addEventListener('click', (e) => {
       if (e.target.id === 'resetCategoriaForm') {
         this.resetFormCategoria();
+      } else if (e.target.id === 'resetProductoForm') {
+        this.resetFormProducto();
       } else if (e.target.id === 'resetMarcaForm') {
         this.resetFormMarca();
       } else if (e.target.id === 'resetProveedorForm') {
         this.resetFormProveedor();
       } else if (e.target.id === 'resetClienteForm') {
         this.resetFormCliente();
-      } else if (e.target.id === 'resetProductoForm') {
-        this.resetFormProducto();
       }
     });
   }
@@ -426,38 +472,38 @@ class AdminController {
   }
 
   async openModalDetailsCat(categoriaId) {
-  try {
-    this.showLoader();
-    const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId);
-    if (!categoria) {
-      console.error("No se encontró la categoría");
-      return;
+    try {
+      this.showLoader();
+      const categoria = await this.categoriaService.obtenerCategoriaPorId(categoriaId);
+      if (!categoria) {
+        console.error("No se encontró la categoría");
+        return;
+      }
+      document.getElementById('modalNombre').textContent = categoria.nombre;
+      document.getElementById('modalEstado').innerHTML = categoria.iconTrueFalse();
+      document.getElementById('modalFechaCreacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaCreacion);
+      document.getElementById('modalFechaActualizacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaActualizacion);
+      const modalDetails = document.getElementById('categoriaModal');
+      modalDetails.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      requestAnimationFrame(() => {
+        modalDetails.classList.add('show');
+      });
+    } catch (error) {
+      console.error("Error abriendo el modal de detalles:", error);
+    } finally {
+      this.hideLoader();
     }
-    document.getElementById('modalNombre').textContent = categoria.nombre;
-    document.getElementById('modalEstado').innerHTML = categoria.iconTrueFalse();
-    document.getElementById('modalFechaCreacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaCreacion);
-    document.getElementById('modalFechaActualizacion').textContent = categoria.formatEcuadorDateTime(categoria.fechaActualizacion);
-    const modalDetails = document.getElementById('categoriaModal');
-    modalDetails.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-    requestAnimationFrame(() => {
-      modalDetails.classList.add('show');
-    });
-  } catch (error) {
-    console.error("Error abriendo el modal de detalles:", error);
-  } finally {
-    this.hideLoader();
   }
-}
 
-closeModalDetailsCat() {
-  const modalDetails = document.getElementById('categoriaModal');
-  modalDetails.classList.remove('show');
-  document.body.classList.remove('modal-open');
-  setTimeout(() => {
-    modalDetails.classList.add('hidden');
-  }, 300);
-}
+  closeModalDetailsCat() {
+    const modalDetails = document.getElementById('categoriaModal');
+    modalDetails.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => {
+      modalDetails.classList.add('hidden');
+    }, 300);
+  }
 
   //---------------------------------------------------
   // Métodos CRUD para Marcas
@@ -1201,9 +1247,10 @@ closeModalDetailsCat() {
   }
 
   //---------------------------------------------------
-  // Métodos CRUD para Productos
+  // Métodos  para Productos
   //---------------------------------------------------
- async cargarProductos(mostrarLoader = true) {
+  // adminController.js
+  async cargarProductos(mostrarLoader = true) {
     try {
       if (mostrarLoader) this.showLoader();
       const productos = await this.productoService.obtenerProductos();
@@ -1231,7 +1278,10 @@ closeModalDetailsCat() {
         `;
 
         tr.querySelector(".btn-details").addEventListener("click", () => this.openModalDetailsProd(producto.id));
+
+
         tr.querySelector(".edit-button").addEventListener("click", async () => {
+
           const producto = await this.productoService.obtenerProductoPorId(producto.id);
           if (producto) {
             this.productoIdInput.value = producto.id;
@@ -1249,6 +1299,7 @@ closeModalDetailsCat() {
             window.scrollTo(0, 0);
           }
         });
+
         tr.querySelector(".delete-button").addEventListener("click", async () => {
           if (confirm("¿Está seguro de eliminar?")) {
             this.showLoader();
@@ -1261,7 +1312,7 @@ closeModalDetailsCat() {
         tr.querySelector(".estado-toggleProducto").addEventListener("change", async (e) => {
           const nuevoEstado = e.currentTarget.checked;
           this.showLoader();
-          await this.productoService.actualizarProducto(producto.id, { estado: nuevoEstado });
+          await this.productoService.actualizarProducto(producto.id, {estado: nuevoEstado});
           this.hideLoader();
         });
 
@@ -1277,6 +1328,7 @@ closeModalDetailsCat() {
 
   async guardarProducto(e) {
     e.preventDefault();
+    console.log("guardarProducto ejecutado")
     const productoId = this.productoIdInput.value;
     const nombre = this.productoNombreInput.value.trim();
     const precio = parseFloat(this.productoPrecioInput.value);
@@ -1303,7 +1355,18 @@ closeModalDetailsCat() {
       this.showLoader();
       let resultado;
       if (productoId) {
-        const datosParaActualizar = { nombre, precio, categoriaId, marcaId, proveedorId, cantidad: stock, pvp, descripcion, imagen, estado };
+        const datosParaActualizar = {
+          nombre,
+          precio,
+          categoriaId,
+          marcaId,
+          proveedorId,
+          cantidad: stock,
+          pvp,
+          descripcion,
+          imagen,
+          estado
+        };
         resultado = await this.productoService.actualizarProducto(parseInt(productoId), datosParaActualizar);
         if (resultado) alert("Producto ACTUALIZADO");
       } else {
@@ -1326,25 +1389,7 @@ closeModalDetailsCat() {
     }
   }
 
-  // async cargarOpcionesProductoForm() {
-  //   try {
-  //     const categorias = await this.appService.getCategorias();
-  //     const marcas = await this.appService.getMarcas();
-  //     const proveedores = await this.appService.getProveedores();
-  //
-  //     this.productoCategoriaSelect.innerHTML = '<option value="">Seleccione Categoría</option>';
-  //     this.productoMarcaSelect.innerHTML = '<option value="">Seleccione Marca</option>';
-  //     this.productoProveedorSelect.innerHTML = '<option value="">Seleccione Proveedor</option>';
-  //
-  //     if (Array.isArray(categorias)) categorias.forEach(c => this.productoCategoriaSelect.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
-  //     if (Array.isArray(marcas)) marcas.forEach(m => this.productoMarcaSelect.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
-  //     if (Array.isArray(proveedores)) proveedores.forEach(p => this.productoProveedorSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`);
-  //   } catch (error) {
-  //     console.error("Error loading form options:", error);
-  //     alert("Hubo Error al cargar opciones para Formulario");
-  //   }
-  // }
-                                                                                                                               async cargarOpcionesProductoForm() {
+  async cargarOpcionesProductoForm() {
     try {
       this.showLoader();
 
@@ -1378,7 +1423,11 @@ closeModalDetailsCat() {
         this.productoProveedorSelect.innerHTML += `<option value="${proveedor.id}">${proveedor.nombre}</option>`;
       });
 
-      console.log('Opciones cargadas correctamente:', { categorias: categorias.length, marcas: marcas.length, proveedores: proveedores.length });
+      console.log('Opciones cargadas correctamente:', {
+        categorias: categorias.length,
+        marcas: marcas.length,
+        proveedores: proveedores.length
+      });
     } catch (error) {
       console.error("Error al cargar opciones para el formulario de productos:", error);
       alert(`Error al cargar opciones: ${error.message}. Revise la consola para más detalles.`);
@@ -1386,6 +1435,7 @@ closeModalDetailsCat() {
       this.hideLoader();
     }
   }
+
   resetFormProducto() {
     this.productoIdInput.value = '';
     this.productoNombreInput.value = '';
@@ -1402,6 +1452,8 @@ closeModalDetailsCat() {
   }
 
   async openModalDetailsProd(productoId) {
+    // Mostrar el loader
+    this.showLoader();
     // Obtener la INSTANCIA del producto
     const producto = await this.productoService.obtenerProductoPorId(productoId);
     const modalDetails = document.getElementById('productoModal'); // ID del modal de producto

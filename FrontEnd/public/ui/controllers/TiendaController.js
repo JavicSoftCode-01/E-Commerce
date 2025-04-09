@@ -284,6 +284,7 @@ class TiendaController {
     return productElement;
   }
 
+
   async cargarFiltros() {
     const categoriaSelect = document.getElementById('filterCategoria');
     const marcaSelect = document.getElementById('filterMarca');
