@@ -56,9 +56,9 @@ html {
 }
 
 /* Hide scrollbar for WebKit browsers */
-/* html::-webkit-scrollbar {
+ html::-webkit-scrollbar {
     display: none;
-} */
+} 
 
 body {
     font-family: var(--font-sans-serif);
