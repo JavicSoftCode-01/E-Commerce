@@ -329,129 +329,93 @@ class Validar {
 
 
   /**
-   * 🔰 Método estático que valida y formatea un valor numérico o cadena a precio con dos decimales; devuelve false en caso de error. 🔰
+   * 🔰 funciona con precio y pvp , Método estático que valida y formatea un valor numérico o cadena a precio con dos decimales; devuelve false en caso de error. 🔰
    */
-  // static precio(valor) {
-  //   let valorNumerico;
-  //
-  //   // Convertir a string y limpiar espacios
-  //   let valorStr = String(valor).trim();
-  //
-  //   // Verificar si contiene tanto coma como punto
-  //   if (valorStr.includes(',') && valorStr.includes('.')) {
-  //     alert("No se pueden usar tanto coma (,) como punto (.) en el mismo número. Usa solo uno como separador decimal.");
-  //     return false;
-  //   }
-  //
-  //   // Si es string, limpiamos y convertimos
-  //   if (typeof valor === 'string') {
-  //     // Eliminar caracteres no permitidos excepto números, punto y coma
-  //     valorNumerico = valorStr.replace(/[^0-9.,]/g, '');
-  //
-  //     // Determinar el separador decimal
-  //     if (valorNumerico.includes(',')) {
-  //       // Si hay coma, asumimos que es el separador decimal
-  //       // Reemplazar coma por punto para estandarizar
-  //       valorNumerico = valorNumerico.replace(',', '.');
-  //     }
-  //     // Si solo hay punto, no hacemos nada adicional
-  //
-  //     // Convertir a número
-  //     valorNumerico = parseFloat(valorNumerico);
-  //   } else if (typeof valor === 'number') {
-  //     valorNumerico = parseFloat(valor);
-  //   } else {
-  //     alert("El precio debe ser un número o una cadena válida.");
-  //     return false;
-  //   }
-  //
-  //   // Validar que sea un número válido
-  //   if (isNaN(valorNumerico)) {
-  //     alert("Formato numérico no válido. Usa números con coma (,) o punto (.) como separador decimal.");
-  //     return false;
-  //   }
-  //
-  //   // Validar que no sea negativo
-  //   if (valorNumerico < 0) {
-  //     alert("El precio no puede ser negativo.");
-  //     return false;
-  //   }
-  //
-  //   // Redondear a 2 decimales con precisión
-  //   const precioFormateado = Math.round((valorNumerico + Number.EPSILON) * 100) / 100;
-  //
-  //   console.info(`Precio validado: ${precioFormateado}`);
-  //   return precioFormateado;
-  // }
-            static precio(valor) {
-      let valorNumerico;
-
-      // Si es string, limpiamos y convertimos
-      if (typeof valor === 'string') {
-          // Eliminar caracteres no permitidos excepto números, punto y coma
-          valorNumerico = valor.trim().replace(/[^0-9.,]/g, '');
-          // Reemplazar coma por punto para consistencia
-          valorNumerico = valorNumerico.replace(',', '.');
-          // Convertir a número usando parseFloat para mejor precisión
-          valorNumerico = parseFloat(valorNumerico);
-      } else if (typeof valor === 'number') {
-          valorNumerico = parseFloat(valor);
-      } else {
-          console.error("Error: El precio debe ser un número o una cadena.");
-          return false;
+  static precio(valor) {
+    let valorNumerico;
+  
+    // Si es string, limpiamos y convertimos
+    if (typeof valor === 'string') {
+      const valorLimpio = valor.trim();
+      console.log(`Validando precio como cadena: "${valorLimpio}"`);
+      // Eliminar caracteres no permitidos excepto números, punto y coma
+      let valorParseado = valorLimpio.replace(/[^0-9.,]/g, '');
+      // Reemplazar coma por punto para consistencia
+      valorParseado = valorParseado.replace(',', '.');
+      // Validar formato numérico
+      if (!/^\d*\.?\d*$/.test(valorParseado)) {
+        console.error(`Error: Formato numérico no válido para precio. Valor recibido: "${valorLimpio}"`);
+        return false;
       }
-
-      // Validar que sea un número válido
-      if (isNaN(valorNumerico)) {
-          console.error("Error: Formato numérico no válido");
-          return false;
-      }
-
-      // Validar que no sea negativo
-      if (valorNumerico < 0) {
-          console.error("Error: El precio no puede ser negativo.");
-          return false;
-      }
-
-      // Usar una técnica más precisa para el redondeo a 2 decimales
-      const precioFormateado = Math.round((valorNumerico + Number.EPSILON) * 100) / 100;
-
-      console.info(`Precio validado: ${precioFormateado}`);
-      return precioFormateado;
+      // Convertir a número usando parseFloat para mejor precisión
+      valorNumerico = parseFloat(valorParseado);
+    } else if (typeof valor === 'number') {
+      console.log(`Validando precio como número: ${valor}`);
+      valorNumerico = valor;
+    } else {
+      console.error(`Error: El precio debe ser un número o una cadena. Valor recibido: ${valor}`);
+      return false;
+    }
+  
+    // Validar que sea un número válido
+    if (isNaN(valorNumerico)) {
+      console.error(`Error: Formato numérico no válido para precio. Valor recibido: ${valor}`);
+      return false;
+    }
+  
+    // Validar que no sea negativo
+    if (valorNumerico < 0) {
+      console.error(`Error: El precio no puede ser negativo. Valor recibido: ${valorNumerico}`);
+      return false;
+    }
+  
+    // Usar una técnica más precisa para el redondeo a 2 decimales
+    const precioFormateado = parseFloat(valorNumerico.toFixed(2));
+  
+    console.info(`Precio validado: ${precioFormateado}`);
+    return precioFormateado;
   }
-
   /**
-   * 🔰Método static que valida la cantidad de stock. Verifica que el valor ingresado sea un número entero positivo mayor a 0 y lo retorna; de lo contrario, devuelve null.🔰
+   * 🔰Método static que valida la cantidad y stock. Verifica que el valor ingresado sea un número entero positivo mayor a 0 y lo retorna; de lo contrario, devuelve null.🔰
    */
   static cantidadStock(valor) {
     let valorNumerico;
-
+  
     // Si es una cadena, convertir a número
     if (typeof valor === 'string') {
-      valorNumerico = parseInt(valor.trim(), 10);
+      const valorLimpio = valor.trim();
+      console.log(`Validando cantidad como cadena: "${valorLimpio}"`);
+      // Aceptar solo dígitos (sin decimales ni otros caracteres)
+      if (!/^\d+$/.test(valorLimpio)) {
+        console.error(`Error: La cantidad debe contener solo dígitos enteros. Valor recibido: "${valorLimpio}"`);
+        return null;
+      }
+      valorNumerico = parseInt(valorLimpio, 10);
       if (isNaN(valorNumerico)) {
-        console.error("Error: La cantidad debe ser un número válido");
+        console.error(`Error: La cantidad no es un número válido. Valor recibido: "${valorLimpio}"`);
         return null;
       }
     } else if (typeof valor === 'number') {
+      console.log(`Validando cantidad como número: ${valor}`);
       valorNumerico = valor;
     } else {
-      console.error("Error: Tipo de dato inválido para cantidad");
+      console.error(`Error: Tipo de dato inválido para cantidad. Valor recibido: ${valor}`);
       return null;
     }
-
+  
     // La cantidad debe ser un número entero
     if (!Number.isInteger(valorNumerico)) {
-      console.error("Error: La cantidad debe ser un número entero");
+      console.error(`Error: La cantidad debe ser un número entero. Valor recibido: ${valorNumerico}`);
       return null;
     }
-
+  
     // Solo se permiten cantidades positivas (mayores a 0)
     if (valorNumerico <= 0) {
-      console.error("Error: La cantidad debe ser un número positivo mayor a 0");
+      console.error(`Error: La cantidad debe ser un número positivo mayor a 0. Valor recibido: ${valorNumerico}`);
       return null;
     }
-
+  
+    console.info(`Cantidad validada: ${valorNumerico}`);
     return valorNumerico;
   }
 
@@ -480,4 +444,4 @@ class Validar {
   }
 }
 
-export {Validar};
+export { Validar };

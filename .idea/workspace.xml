@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="" />
+    <list default="true" id="055ca6dc-5ba3-4051-ae17-de73aee09a6e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/database/GoogleSheetReader.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/database/GoogleSheetReader.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/FacturaService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" beforeDir="false" afterPath="$PROJECT_DIR$/BackEnd/src/services/ProductoService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/AdminController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/public/ui/controllers/CheckoutController.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -84,6 +91,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="negra" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="E-Commerce" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/negra.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.negra" />
@@ -116,6 +146,8 @@
       <workItem from="1743353954118" duration="6071000" />
       <workItem from="1743904787812" duration="26470000" />
       <workItem from="1744072630882" duration="6105000" />
+      <workItem from="1744142095798" duration="21644000" />
+      <workItem from="1744252370011" duration="1574000" />
     </task>
     <servers />
   </component>

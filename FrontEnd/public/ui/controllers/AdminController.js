@@ -703,7 +703,7 @@ class AdminController {
     } catch (error) {
       console.error("Error abriendo el modal de detalles:", error);
     } finally {
-      this.hideLoader();
+     this.hideLoader();
     }
   }
 
@@ -1175,7 +1175,7 @@ class AdminController {
     } catch (error) {
       console.error("Error abriendo el modal de detalles:", error);
     } finally {
-      this.hideLoader();
+     this.hideLoader();
     }
   }
 
@@ -1281,22 +1281,42 @@ class AdminController {
 
 
         tr.querySelector(".edit-button").addEventListener("click", async () => {
-
-          const producto = await this.productoService.obtenerProductoPorId(producto.id);
-          if (producto) {
-            this.productoIdInput.value = producto.id;
-            this.productoNombreInput.value = producto.nombre;
-            this.productoPrecioInput.value = producto.precio;
-            this.productoCategoriaSelect.value = producto.categoriaId;
-            this.productoMarcaSelect.value = producto.marcaId;
-            this.productoProveedorSelect.value = producto.proveedorId;
-            this.productoStockInput.value = producto.stock;
-            this.productoPVPInput.value = producto.pvp;
-            this.productoDescripcionInput.value = producto.descripcion;
-            this.productoImagenInput.value = producto.imagen;
-            this.productoEstadoInput.checked = producto.estado;
-            this.estadoProductoTextoSpan.textContent = producto.estado ? "Activo" : "Inactivo";
+          console.log(`Intentando editar producto con ID: ${producto.id}`);
+          const productoObtenido = await this.productoService.obtenerProductoPorId(producto.id);
+          console.log('Producto obtenido para edición:', productoObtenido);
+        
+          if (productoObtenido) {
+            console.log('Llenando formulario con datos del producto...');
+            this.productoIdInput.value = productoObtenido.id;
+            this.productoNombreInput.value = productoObtenido.nombre;
+            this.productoPrecioInput.value = productoObtenido.precio;
+            this.productoCategoriaSelect.value = productoObtenido.categoriaId;
+            this.productoMarcaSelect.value = productoObtenido.marcaId;
+            this.productoProveedorSelect.value = productoObtenido.proveedorId;
+            this.productoStockInput.value = productoObtenido.stock;
+            this.productoPVPInput.value = productoObtenido.pvp;
+            this.productoDescripcionInput.value = productoObtenido.descripcion || '';
+            this.productoImagenInput.value = productoObtenido.imagen || '';
+            this.productoEstadoInput.checked = productoObtenido.estado;
+            this.estadoProductoTextoSpan.textContent = productoObtenido.estado ? "Activo" : "Inactivo";
+            console.log('Formulario llenado:', {
+              id: this.productoIdInput.value,
+              nombre: this.productoNombreInput.value,
+              precio: this.productoPrecioInput.value,
+              categoriaId: this.productoCategoriaSelect.value,
+              marcaId: this.productoMarcaSelect.value,
+              proveedorId: this.productoProveedorSelect.value,
+              stock: this.productoStockInput.value,
+              pvp: this.productoPVPInput.value,
+              descripcion: this.productoDescripcionInput.value,
+              imagen: this.productoImagenInput.value,
+              estado: this.productoEstadoInput.checked,
+              estadoTexto: this.estadoProductoTextoSpan.textContent
+            });
             window.scrollTo(0, 0);
+          } else {
+            console.error(`No se pudo obtener el producto con ID ${producto.id} para edición.`);
+            alert('No se pudo cargar el producto para editar.');
           }
         });
 
@@ -1452,48 +1472,53 @@ class AdminController {
   }
 
   async openModalDetailsProd(productoId) {
-    // Mostrar el loader
     this.showLoader();
-    // Obtener la INSTANCIA del producto
-    const producto = await this.productoService.obtenerProductoPorId(productoId);
-    const modalDetails = document.getElementById('productoModal'); // ID del modal de producto
-
-    if (!modalDetails) {
-      console.error("Modal para detalles de Producto no encontrado (productoModal)");
-      return;
+  
+    try {
+      const producto = await this.productoService.obtenerProductoPorId(productoId);
+      const modalDetails = document.getElementById('productoModal'); // ID del modal de producto
+  
+      if (!modalDetails) {
+        console.error("Modal para detalles de Producto no encontrado (productoModal)");
+        return;
+      }
+  
+      if (!producto) {
+        console.error("No se encontró el producto con ID:", productoId);
+        alert("No se pudo cargar la información del producto.");
+        return;
+      }
+  
+      // Llenar el modal - Adapta los IDs a tu modal de producto
+      document.getElementById('modalProdNombre').textContent = producto.nombre;
+      document.getElementById('modalProdCatNombre').textContent = producto.categoriaNombre;
+      document.getElementById('modalProdMarNombre').textContent = producto.marcaNombre;
+      document.getElementById('modalProdProvNombre').textContent = producto.proveedorNombre;
+      document.getElementById('modalProdCosto').textContent = producto.precio;
+      document.getElementById('modalProdPVP').textContent = producto.pvp;
+      document.getElementById('modalProdCant').textContent = producto.cantidad;
+      document.getElementById('modalProdStock').textContent = producto.stock;
+      document.getElementById('modalProdDesc').textContent = producto.descripcion || 'N/A';
+      document.getElementById('modalProdIMG').innerHTML = `<img style="max-width: 120%; height: 100%; border-radius: 8px; border:2px solid #800000" src="${producto.imagen}" alt="Imagen de producto">`;
+      document.getElementById('modalProdEstado').innerHTML = producto.iconTrueFalse();
+      document.getElementById('modalProdFechaCreacion').textContent = producto.formatEcuadorDateTime(producto.fechaCreacion);
+      document.getElementById('modalProdFechaActualizacion').textContent = producto.formatEcuadorDateTime(producto.fechaActualizacion);
+  
+      // Mostrar el modal
+      modalDetails.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      requestAnimationFrame(() => {
+        modalDetails.classList.add('show');
+      });
+  
+    } catch (error) {
+      console.error("Error al cargar los detalles del producto:", error);
+      alert("Ocurrió un error al intentar mostrar los detalles del producto.");
+    } finally {
+      this.hideLoader();
     }
-
-    if (!producto) {
-      console.error("No se encontró el producto con ID:", productoId);
-      alert("No se pudo cargar la información del producto.");
-      return;
-    }
-
-    // Llenar el modal - Adapta los IDs a tu modal de producto
-    document.getElementById('modalProdNombre').textContent = producto.nombre;
-    document.getElementById('modalProdCatNombre').textContent = producto.categoriaNombre;
-    document.getElementById('modalProdMarNombre').textContent = producto.marcaNombre;
-    document.getElementById('modalProdProvNombre').textContent = producto.proveedorNombre;
-    document.getElementById('modalProdCosto').textContent = producto.precio; // Formatear como moneda si quieres
-    document.getElementById('modalProdPVP').textContent = producto.pvp;       // Formatear como moneda si quieres
-    document.getElementById('modalProdCant').textContent = producto.cantidad;       // Formatear como moneda si quieres
-    document.getElementById('modalProdStock').textContent = producto.stock;
-    document.getElementById('modalProdDesc').textContent = producto.descripcion || 'N/A';
-    document.getElementById('modalProdIMG').innerHTML = '<img   style="max-width: 120%; height: 100%; border-radius: 8px; border:2px solid #800000"  src="' + producto.imagen + '" alt="Imagen de producto">';
-
-    // document.getElementById('modalProdIMG').textContent = producto.imagen;
-    document.getElementById('modalProdEstado').innerHTML = producto.iconTrueFalse(); // Usar método de instancia
-
-    document.getElementById('modalProdFechaCreacion').textContent = producto.formatEcuadorDateTime(producto.fechaCreacion);
-    document.getElementById('modalProdFechaActualizacion').textContent = producto.formatEcuadorDateTime(producto.fechaActualizacion);
-
-    // Mostrar el modal
-    modalDetails.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-    requestAnimationFrame(() => {
-      modalDetails.classList.add('show');
-    });
   }
+  
 
   closeModalDetailsProd() {
     const modalDetails = document.getElementById('productoModal');
