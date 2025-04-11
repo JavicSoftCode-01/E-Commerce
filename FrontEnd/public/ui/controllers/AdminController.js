@@ -176,40 +176,6 @@ class AdminController {
   }
 
   // Envio de formularios
-  // setupEventListeners() {
-  //   this.adminTabs.forEach(tab => {
-  //     tab.addEventListener('click', () => this.cargarSeccionAdmin(tab.dataset.tab));
-  //   });
-  //   // Eventos de los formularios usando delegación de eventos
-  //   this.adminSection.addEventListener('submit', async (e) => { //Se agrega async
-  //     if (e.target.id === 'formCategoria') {
-  //       await this.guardarCategoria(e); //Se agrega await
-  //     } else if (e.target.id === 'formMarca') {
-  //       await this.guardarMarca(e);//Se agrega await
-  //     } else if (e.target.id === 'formProveedor') {
-  //       await this.guardarProveedor(e)//Se agrega await
-  //     } else if (e.target.id === 'formCliente') {
-  //       await this.guardarCliente(e)//Se agrega await
-  //     } else if (e.target.id === 'formProducto') {
-  //       await this.guardarProducto(e)//Se agrega await
-  //     }
-  //   });
-  //
-  //   // Botones de reset (delegación de eventos también)
-  //   this.adminSection.addEventListener('click', (e) => {
-  //     if (e.target.id === 'resetCategoriaForm') {
-  //       this.resetFormCategoria();
-  //     } else if (e.target.id === 'resetMarcaForm') {
-  //       this.resetFormMarca();
-  //     } else if (e.target.id === 'resetProveedorForm') {
-  //       this.resetFormProveedor();
-  //     } else if (e.target.id === 'resetClienteForm') {
-  //       this.resetFormCliente();
-  //     } else if (e.target.id === 'resetProductoForm') {
-  //       this.resetFormProducto();
-  //     }
-  //   });
-  // }
   setupEventListeners() {
     this.adminTabs.forEach(tab => {
       tab.addEventListener('click', () => this.cargarSeccionAdmin(tab.dataset.tab));
@@ -293,13 +259,6 @@ class AdminController {
         break;
     }
   }
-
-  // formatearTelefono(telefono) {
-  //   if (!telefono || typeof telefono !== 'string') return '';
-  //   return telefono
-  //     .replace(/[^\d+]/g, '') // Elimina todo lo que no sea número o "+"
-  //     .replace(/\+/g, '');    // Elimina el "+"
-  // }
 
   //---------------------------------------------------
   // Métodos CRUD para Categorías
@@ -1534,7 +1493,7 @@ class AdminController {
   //-------------------------
   //Ventas (Historial)
   //-------------------------
-
+// adminController.js
   async cargarVentas() {
     try {
       const tablaVentas = document.querySelector('#tablaVentas tbody');

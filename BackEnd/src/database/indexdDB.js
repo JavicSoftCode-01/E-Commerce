@@ -125,16 +125,6 @@ async add(item) {
     }
 }
 
- // async add(data) {
- //    const db = await this.dbPromise;
- //    const transaction = db.transaction([this.storeName], 'readwrite');
- //    const store = transaction.objectStore(this.storeName);
- //    return new Promise((resolve, reject) => {
- //      const request = store.add(data);
- //      request.onsuccess = (event) => resolve(event.target.result); // Returns the auto-incremented localId
- //      request.onerror = (event) => reject(event.target.error);
- //    });
- //  }
 
   /**
    * Actualiza un registro existente en el almacén de objetos.
