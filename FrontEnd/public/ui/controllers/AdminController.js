@@ -8,7 +8,6 @@ import {Producto} from '../../../../BackEnd/src/models/Producto.js';
 import {appService} from '../services/UшымтаService.js';
 import {InvoiceTemplate} from './InvoicePlantilla.js';
 import {Factura} from '../../../../BackEnd/src/models/Factura.js';
-import GoogleSheetSync from '../../../../BackEnd/src/database/syncGoogleSheet.js';
 import {ProveedorService} from "../../../../BackEnd/src/services/ProveedorService.js";
 import {ClienteService} from "../../../../BackEnd/src/services/ClienteService.js";
 import {MarcaService} from "../../../../BackEnd/src/services/MarcaService.js";
@@ -17,20 +16,7 @@ import {ProductoService} from "../../../../BackEnd/src/services/ProductoService.
 import {FacturaService} from "../../../../BackEnd/src/services/FacturaService.js";
 
 class AdminController {
-
-  static googleSheetSync = new GoogleSheetSync(        // categoria
-    'https://script.google.com/macros/s/AKfycbx0M1Jaz4ZIHs4tqeIulSrdIsn1tsu6BW0twVwc3Vo0_YybZftwE0RR8dQL3ZZgtUg/exec'
-  );
-  static googleSheetSyncMarca = new GoogleSheetSync(
-    'https://script.google.com/macros/s/AKfycbzrQBaqY-DyXEiKSd_BZQjrRCwGX2Q-mehjcjucQQUm2SWoDOdzu6ZJ5bbk9ubEid_i/exec'
-  );
-
   constructor(categoriaService, marcaService, proveedorService, clienteService, productoService, facturaService, appService) {
-    // this.categoriaService = categoriaService;
-    // this.marcaService = marcaService;
-    // this.proveedorService = proveedorService;
-    // this.clienteService = clienteService;
-    // this.productoService = productoService;
     this.categoriaService = categoriaService || new CategoriaService();
     this.marcaService = marcaService || new MarcaService();
     this.proveedorService = proveedorService || new ProveedorService();
